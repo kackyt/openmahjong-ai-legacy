@@ -350,29 +350,47 @@ void CMahjongBtn::paintPai(CPaintDC &dc,CRect &rect,CString &str,CMember *member
 
 	pOldPen = dc.SelectObject(&selPen);
 	pOldBrush = dc.SelectObject(&nullbrush);
+	num = 0;
 	for(j=0;j<member->m_aDahai.GetSize();j++){
+		if(member->m_aDahai[j].m_bNaki) continue;
 		if(member->m_aDahai[j].m_bRiichi){
 			pPaigaYoko->setState((UINT)member->m_aDahai[j]);
 			if(count == 0){
-				pPaigaYoko->drawCurrentImage(dc,tmpx+8,tmpy-10);
+				if(m_rule.m_iGlasshai == 1 && member->m_aDahai[j].m_iId != 4){
+					pPaigaYoko->drawCurrentImage(dc,tmpx+8,tmpy-10,120);
+				}else{
+					pPaigaYoko->drawCurrentImage(dc,tmpx+8,tmpy-10);
+				}
 				if(j==member->m_aDahai.GetSize() - 1 && member->m_aDahai[j].m_bTsumogiri){
 					dc.Rectangle(tmpx+8,tmpy-10,tmpx+8+24,tmpy-10+34);
 				}
 				tmpy -= 35;
 			}else if(count == 1){
-				pPaigaYoko->drawCurrentImage(dc,tmpx-10,tmpy);
+				if(m_rule.m_iGlasshai == 1 && member->m_aDahai[j].m_iId != 4){
+					pPaigaYoko->drawCurrentImage(dc,tmpx-10,tmpy,120);
+				}else{
+					pPaigaYoko->drawCurrentImage(dc,tmpx-10,tmpy);
+				}
 				if(j==member->m_aDahai.GetSize() - 1 && member->m_aDahai[j].m_bTsumogiri){
 					dc.Rectangle(tmpx-10,tmpy,tmpx-10+32,tmpy+24);
 				}
 				tmpx -= 35;
 			}else if(count == 2){
-				pPaigaYoko->drawCurrentImage(dc,tmpx,tmpy);
+				if(m_rule.m_iGlasshai == 1 && member->m_aDahai[j].m_iId != 4){
+					pPaigaYoko->drawCurrentImage(dc,tmpx,tmpy,120);
+				}else{
+					pPaigaYoko->drawCurrentImage(dc,tmpx,tmpy);
+				}
 				if(j==member->m_aDahai.GetSize() - 1 && member->m_aDahai[j].m_bTsumogiri){
 					dc.Rectangle(tmpx,tmpy,tmpx+24,tmpy+34);
 				}
 				tmpy += 35;
 			}else if(count == 3){
-				pPaigaYoko->drawCurrentImage(dc,tmpx,tmpy+10);
+				if(m_rule.m_iGlasshai == 1 && member->m_aDahai[j].m_iId != 4){
+					pPaigaYoko->drawCurrentImage(dc,tmpx,tmpy+10,120);
+				}else{
+					pPaigaYoko->drawCurrentImage(dc,tmpx,tmpy+10);
+				}
 				if(j==member->m_aDahai.GetSize() - 1 && member->m_aDahai[j].m_bTsumogiri){
 					dc.Rectangle(tmpx,tmpy+10,tmpx-10+32,tmpy+24);
 				}
@@ -380,7 +398,11 @@ void CMahjongBtn::paintPai(CPaintDC &dc,CRect &rect,CString &str,CMember *member
 			}
 		}else{
 			pPaiga->setState((UINT)member->m_aDahai[j]);
-			pPaiga->drawCurrentImage(dc,tmpx,tmpy);
+			if(m_rule.m_iGlasshai == 1 && member->m_aDahai[j].m_iId != 4){
+				pPaiga->drawCurrentImage(dc,tmpx,tmpy,120);
+			}else{
+				pPaiga->drawCurrentImage(dc,tmpx,tmpy);
+			}
 			if(count == 0){
 				if(j==member->m_aDahai.GetSize() - 1 && member->m_aDahai[j].m_bTsumogiri){
 					dc.Rectangle(tmpx,tmpy,tmpx+32,tmpy+24);
@@ -403,7 +425,7 @@ void CMahjongBtn::paintPai(CPaintDC &dc,CRect &rect,CString &str,CMember *member
 				tmpx += 25;
 			}
 		}
-		if((j + 1) % 6 == 0 && j < 12){
+		if((num + 1) % 6 == 0 && num < 12){
 			if(count == 0){
 				tmpx += 35;
 				tmpy = posy;
@@ -418,6 +440,7 @@ void CMahjongBtn::paintPai(CPaintDC &dc,CRect &rect,CString &str,CMember *member
 				tmpy += 35;
 			}
 		}
+		num++;
 	}
 
 	dc.SelectObject(pOldPen);
@@ -440,7 +463,11 @@ void CMahjongBtn::paintPai(CPaintDC &dc,CRect &rect,CString &str,CMember *member
 				tmpx = PLAYER_OFFSETX+25*j;
 				tmpy = PLAYER_OFFSETY;
 			}
-			pPaiga->drawCurrentImage(dc,tmpx,tmpy);
+			if(m_rule.m_iGlasshai == 1 && member->m_aTehai[j] != PAI_NIL && member->m_aTehai[j].m_iId != 4){
+				pPaiga->drawCurrentImage(dc,tmpx,tmpy,120);
+			}else{
+				pPaiga->drawCurrentImage(dc,tmpx,tmpy);
+			}
 		}
 		if(count == 0){
 			tmpy -= 30;
@@ -453,7 +480,11 @@ void CMahjongBtn::paintPai(CPaintDC &dc,CRect &rect,CString &str,CMember *member
 		}
 		if(member->m_gamestate.m_bTsumo){
 			pPaiga->setState((UINT)member->m_aTehai[j]);
-			pPaiga->drawCurrentImage(dc,tmpx,tmpy);
+			if(m_rule.m_iGlasshai == 1 && member->m_aTehai[j].m_iId != 4){
+				pPaiga->drawCurrentImage(dc,tmpx,tmpy,120);
+			}else{
+				pPaiga->drawCurrentImage(dc,tmpx,tmpy);
+			}
 		}
 	}else{
 		for(j=0;j<13-member->m_gamestate.m_aNakiList.GetSize()*3;j++){
@@ -504,13 +535,17 @@ void CMahjongBtn::paintPai(CPaintDC &dc,CRect &rect,CString &str,CMember *member
 	for(j=0;j<member->m_gamestate.m_aNakiList.GetSize();j++){
 		if(member->m_gamestate.m_aNakiList[j].m_iCategory == MENTSU_ANKAN){
 			for(k=0;k<4;k++){
-				if(k==0 || k==3){
+				if((k==0 || k==3) && m_rule.m_iGlasshai == 0){
 					pPaiga->setState(34);
 				}else{
 					pPaiga->setState((UINT)member->m_gamestate.m_aNakiList[j].m_aPaiList[0]);
 				}
 				
-				pPaiga->drawCurrentImage(dc,tmpx,tmpy);
+				if(m_rule.m_iGlasshai == 1 && member->m_gamestate.m_aNakiList[j].m_aPaiList[k].m_iId != 4){
+					pPaiga->drawCurrentImage(dc,tmpx,tmpy,120);
+				}else{
+					pPaiga->drawCurrentImage(dc,tmpx,tmpy);
+				}
 				if(count == 0){
 					tmpy += 26;
 				}else if(count == 1){
@@ -556,7 +591,11 @@ void CMahjongBtn::paintPai(CPaintDC &dc,CRect &rect,CString &str,CMember *member
 				}
 				if(k!=(int)member->m_gamestate.m_aNakiList[j].getNakiPos()){
 					pPaiga->setState((UINT)member->m_gamestate.m_aNakiList[j].m_aPaiList[k]);
-					pPaiga->drawCurrentImage(dc,tmpx,tmpy);
+					if(m_rule.m_iGlasshai == 1 && member->m_gamestate.m_aNakiList[j].m_aPaiList[k].m_iId != 4){
+						pPaiga->drawCurrentImage(dc,tmpx,tmpy,120);
+					}else{
+						pPaiga->drawCurrentImage(dc,tmpx,tmpy);
+					}
 					if(count == 0){
 						tmpy += 26;
 					}else if(count == 1){
@@ -573,13 +612,29 @@ void CMahjongBtn::paintPai(CPaintDC &dc,CRect &rect,CString &str,CMember *member
 			/* –Â‚«”v‚ð•`‰æ(‰¡) */
 			pPaigaYoko->setState((UINT)member->m_gamestate.m_aNakiList[j].m_nakihai);
 			if(count == 0){
-				pPaigaYoko->drawCurrentImage(dc,tmpx + 8,offset + 26*ind);
+				if(m_rule.m_iGlasshai == 1 && member->m_gamestate.m_aNakiList[j].m_nakihai.m_iId != 4){
+					pPaigaYoko->drawCurrentImage(dc,tmpx + 8,offset + 26*ind,120);
+				}else{
+					pPaigaYoko->drawCurrentImage(dc,tmpx + 8,offset + 26*ind);
+				}
 			}else if(count == 1){
-				pPaigaYoko->drawCurrentImage(dc,offset + 25*ind,tmpy);
+				if(m_rule.m_iGlasshai == 1 && member->m_gamestate.m_aNakiList[j].m_nakihai.m_iId != 4){
+					pPaigaYoko->drawCurrentImage(dc,offset + 25*ind,tmpy,120);
+				}else{
+					pPaigaYoko->drawCurrentImage(dc,offset + 25*ind,tmpy);
+				}
 			}else if(count == 2){
-				pPaigaYoko->drawCurrentImage(dc,tmpx,offset - 26*ind);
+				if(m_rule.m_iGlasshai == 1 && member->m_gamestate.m_aNakiList[j].m_nakihai.m_iId != 4){
+					pPaigaYoko->drawCurrentImage(dc,tmpx,offset - 26*ind,120);
+				}else{
+					pPaigaYoko->drawCurrentImage(dc,tmpx,offset - 26*ind);
+				}
 			}else if(count == 3){
-				pPaigaYoko->drawCurrentImage(dc,offset - 25*ind,tmpy+10);
+				if(m_rule.m_iGlasshai == 1 && member->m_gamestate.m_aNakiList[j].m_nakihai.m_iId != 4){
+					pPaigaYoko->drawCurrentImage(dc,offset - 25*ind,tmpy+10,120);
+				}else{
+					pPaigaYoko->drawCurrentImage(dc,offset - 25*ind,tmpy+10);
+				}
 			}
 			
 			if(num < member->m_gamestate.m_aNakiList[j].m_aPaiList.GetSize()){

@@ -92,11 +92,14 @@ void CMember::parseXML(IXMLDOMNodePtr pElem)
 	}
 
 	/* ƒcƒ‚”v‚ÌŠi”[ */
-	pNode = pElem->selectSingleNode(_T(TAG_TSUMOHAI "/" TAG_PAI));
+	pNode = pElem->selectSingleNode(_T(TAG_TSUMOHAI));
 
 	if(pNode != NULL){
-		m_tsumohai.parseXML(pNode);
 		m_gamestate.m_bTsumo = TRUE;
+		pNode = pElem->selectSingleNode(_T(TAG_TSUMOHAI "/" TAG_PAI));
+		if(pNode != NULL){
+			m_tsumohai.parseXML(pNode);
+		}
 	}else{
 		m_gamestate.m_bTsumo = FALSE;
 	}

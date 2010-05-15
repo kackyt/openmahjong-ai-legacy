@@ -8,6 +8,7 @@
 #include "Player.h"	// ClassView によって追加されました。
 #include "Pai.h"	// ClassView によって追加されました。
 #include "NakiMentsu.h"	// ClassView によって追加されました。
+#include "Rule.h"	// ClassView によって追加されました。
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -15,6 +16,7 @@
 class CCommand  
 {
 public:
+	CRule m_rule;
 	void toXML(IXMLDOMDocumentPtr,IXMLDOMElementPtr);
 	CCommand& operator=(CCommand&);
 	CNakiMentsu m_mentsu;

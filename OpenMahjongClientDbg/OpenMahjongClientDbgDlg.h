@@ -20,6 +20,7 @@
 #include "WavePlayer.h"	// ClassView によって追加されました。
 #include "WavePlayMatrix.h"	// ClassView によって追加されました。
 #include "WaveFilePlayMethod.h"	// ClassView によって追加されました。
+#include "Rule.h"	// ClassView によって追加されました。
 
 #if _MSC_VER > 1000
 #pragma once
@@ -34,6 +35,7 @@ class COpenMahjongClientDbgDlg : public CDialog
 {
 // 構築
 public:
+	CRule m_rule;
 	CWaveFilePlayMethod m_fileNormal;
 	CWaveFilePlayMethod m_fileCommand;
 	CWavePlayMatrix m_matrix;
@@ -141,6 +143,7 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnAbort();
+	afx_msg void OnBtnrule();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:

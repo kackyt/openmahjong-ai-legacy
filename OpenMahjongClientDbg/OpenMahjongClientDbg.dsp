@@ -180,6 +180,10 @@ SOURCE=.\Result.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\Rule.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\RuleDialog.cpp
 # End Source File
 # Begin Source File
@@ -314,6 +318,10 @@ SOURCE=.\Resource.h
 # Begin Source File
 
 SOURCE=.\Result.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Rule.h
 # End Source File
 # Begin Source File
 

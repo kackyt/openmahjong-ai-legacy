@@ -19,10 +19,11 @@ static char THIS_FILE[]=__FILE__;
 CPai::CPai()
 {
 	m_iCategory = -1;
-	m_iNo = 0;
-	m_iId = 0;
+	m_iNo = -1;
+	m_iId = -1;
 	m_bTsumogiri = FALSE;
 	m_bRiichi = FALSE;
+	m_bNaki = FALSE;
 
 }
 

@@ -1,6 +1,7 @@
 #if !defined(AFX_CONNECTDLG_H__CF340994_31A2_45F7_9DFF_4A4F8CEE4ECA__INCLUDED_)
 #define AFX_CONNECTDLG_H__CF340994_31A2_45F7_9DFF_4A4F8CEE4ECA__INCLUDED_
 
+#include "RuleDialog.h"	// ClassView によって追加されました。
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -14,6 +15,7 @@ class CConnectDlg : public CDialog
 {
 // コンストラクション
 public:
+	CRuleDialog m_ruleDlg;
 	CString m_strComp3;
 	CString m_strComp2;
 	CString m_strComp1;
@@ -49,6 +51,7 @@ protected:
 	//{{AFX_MSG(CConnectDlg)
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
+	afx_msg void OnBtnrule();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

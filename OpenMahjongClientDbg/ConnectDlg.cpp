@@ -45,6 +45,7 @@ void CConnectDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CConnectDlg, CDialog)
 	//{{AFX_MSG_MAP(CConnectDlg)
+	ON_BN_CLICKED(IDC_BTNRULE, OnBtnrule)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -115,4 +116,12 @@ void CConnectDlg::OnOK()
 	m_cmbComp3.GetLBText(m_cmbComp3.GetCurSel(),m_strComp3);
 	
 	CDialog::OnOK();
+}
+
+void CConnectDlg::OnBtnrule() 
+{
+	// TODO: この位置にコントロール通知ハンドラ用のコードを追加してください
+	m_ruleDlg.setAccessMode(TRUE);
+	m_ruleDlg.DoModal();
+	
 }

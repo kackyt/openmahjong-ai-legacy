@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
 // RuleDialog.h : ヘッダー ファイル
 //
+#include "Rule.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CRuleDialog ダイアログ
@@ -14,12 +15,18 @@ class CRuleDialog : public CDialog
 {
 // コンストラクション
 public:
+	BOOL m_bWritable;
+	CRule m_rule;
+	void getRule(CRule&);
+	void setRule(CRule&);
+	void setAccessMode(BOOL);
 	CRuleDialog(CWnd* pParent = NULL);   // 標準のコンストラクタ
 
 // ダイアログ データ
 	//{{AFX_DATA(CRuleDialog)
 	enum { IDD = IDD_RULE };
-		// メモ: ClassWizard はこの位置にデータ メンバを追加します。
+	CComboBox	m_cmbKuitan;
+	CComboBox	m_cmbGlasshai;
 	//}}AFX_DATA
 
 
@@ -35,7 +42,8 @@ protected:
 
 	// 生成されたメッセージ マップ関数
 	//{{AFX_MSG(CRuleDialog)
-		// メモ: ClassWizard はこの位置にメンバ関数を追加します。
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

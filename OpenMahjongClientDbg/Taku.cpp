@@ -282,7 +282,7 @@ int CTaku::getKawahai(int index,UINT *pBuf)
 
 }
 
-int CTaku::getVisibleHais(UINT num)
+int CTaku::getVisibleHais(UINT num,int iPlayerIndex)
 {
 	int i,j,k,count;
 	count = 0;
@@ -291,6 +291,13 @@ int CTaku::getVisibleHais(UINT num)
 		for(j=0;j<m_members[i].m_aDahai.GetSize();j++){
 			if(num == m_members[i].m_aDahai[j]){
 				count++;				
+			}
+		}
+		if(i != iPlayerIndex){
+			for(j=0;j<m_members[i].m_aTehai.GetSize();j++){
+				if(num == m_members[i].m_aTehai[j]){
+					count++;				
+				}
 			}
 		}
 		for(j=0;j<m_members[i].m_gamestate.m_aNakiList.GetSize();j++){
@@ -493,7 +500,7 @@ CTaku& CTaku::operator =(CTaku& value)
 
 void CTaku::update(CTaku& value)
 {
-	int i,j;
+	int i,j,num;
 	int ind;
 	CPai pai;
 	BOOL bInserted,bDeleted,bTsumo = TRUE;
@@ -520,7 +527,17 @@ void CTaku::update(CTaku& value)
 				}
 				
 				if(!bDeleted){
-					AfxDebugBreak();
+					for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
+						if(m_members[ind].m_aTehai[i] == PAI_NIL){
+							m_members[ind].m_aTehai.RemoveAt(i);
+							bDeleted = TRUE;
+							break;
+						}
+					}
+					
+					if(!bDeleted){
+						AfxDebugBreak();
+					}
 				}
 				
 				// Žè”v‚ð•À‚×’¼‚µ
@@ -548,19 +565,36 @@ void CTaku::update(CTaku& value)
 				m_members[ind].m_gamestate.m_aNakiList.Add(value.m_event.m_command.m_mentsu);
 				for(i=0;i<m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai.GetSize();i++){
 					if(m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].match(value.m_event.m_command.m_pai)){
-						m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai.RemoveAt(i);
+						m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].m_bNaki = TRUE;
 						break;
 					}
 				}
+				num = 0;
 				for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
 					for(j=0;j<value.m_event.m_command.m_mentsu.m_aPaiList.GetSize();j++){
 						if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
 							m_members[ind].m_aTehai.RemoveAt(i);
 							i--;
+							num++;
 							break;
 						}
 					}
 				}
+
+				if(num < 2){
+					for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
+						if(m_members[ind].m_aTehai[i] == PAI_NIL){
+							m_members[ind].m_aTehai.RemoveAt(i);
+							i--;
+							num++;
+							if(num >= 2) break;
+						}
+					}
+				}
+				if(num < 2){
+					AfxDebugBreak();
+				}
+
 				bTsumo = FALSE;
 				break;
 			case TYPE_PON:
@@ -568,19 +602,37 @@ void CTaku::update(CTaku& value)
 				m_members[ind].m_gamestate.m_aNakiList.Add(value.m_event.m_command.m_mentsu);
 				for(i=0;i<m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai.GetSize();i++){
 					if(m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].match(value.m_event.m_command.m_pai)){
-						m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai.RemoveAt(i);
+						m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].m_bNaki = TRUE;
 						break;
 					}
 				}
+
+				num = 0;
 				for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
 					for(j=0;j<value.m_event.m_command.m_mentsu.m_aPaiList.GetSize();j++){
 						if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
 							m_members[ind].m_aTehai.RemoveAt(i);
 							i--;
+							num++;
 							break;
 						}
 					}
 				}
+
+				if(num < 2){
+					for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
+						if(m_members[ind].m_aTehai[i] == PAI_NIL){
+							m_members[ind].m_aTehai.RemoveAt(i);
+							i--;
+							num++;
+							if(num >= 2) break;
+						}
+					}
+				}
+				if(num < 2){
+					AfxDebugBreak();
+				}
+
 				bTsumo = FALSE;
 				break;
 			case TYPE_DAIMINKAN:
@@ -588,20 +640,37 @@ void CTaku::update(CTaku& value)
 				m_members[ind].m_gamestate.m_aNakiList.Add(value.m_event.m_command.m_mentsu);
 				for(i=0;i<m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai.GetSize();i++){
 					if(m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].match(value.m_event.m_command.m_pai)){
-						m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai.RemoveAt(i);
+						m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].m_bNaki = TRUE;
 						break;
 					}
 				}
 				
+				num = 0;
 				for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
 					for(j=0;j<value.m_event.m_command.m_mentsu.m_aPaiList.GetSize();j++){
 						if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
 							m_members[ind].m_aTehai.RemoveAt(i);
 							i--;
+							num++;
 							break;
 						}
 					}
 				}
+				if(num < 3){
+					for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
+						if(m_members[ind].m_aTehai[i] == PAI_NIL){
+							m_members[ind].m_aTehai.RemoveAt(i);
+							i--;
+							num++;
+							if(num >= 3) break;
+						}
+					}
+				}
+
+				if(num < 3){
+					AfxDebugBreak();
+				}
+
 				break;
 			case TYPE_KUWAEKAN:
 				ind = getMemberIndex(&value.m_event.m_command.m_player);
@@ -612,6 +681,7 @@ void CTaku::update(CTaku& value)
 					}
 				}
 				m_members[ind].m_gamestate.m_aNakiList.Add(value.m_event.m_command.m_mentsu);
+				num = 0;
 				for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
 					for(j=0;j<value.m_event.m_command.m_mentsu.m_aPaiList.GetSize();j++){
 						if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
@@ -621,10 +691,25 @@ void CTaku::update(CTaku& value)
 						}
 					}
 				}
+				if(num < 1){
+					for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
+						if(m_members[ind].m_aTehai[i] == PAI_NIL){
+							m_members[ind].m_aTehai.RemoveAt(i);
+							i--;
+							num++;
+							if(num >= 1) break;
+						}
+					}
+				}
+
+				if(num < 1){
+					AfxDebugBreak();
+				}
 				break;
 			case TYPE_ANKAN:
 				ind = getMemberIndex(&value.m_event.m_command.m_player);
 				m_members[ind].m_gamestate.m_aNakiList.Add(value.m_event.m_command.m_mentsu);
+				num = 0;
 				for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
 					for(j=0;j<value.m_event.m_command.m_mentsu.m_aPaiList.GetSize();j++){
 						if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
@@ -633,6 +718,20 @@ void CTaku::update(CTaku& value)
 							break;
 						}
 					}
+				}
+				if(num < 4){
+					for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
+						if(m_members[ind].m_aTehai[i] == PAI_NIL){
+							m_members[ind].m_aTehai.RemoveAt(i);
+							i--;
+							num++;
+							if(num >= 4) break;
+						}
+					}
+				}
+
+				if(num < 4){
+					AfxDebugBreak();
 				}
 				break;
 			case TYPE_RIICHI:
@@ -649,7 +748,17 @@ void CTaku::update(CTaku& value)
 				}
 				
 				if(!bDeleted){
-					AfxDebugBreak();
+					for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
+						if(m_members[ind].m_aTehai[i] == PAI_NIL){
+							m_members[ind].m_aTehai.RemoveAt(i);
+							bDeleted = TRUE;
+							break;
+						}
+					}
+					
+					if(!bDeleted){
+						AfxDebugBreak();
+					}
 				}
 				
 				// Žè”v‚ð•À‚×’¼‚µ
@@ -687,7 +796,17 @@ void CTaku::update(CTaku& value)
 					}
 					
 					if(!bDeleted){
-						AfxDebugBreak();
+						for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
+							if(m_members[ind].m_aTehai[i] == PAI_NIL){
+								m_members[ind].m_aTehai.RemoveAt(i);
+								bDeleted = TRUE;
+								break;
+							}
+						}
+						
+						if(!bDeleted){
+							AfxDebugBreak();
+						}
 					}
 					
 					// Žè”v‚ð•À‚×’¼‚µ
@@ -755,3 +874,20 @@ void CTaku::update(CTaku& value)
 	
 }
 
+
+int CTaku::getKawahaiEx(int index,MJIKawahai *pKawa)
+{
+	CMember& member = m_members[index];
+	int i;
+
+	for(i=0;i<member.m_aDahai.GetSize();i++){
+		pKawa->hai = member.m_aDahai[i];
+		pKawa->state = 0;
+		if(member.m_aDahai[i].m_bNaki) pKawa->state |= MJKS_NAKI;
+		if(member.m_aDahai[i].m_bRiichi) pKawa->state |= MJKS_REACH;
+		pKawa++;
+	}
+
+	return member.m_aDahai.GetSize();
+
+}

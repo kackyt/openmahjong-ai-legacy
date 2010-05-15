@@ -16,6 +16,7 @@
 class CPai  
 {
 public:
+	BOOL m_bNaki;
 	BOOL match(CPai&);
 	void set(UINT id);
 	BOOL m_bRiichi;

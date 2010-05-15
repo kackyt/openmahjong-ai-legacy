@@ -168,5 +168,8 @@ enum{
 #define TAG_RESULTLIST "rl"
 #define TAG_ERROR "err"
 #define TAG_SEQ "seq"
+#define TAG_RULE "ru"
+#define TAG_GLASSHAI "glh"
+#define TAG_KUITAN "kt"
 
 #endif

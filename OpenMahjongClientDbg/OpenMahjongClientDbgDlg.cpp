@@ -6,6 +6,7 @@
 #include "OpenMahjongClientDbg.h"
 #include "OpenMahjongClientDbgDlg.h"
 #include "AILib.h"
+#include "RuleDialog.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -195,7 +196,10 @@ UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 #ifdef MJ_TRACE
 		TRACE("GETKAWAEX\n");
 #endif
-		ret = 0;
+		idx = pDlg->m_pCurTaku->getMemberIndex(pDlg->m_pCurPlayer);
+		ASSERT(idx >= 0 && idx <= 3);
+		idx = (idx + LOWORD(param1)) % 4;
+		ret = pDlg->m_pCurTaku->getKawahaiEx(idx,(MJIKawahai*)param2);
 		break;
 	case MJMI_GETDORA:
 #ifdef MJ_TRACE
@@ -247,7 +251,8 @@ UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 #ifdef MJ_TRACE
 		TRACE("GETVISIBLEHAIS\n");
 #endif
-		ret = pDlg->m_pCurTaku->getVisibleHais(param1);
+		idx = pDlg->m_pCurTaku->getMemberIndex(pDlg->m_pCurPlayer);
+		ret = pDlg->m_pCurTaku->getVisibleHais(param1,idx);
 		break;
 	case MJMI_ANKANABILITY:
 #ifdef MJ_TRACE
@@ -395,9 +400,10 @@ BEGIN_MESSAGE_MAP(COpenMahjongClientDbgDlg, CDialog)
 	ON_BN_CLICKED(IDC_SNDTOALL, OnSndtoall)
 	ON_WM_DESTROY()
 	ON_WM_SETCURSOR()
+	ON_BN_CLICKED(IDC_ABORT, OnAbort)
 	ON_MESSAGE(WM_REFRESH,OnRefresh)
 	ON_MESSAGE(WM_SNDCOMMAND,OnSndCommand)
-	ON_BN_CLICKED(IDC_ABORT, OnAbort)
+	ON_BN_CLICKED(IDC_BTNRULE, OnBtnrule)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -590,6 +596,9 @@ void COpenMahjongClientDbgDlg::OnBtnconnect()
 					/* 新しいセッションの作成 */
 					com.m_iId = ID_CREATE;
 					m_iSession = -1;
+					m_connDlg.m_ruleDlg.getRule(com.m_rule);
+					m_rule = com.m_rule;
+					m_btnMahjong.m_rule = com.m_rule;
 				}else{
 					/* 既存のセッションに接続 */
 					com.m_iId = ID_CONNECT;
@@ -611,6 +620,12 @@ void COpenMahjongClientDbgDlg::OnBtnconnect()
 					pNode->get_text(&pStr);
 					text = pStr;
 					m_players[i].m_iId = _tcstol((const TCHAR*)text,NULL,0);
+				}
+
+				if(m_connDlg.m_iNewSess != 0){
+					pNode = pDoc->selectSingleNode(_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_COMMAND "/" TAG_RULE));
+					m_rule.parseXML(pNode);
+					m_btnMahjong.m_rule = m_rule;
 				}
 
 				if(m_players[i].m_bIsComp){
@@ -1934,4 +1949,14 @@ void COpenMahjongClientDbgDlg::sendCommand(CArray<CCommand,CCommand&> &aCommand,
 	sendString(sendMessage,recvMessage);
 
 
+}
+
+void COpenMahjongClientDbgDlg::OnBtnrule() 
+{
+	CRuleDialog ruleDialog;
+
+	ruleDialog.setRule(m_rule);
+	ruleDialog.setAccessMode(FALSE);
+	
+	ruleDialog.DoModal();
 }

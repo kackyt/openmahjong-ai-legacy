@@ -17,11 +17,12 @@
 class CTaku  
 {
 public:
+	int getKawahaiEx(int,MJIKawahai*);
 	void getMJITehai(int,MJITehai1 *);
 	void update(CTaku&);
 	CTaku& operator=(CTaku&);
 	void printState(int,CString&);
-	int getVisibleHais(UINT);
+	int getVisibleHais(UINT,int);
 	int getKawahai(int,UINT*);
 	void getMJITehai(int,MJITehai*);
 	int getMemberIndex(CPlayer*);

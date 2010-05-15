@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=COpenMahjongClientDbgDlg
+LastClass=CRuleDialog
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "OpenMahjongClientDbg.h"
@@ -14,12 +14,12 @@ Class2=COpenMahjongClientDbgDlg
 ResourceCount=6
 Resource1=IDR_MAINFRAME
 Class3=CMahjongWnd
-Resource2=IDD_OPENMAHJONGCLIENTDBG_DIALOG
+Resource2=IDD_AGARI
 Class4=CConnectDlg
 Class5=CMahjongStatic
 Class6=CMahjongBtn
 Class7=CMyButton
-Resource3=IDD_AGARI
+Resource3=IDD_OPENMAHJONGCLIENTDBG_DIALOG
 Class8=CDebugDialog
 Class9=CMessageEdit
 Resource4=IDD_CONNECT
@@ -48,7 +48,7 @@ VirtualFilter=dWC
 [DLG:IDD_OPENMAHJONGCLIENTDBG_DIALOG]
 Type=1
 Class=COpenMahjongClientDbgDlg
-ControlCount=31
+ControlCount=32
 Control1=IDC_BTNSYNC,button,1342242816
 Control2=IDC_BTNCONNECT,button,1342242816
 Control3=IDC_BTNTII,button,1476464643
@@ -80,6 +80,7 @@ Control28=IDC_SNDTO3,button,1342242819
 Control29=IDC_SNDTOALL,button,1342242816
 Control30=IDC_STATIC,static,1342308352
 Control31=IDC_ABORT,button,1342242816
+Control32=IDC_BTNRULE,button,1342242816
 
 [CLS:CMahjongWnd]
 Type=0
@@ -92,7 +93,7 @@ VirtualFilter=WC
 [DLG:IDD_CONNECT]
 Type=1
 Class=CConnectDlg
-ControlCount=19
+ControlCount=20
 Control1=IDC_CONNECTDST,combobox,1344339970
 Control2=IDC_RADIONEW,button,1342308361
 Control3=IDC_RADIOAPPEND,button,1342177289
@@ -112,6 +113,7 @@ Control16=IDC_STATIC,static,1342308352
 Control17=IDC_STATIC,static,1342308352
 Control18=IDC_STATIC,static,1342308352
 Control19=IDC_STATIC,static,1342308352
+Control20=IDC_BTNRULE,button,1342242816
 
 [CLS:CConnectDlg]
 Type=0
@@ -120,7 +122,7 @@ ImplementationFile=ConnectDlg.cpp
 BaseClass=CDialog
 Filter=D
 VirtualFilter=dWC
-LastObject=CConnectDlg
+LastObject=IDC_BTNRULE
 
 [CLS:CMahjongStatic]
 Type=0
@@ -232,16 +234,16 @@ Class=CRuleDialog
 ControlCount=12
 Control1=IDOK,button,1342242817
 Control2=IDCANCEL,button,1342242816
-Control3=IDC_COMBO1,combobox,1344340227
+Control3=IDC_CMBGLASSHAI,combobox,1344339971
 Control4=IDC_STATIC,static,1342308352
 Control5=IDC_STATIC,static,1342308352
-Control6=IDC_COMBO2,combobox,1344340227
+Control6=IDC_CMBKUITAN,combobox,1344339971
 Control7=IDC_STATIC,static,1342308352
-Control8=IDC_COMBO3,combobox,1344340227
+Control8=IDC_CMBSHANYU,combobox,1344339971
 Control9=IDC_STATIC,static,1342308352
-Control10=IDC_COMBO4,combobox,1344340227
+Control10=IDC_CMBSUFURENDA,combobox,1344339971
 Control11=IDC_STATIC,static,1342308352
-Control12=IDC_COMBO5,combobox,1344340227
+Control12=IDC_CMBAKADORA,combobox,1344339971
 
 [CLS:CRuleDialog]
 Type=0
@@ -249,5 +251,6 @@ HeaderFile=RuleDialog.h
 ImplementationFile=RuleDialog.cpp
 BaseClass=CDialog
 Filter=D
-LastObject=CRuleDialog
+LastObject=IDOK
+VirtualFilter=dWC
 

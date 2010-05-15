@@ -3,6 +3,7 @@
 
 #include "Taku.h"	// ClassView によって追加されました。
 #include "Komae.h"	// ClassView によって追加されました。
+#include "Rule.h"	// ClassView によって追加されました。
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -35,6 +36,7 @@ public:
 
 // インプリメンテーション
 public:
+	CRule m_rule;
 	CKomae m_haigaListYoko180;
 	CKomae m_haigaList180;
 	CKomae m_haigaListYoko;

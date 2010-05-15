@@ -78,6 +78,12 @@ void CCommand::parseXML(IXMLDOMNodePtr pElem)
 		}
 	}
 
+	pNode = pElem->selectSingleNode(_T(TAG_RULE));
+
+	if(pNode != NULL){
+		m_rule.parseXML(pNode);
+	}
+
 }
 
 CCommand& CCommand::operator=(CCommand& value)
@@ -106,4 +112,8 @@ void CCommand::toXML(IXMLDOMDocumentPtr pDoc,IXMLDOMElementPtr pParent)
 	pElemID->appendChild(pDoc->createTextNode((LPCTSTR)str));
 
 	m_player.toXML(pDoc,pElemCom);
+
+	if(m_rule.m_bActive){
+		m_rule.toXML(pDoc,pElemCom);
+	}
 }

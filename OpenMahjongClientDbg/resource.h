@@ -71,18 +71,24 @@
 #define IDC_RESTIMR6                    1066
 #define IDC_RESTIMR5                    1067
 #define IDC_COMBO1                      1068
+#define IDC_CMBGLASSHAI                 1068
 #define IDC_COMBO2                      1069
+#define IDC_CMBKUITAN                   1069
 #define IDC_COMBO3                      1070
+#define IDC_CMBSHANYU                   1070
 #define IDC_COMBO4                      1071
+#define IDC_CMBSUFURENDA                1071
 #define IDC_COMBO5                      1072
+#define IDC_CMBAKADORA                  1072
+#define IDC_BTNRULE                     1072
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        134
+#define _APS_NEXT_RESOURCE_VALUE        135
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1072
+#define _APS_NEXT_CONTROL_VALUE         1074
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

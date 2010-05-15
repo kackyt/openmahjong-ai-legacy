@@ -1,0 +1,835 @@
+// 「まうじゃん」用対戦相手プラグイン
+//     「てぃると」
+// 　　　　　　　　　　　　石畑 恭平
+#include <windows.h>
+#include <stdio.h>
+#include "MIPIface.h"
+#include "AILib.h"
+
+#define AIDUMP
+#define AIDUMP_1
+
+#define SCORE_KOUKEI_BIAS        (1.0)
+#define SCORE_MENTSU_BIAS        (1.0)
+#define SCORE_ANPAI              (0.08)
+#define SCORE_SUZI               (0.04)
+#define SCORE_RIICHI_BIAS        (2.0) 
+#define SCORE_SUPAI_BIAS         (0.1)
+#define SCORE_HANPAI_TRIPLE_BIAS (0.02)
+#define SCORE_HANPAI_BIAS        (0.01)
+#define SCORE_DORA_BIAS          (0.05)
+
+class MahjongAI {
+public :
+	UINT InterfaceFunc(UINT message,UINT param1,UINT param2);
+
+protected :
+#ifdef AIDUMP
+	FILE *fp;
+#endif
+	int machi[34];
+	char reach_flag[4];
+	int te_cnt[34];
+	int menzen;
+	MJITehai tehai;
+	int nakiok_flag;
+	int sthai;
+	double tehai_score;
+	char anpai[34][4];
+	int cha;
+	int tenpai_flag;
+	static int kyoku,kaze;
+	int jun;
+
+	int search(int obj,int start,int mask);
+	void set_machi(void);
+	void set_Tehai(void);
+	UINT sutehai_sub(int tsumohai);
+	double eval_Tehai_sub(int atama_flag);
+	double eval_Tehai_sub2(int atama_flag);
+	double eval_Tehai(void);
+	double eval_hai(int hai);
+	double eval_sutehai(int hai);
+	int calc_sutehai(void);
+	int nakability(int hai,int chii_flag);
+	UINT koe_req(int no,int hai);
+	UINT on_start_kyoku(int k,int c);
+	UINT on_end_kyoku(UINT reason,LONG* inc_sc);
+	UINT on_action(int player,int taishou,UINT action);
+	UINT on_start_game(void);
+	UINT on_end_game(int rank,LONG score);
+	UINT on_exchange(UINT state,UINT option);
+};
+
+int MahjongAI::kyoku,MahjongAI::kaze;
+
+TCHAR player_name[] = TEXT("テストAI");
+
+UINT (WINAPI *MJSendMessage)(MahjongAI*,UINT,UINT,UINT);
+
+
+// 手牌の中から任意の牌を見つけ、その位置を返す
+int MahjongAI::search(int obj,int start,int mask)
+{
+	while(start<(int)tehai.tehai_max){
+		if (!(mask&(1<<start)) && (int)tehai.tehai[start]==obj) break;
+		start++;
+	}
+	return start<(int)tehai.tehai_max ? start : -1;
+}
+
+// 当たり牌を調べ、配列machiに入れる。
+// また張っているかどうか調べてtenpai_flagをセットする。
+void MahjongAI::set_machi(void)
+{
+	int i,j,cnt;
+	(*MJSendMessage)(this,MJMI_GETMACHI,0,(UINT)machi);
+	tenpai_flag = 0;
+	for(i=0;i<34;i++){
+		if (machi[i]) {
+			cnt = 0;
+			for(j=0;j<(int)tehai.tehai_max;j++) if ((int)tehai.tehai[j]==i) cnt++;
+			if (cnt+(*MJSendMessage)(this,MJMI_GETVISIBLEHAIS,i,0)<4){
+				tenpai_flag = 1;
+				return;
+			}
+			tenpai_flag = -1;
+		}
+	}
+}
+
+// 手牌の変数tehaiとte_cntをセットする
+void MahjongAI::set_Tehai(void)
+{
+	int i;
+	(*MJSendMessage)(this,MJMI_GETTEHAI,0,(UINT)&tehai);
+#ifdef AIDUMP_COMMAND
+	fprintf(fp,TEXT("GET TEHAI\n"));
+#endif
+	for(i=0;i<34;i++) te_cnt[i] = 0;
+	for(i=0;i<(int)tehai.tehai_max;i++) te_cnt[tehai.tehai[i]]++;
+}
+
+// 捨て牌時の処理
+// tsumohai : 今つもってきた牌
+UINT MahjongAI::sutehai_sub(int tsumohai)
+{
+	int mc[34];
+	UINT rchk=MJPIR_SUTEHAI;
+	int i,hai,del_hai,hai_remain,tmp;
+
+	// 現在の手牌の状態をセットする
+	set_Tehai();
+	
+	// 現在の待ち牌を取得する
+	set_machi();
+
+	// ツモった場合は「ツモ」る
+	if (tsumohai>=0 && tsumohai<34) if (machi[tsumohai]) return MJPIR_TSUMO;
+
+	// リーチをかけている場合は「ツモ切り」
+	if (reach_flag[0]) return MJPIR_SUTEHAI | 13;
+
+	// 九種九牌で流せる場合は流す
+	tmp = (*MJSendMessage)(this,MJMI_KKHAIABILITY,0,0);
+
+#ifdef AIDUMP_COMMAND
+	fprintf(fp,TEXT("KKHAIABILITY %u\n"),tmp);
+#endif
+
+	if (tmp) return MJPIR_NAGASHI;
+	
+	// もしツモってきた牌があるなら、その牌を入れる
+	if (tsumohai>=0 && tsumohai<34) te_cnt[tsumohai]++;
+	
+	// 捨てる牌を決める
+	hai = calc_sutehai();
+	if (hai<(int)tehai.tehai_max) del_hai = tehai.tehai[hai]; else del_hai = tsumohai;
+	
+	// 門前で、テンパった場合はリーチをかけようかなぁ？
+	if (menzen){
+		if (hai<(int)tehai.tehai_max){
+			tehai.tehai[hai] = tsumohai;
+		}
+		hai_remain = (*MJSendMessage)(this,MJMI_GETHAIREMAIN,0,0);
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("GETHAIREMAIN %u\n"),hai_remain);
+#endif
+		tenpai_flag = (*MJSendMessage)(this,MJMI_GETMACHI,(UINT)&tehai,(UINT)mc);
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("GETMACHI %u\n"),tenpai_flag);
+#endif
+		for(i=0;i<34;i++){
+			if (mc[i]){
+				tmp = (*MJSendMessage)(this,MJMI_GETVISIBLEHAIS,i,0);
+#ifdef AIDUMP_COMMAND
+				fprintf(fp,TEXT("GETVISIBLEHAIS %u\n"),tmp);
+#endif
+
+				if (te_cnt[i]+tmp<4){
+					if (hai_remain>60){ rchk = MJPIR_REACH; break;}
+					tmp = (*MJSendMessage)(this,MJMI_GETAGARITEN,(UINT)&tehai,i);
+#ifdef AIDUMP_COMMAND
+					fprintf(fp,TEXT("GETAGARITEN %u\n"),tmp);
+#endif
+					
+					if (!tmp){ rchk = MJPIR_REACH; break;}
+				}
+			}
+		}
+	}
+
+	// 各種フラグのセット
+	if (rchk==MJPIR_REACH) reach_flag[0] = 1;
+	return hai|rchk;
+}
+
+// 手牌を部分的に評価する
+double MahjongAI::eval_Tehai_sub2(int atama_flag)
+{
+#define MAI_TENPAI_SIZE (20)
+	TENPAI_LIST list[MAI_TENPAI_SIZE];
+	int yukohai[34];
+	int yukonum;
+	int num;
+	int i,j,k;
+	int painum;
+	int shanten,remain;
+	int junremain;
+	int maxshanten;
+	double tmp,maxval;
+	int paiarray[14];
+	int avepais;
+	double avebias; // 牌の個数および有効牌の評価点の平均値を求める
+	
+	painum = 0;
+
+	/* 面倒だけど、また手牌の配列に戻す (暫定) */
+	for(i=0;i<34;i++){
+		for(j=0;j<te_cnt[i];j++){
+			paiarray[painum++] = i;
+			fprintf(fp,"%d ",i);
+		}
+	}
+
+	if(jun > 18){
+		junremain = 1;
+	}else{
+		junremain = 18 - jun;
+	}
+
+
+	remain = (*MJSendMessage)(this,MJMI_GETHAIREMAIN,0,0);
+
+	memset(yukohai,0,sizeof(yukohai));
+	memset(list,0,sizeof(list));
+
+	maxval = 0.0;
+
+	// ４シャンテンまで計算する
+	num = search_tenpai(paiarray,painum,list,MAI_TENPAI_SIZE,4);
+
+	for(shanten=1;shanten<=4;shanten++){
+		for(i=0;i<num;i++){
+			if(list[i].shanten == shanten){
+				for(j=0;j<34;j++){
+					if(yukohai[j] < list[i].machi[j]){
+						yukohai[j] = list[i].machi[j];
+					}
+				}
+			}
+		}
+
+		avepais = 0;
+		avebias = 0.0;
+		yukonum = 0;
+		// 有効牌のうち、シャンテン数分を持ってくる確率を求める
+		// (面子にならない可能性があるがここはちょっと簡略化)
+		for(i=0;i<34;i++){
+			// 牌の数で有効牌をソートする
+			if(yukohai[i] > 0){
+				painum = 4 - (*MJSendMessage)(this,MJMI_GETVISIBLEHAIS,i,0);
+
+				// 牌の個数および有効牌の評価点の合計を求める
+				avepais += painum;
+				if(yukohai[i] >= AI_FLAG_EFFECT_KOUTSU){
+					avebias += SCORE_MENTSU_BIAS;
+				}else if(yukohai[i] >= AI_FLAG_EFFECT_RYANTAH){
+					avebias += SCORE_KOUKEI_BIAS;
+				}else{
+					avebias += 1.0;
+				}
+				yukonum++;
+			}
+		}
+
+		tmp = 1.0;
+
+		for(i=0;i<shanten;i++){
+			tmp *= probabilityFunction((double)avepais / (double)yukonum / (double)remain,junremain/shanten);
+		}
+
+		tmp *= avebias / (double)yukonum; // * combination(yukonum,shanten);
+
+		if(tmp > maxval){
+			maxval = tmp;
+			maxshanten = shanten;
+		}
+
+	}
+
+#ifdef AIDUMP_1
+	fprintf(fp,"shanten = %d value=%.3f",maxshanten,maxval);
+#endif
+
+	return maxval;
+}
+// 手牌を部分的に評価する
+double MahjongAI::eval_Tehai_sub(int atama_flag)
+{
+	int p=0,sc_max=0,sc,kazu,chk;
+	char c;
+	UINT tmp;
+
+	for(p=0;p<34;p++) if (te_cnt[p]) break;
+	if (p==34) return 0;
+	c = te_cnt[p];
+
+	// 刻子の評価
+	if (c>=3) {
+		te_cnt[p]-=3;
+		sc_max = eval_Tehai_sub(atama_flag)+18;
+		te_cnt[p]+=3;
+	}
+
+	// 対子の評価
+	if (c>=2) {
+		te_cnt[p]-=2;
+		tmp = (*MJSendMessage)(this,MJMI_GETVISIBLEHAIS,p,0);
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("GETVISIBLEHAIS %u\n"),tmp);
+#endif
+		sc = eval_Tehai_sub(1)+6*(!anpai[p][0] || !atama_flag)+!atama_flag*12-tmp;
+		if (sc>sc_max) sc_max = sc;
+		te_cnt[p]+=2;
+	}
+
+	// 数牌の評価
+	if (p<27){
+		kazu = p%9;
+		if (kazu<7){
+			if (te_cnt[p+2]){
+				te_cnt[p]--; te_cnt[p+2]--;
+
+				// カンチャンの評価
+				if (!anpai[p+1][0] && sthai!=p+1){
+					tmp = (*MJSendMessage)(this,MJMI_GETVISIBLEHAIS,p+1,0);
+#ifdef AIDUMP_COMMAND
+					fprintf(fp,TEXT("GETVISIBLEHAIS %u\n"),tmp);
+#endif
+					sc = eval_Tehai_sub(atama_flag)+8-tmp;
+					if (sc>sc_max) sc_max = sc;
+					if (kazu<5) if (te_cnt[p+4]) if (!anpai[p+3][0] && sthai!=p+3){
+						te_cnt[p+4]--;
+						sc = eval_Tehai_sub(atama_flag)+12;
+						if (sc>sc_max) sc_max = sc;
+						te_cnt[p+4]++;
+					}
+				}
+
+				// 順子の評価
+				if (te_cnt[p+1]){
+					te_cnt[p+1]--;
+					sc = eval_Tehai_sub(atama_flag)+18;
+					if (sc>sc_max) sc_max = sc;
+					te_cnt[p+1]++;
+				}
+				te_cnt[p]++; te_cnt[p+2]++;
+			}
+		}
+
+		// 両面待ち、ペンチャンの評価
+		if (kazu<8){
+			if (te_cnt[p+1]){
+				chk = 0;
+				if (kazu>0) if (anpai[p-1][0] || sthai==p-1) chk = 1;
+				if (kazu<7) if (anpai[p+2][0] || sthai==p+2) chk = 1;
+				if (!chk){
+					te_cnt[p]--; te_cnt[p+1]--;
+					sc = eval_Tehai_sub(atama_flag)+8+(kazu>0 && kazu<7)*4;
+					if (sc>sc_max) sc_max = sc;
+					te_cnt[p]++; te_cnt[p+1]++;
+				}
+			}
+		}
+	}
+
+	// 牌を一つ削った状態での評価点も出してみる
+	te_cnt[p]--;
+	sc = eval_Tehai_sub(atama_flag);
+	if (sc>sc_max) sc_max = sc;
+	te_cnt[p]++;
+	return sc_max;
+}
+
+// 手牌を評価して評価値を返す
+double MahjongAI::eval_Tehai(void)
+{
+	double ret = eval_Tehai_sub2(0);
+	int i;
+	for(i=0;i<34;i++){
+		if (!te_cnt[i]) continue;
+		ret *= eval_hai(i); //*te_cnt[i];
+	}
+	return ret;
+}
+
+// 牌を評価して評価値を返す
+double MahjongAI::eval_hai(int hai)
+{
+	double ret = 1.0;
+	int j,doras;
+	UINT dora[6];
+	UINT tmp;
+
+	if (hai<27){
+		//ret+= SCORE_SUPAI_BIAS;
+	}else {
+		tmp = (*MJSendMessage)(this,MJMI_GETVISIBLEHAIS,hai,0);
+	
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("GETVISIBLEHAIS %u"),tmp);
+#endif
+		if (hai>30 || hai==cha+27 || hai==kaze+27){
+			if(te_cnt[hai] >= 3){
+				ret += SCORE_HANPAI_TRIPLE_BIAS;
+			}
+			if (tmp<2 && te_cnt[hai] == 2)
+				ret+= SCORE_HANPAI_BIAS;
+		}
+	}
+
+	doras = (*MJSendMessage)(this,MJMI_GETDORA,(UINT)dora,0);
+
+#ifdef AIDUMP_COMMAND
+	fprintf(fp,TEXT("GETDORA %u\n"),doras);
+#endif
+	for(j=0;j<doras;j++)
+		if (hai==(int)dora[j]) ret+=SCORE_DORA_BIAS*te_cnt[hai];
+	return ret;
+}
+
+// 捨て牌を評価して評価値を返す
+double MahjongAI::eval_sutehai(int hai)
+{
+	int i;
+	double ret = 0;
+
+	for(i=1;i<4;i++){
+		if (anpai[hai][i]) ret += SCORE_ANPAI;
+		else if (hai<27){
+			int kazu = hai%9,fl=1;
+			if (kazu>2) if (!anpai[hai-3][i]) fl = 0;
+			if (fl) if (kazu<6) if (!anpai[hai+3][i]) fl = 0;
+			if (fl) ret += SCORE_SUZI;
+		}
+		else if (!reach_flag[i]) ret *= SCORE_RIICHI_BIAS;
+	}
+	return ret;
+}
+
+// 捨てる牌を決める
+int MahjongAI::calc_sutehai(void)
+{
+	int i,ret;
+
+	// 捨てる牌を一つ一つ試してみて、もっとも評価値の高いものをとる
+	double sc_max = -1;
+	int sh;
+	double sc,scc,scc_max=-1;
+
+#ifdef AIDUMP_1
+	int j;
+	fprintf(fp,"TEHAI ");
+	for(i=0;i<34;i++){
+		for(j=0;j<te_cnt[i];j++){
+			fprintf(fp,"%d ",i);
+		}
+	}
+	fprintf(fp,"\n");
+
+#endif
+
+	for(i=0;i<34;i++){
+		if (!te_cnt[i]) continue;
+#ifdef AIDUMP_1
+		fprintf(fp,"[%d] --> ",i);
+#endif
+		te_cnt[i]--;
+		sthai = i;
+		sc = eval_Tehai();
+#ifdef AIDUMP_1
+		fprintf(fp," total = %.3f",sc);
+#endif
+		scc = eval_sutehai(i);
+#ifdef AIDUMP_1
+		fprintf(fp," sutehai = %.3f",scc);
+#endif
+
+		scc += sc;
+		if (scc>scc_max){ scc_max = scc; sc_max = sc; sh = i;}
+		te_cnt[i]++;
+#ifdef AIDUMP_1
+		fprintf(fp,"\n");
+#endif
+	}
+	tehai_score = sc_max;
+	ret = search(sh,0,0);
+
+	return ret>=0 ? ret : 13;
+}
+
+// 鳴くことができるかどうか調べる
+// hai : 対象の牌
+// chii_flag : チーについてもチェックするかどうか
+// return : 以下の値の論理和
+//		 1 : ポンできる
+//		 2 : カンできる
+//		 4 : チー１（左）できる
+//		 8 : チー２（右）できる
+//		16 : チー３（中）できる
+//		32 : ロンできる
+int MahjongAI::nakability(int hai,int chii_flag)
+{
+	int x,ret=0,kazu;
+
+	if (machi[hai]) ret |= 32;
+	if (reach_flag[0]) return ret;
+	if ((*MJSendMessage)(this,MJMI_GETHAIREMAIN,0,0)==0) return ret;
+	if ((x=search(hai,0,0))>=0){
+		if (x<(int)tehai.tehai_max-1){
+			if ((int)tehai.tehai[x+1]==hai){
+				ret |= 1;
+				if (x<(int)tehai.tehai_max-2){
+					if ((int)tehai.tehai[x+2]==hai) ret |= 2;
+				}
+			}
+		}
+	}
+	if (chii_flag){
+		if (hai<27){
+			kazu = hai%9;
+			if (kazu>1){
+				if (te_cnt[hai-2]>0 && te_cnt[hai-1]>0) ret |= 8;
+			}
+			if (kazu<7){
+				if (te_cnt[hai+2]>0 && te_cnt[hai+1]>0) ret |= 4;
+			}
+			if (kazu>0 && kazu<8){
+				if (te_cnt[hai-1]>0 && te_cnt[hai+1]>0) ret |= 16;
+			}
+		}
+	}
+	return ret;
+}
+
+// 他家の捨て牌に対するアクションを決める
+// no : だれが捨てたか
+// hai : 何を捨てたか
+// return : アクション
+UINT MahjongAI::koe_req(int no,int hai)
+{
+	int chii_flag;
+	double sc;
+	int naki_ok;
+	UINT tmp;
+
+	set_Tehai();
+	set_machi();
+	chii_flag = (no == 3);
+	naki_ok = nakability(hai,chii_flag);
+	if (!naki_ok) return 0;
+	if (naki_ok&32){
+		tmp = (*MJSendMessage)(this,MJMI_GETAGARITEN,0,hai);
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("GETAGARITEN %u\n"),tmp);
+#endif
+		if (tmp>0) {
+			return MJPIR_RON;
+		}
+	}
+	if (tenpai_flag==1) return 0;
+	sthai = -1;
+	if (naki_ok&1){
+		if (hai>=27){
+			if (te_cnt[hai]==2){
+				if (hai>=31 || hai-27==cha || hai-27==kaze || nakiok_flag){
+					return MJPIR_PON;
+				}
+			}
+		} else {
+			if (nakiok_flag){
+				te_cnt[hai] -= 2;
+				sc = eval_Tehai();
+				te_cnt[hai] += 2;
+				if (sc+eval_hai(hai)*3+7>tehai_score) {
+					return MJPIR_PON;
+				}
+			}
+		}
+	}
+	if (!nakiok_flag) return 0;
+	if (naki_ok&4){
+		te_cnt[hai+1]--; te_cnt[hai+2]--;
+		sc = eval_Tehai()+eval_hai(hai)+eval_hai(hai+1)+eval_hai(hai+2);
+		te_cnt[hai+1]++; te_cnt[hai+2]++;
+		if (sc+7>tehai_score){
+			return MJPIR_CHII1;
+		}
+	}
+	if (naki_ok&8){
+		te_cnt[hai-1]--; te_cnt[hai-2]--;
+		sc = eval_Tehai()+eval_hai(hai)+eval_hai(hai-1)+eval_hai(hai-2);
+		te_cnt[hai-1]++; te_cnt[hai-2]++;
+		if (sc+7>tehai_score){
+			return MJPIR_CHII2;
+		}
+	}
+	if (naki_ok&16){
+		te_cnt[hai-1]--; te_cnt[hai+1]--;
+		sc = eval_Tehai()+eval_hai(hai)+eval_hai(hai+1)+eval_hai(hai-1);
+		te_cnt[hai-1]++; te_cnt[hai+1]++;
+		if (sc+7>tehai_score){
+			return MJPIR_CHII3;
+		}
+	}
+	return 0;
+}
+
+// 局開始時の処理
+// k : 局
+// c : 家
+UINT MahjongAI::on_start_kyoku(int k,int c)
+{
+	int i,j;
+	set_Tehai();
+	for(i=0;i<34;i++) {
+		for (j=0;j<4;j++) anpai[i][j] = 0;
+	}
+	kyoku = k;
+	kaze = kyoku/4;
+	cha = c;
+	menzen = 1;
+	nakiok_flag = 0;
+	jun = 0;
+	sthai = -1;
+	for(i=0;i<4;i++) reach_flag[i] = 0;
+	tehai_score = eval_Tehai();
+	set_machi();
+	return 0;
+}
+
+// 局終了時の処理
+// reason : 終了した理由
+// inc_sc : 点数の変化
+UINT MahjongAI::on_end_kyoku(UINT reason,LONG* inc_sc)
+{
+	if (*inc_sc>5000) (*MJSendMessage)(this,MJMI_FUKIDASHI,(UINT)TEXT("よしよし…"),0);
+	return 0;
+}
+
+// アクションに対する応答をする
+UINT MahjongAI::on_action(int player,int taishou,UINT action)
+{
+	int hai = action&63;
+
+	if (action & MJPIR_REACH) reach_flag[player] = 1;
+	if (action & (MJPIR_SUTEHAI | MJPIR_REACH)){
+		anpai[hai][player] = 1;
+		for(int i=0;i<4;i++) if (reach_flag[i]) anpai[hai][i] = 1;
+		if (player==0) return 0;
+		return koe_req(player,hai);
+	}
+	if ((action & MJPIR_RON) && taishou==0){
+		(*MJSendMessage)(this,MJMI_FUKIDASHI,(UINT)TEXT("うっ…"),0);
+	}
+	if ((action & MJPIR_PON) && player==0){
+		nakiok_flag = 1;
+		menzen = 0;
+	}
+	if ((action & MJPIR_CHII1) && player==0){
+		menzen = 0;
+	}
+	if ((action & MJPIR_CHII2) && player==0){
+		menzen = 0;
+	}
+	if ((action & MJPIR_CHII3) && player==0){
+		menzen = 0;
+	}
+	if ((action & MJPIR_MINKAN) && player==0){
+		menzen = 0;
+	}
+	return 0;
+}
+
+// 半荘開始時の処理
+UINT MahjongAI::on_start_game(void)
+{
+	return 0;
+}
+
+// 半荘終了時の処理
+// rank : 順位
+// score : 点数
+UINT MahjongAI::on_end_game(int rank,LONG score)
+{
+	/*char str[40];
+	sprintf(str,"%d点、%d位か…",score,rank+1);
+	(*MJSendMessage)(this,MJMI_FUKIDASHI,(UINT)str,0);*/
+	return 0;
+}
+
+// 途中参加時の処理
+// state : そのときの状態
+// option : 状態に関連して送られる情報
+UINT MahjongAI::on_exchange(UINT state,UINT option)
+{
+	if (state==MJST_INKYOKU){
+		int i,j,k;
+		set_Tehai();
+		for(i=0;i<34;i++) {
+			for (j=0;j<4;j++) anpai[i][j] = 0;
+		}
+
+		MJIKawahai kawa[30];
+		for(i=0;i<4;i++){
+			k = (*MJSendMessage)(this,MJMI_GETKAWAEX,MAKELPARAM(i,30),(UINT)kawa);
+			reach_flag[i] = 0;
+			for(j=0;j<k;j++){
+				anpai[kawa[j].hai&63][j] = 1;
+				if (kawa[j].state&MJKS_REACH) reach_flag[i] = 1;
+			}
+		}
+
+		kyoku = LOWORD(option);
+		kaze = kyoku/4;
+		cha = HIWORD(option);
+		menzen = tehai.minshun_max+tehai.minkan_max+tehai.minkou_max==0;
+		nakiok_flag = !menzen;
+		sthai = -1;
+		tehai_score = eval_Tehai();
+		set_machi();
+	}
+	return 0;
+}
+
+// インスタンス用のインターフェース関数
+UINT MahjongAI::InterfaceFunc(UINT message,UINT param1,UINT param2)
+{
+	UINT ret = MJR_NOTCARED;
+#ifdef AIDUMP
+	fp = fopen(TEXT("./AIDUMP_COMMAND.txt"),TEXT("a"));
+#endif
+
+	switch(message){
+	case MJPI_SUTEHAI :
+		jun++;
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("SUTEHAI %u\n"),param1);
+#endif
+		ret = sutehai_sub(LOWORD(param1));
+		break;
+	case MJPI_ONACTION :
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("ONACTION %u %u\n"),param1,param2);
+#endif
+		ret = on_action(LOWORD(param1),HIWORD(param1),param2);
+		break;
+	case MJPI_STARTKYOKU :
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("STARTKYOKU %u %u\n"),param1,param2);
+#endif
+		ret = on_start_kyoku(LOWORD(param1),LOWORD(param2));
+		break;
+	case MJPI_ENDKYOKU :
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("ENDKYOKU %u %u\n"),param1,param2);
+#endif
+		ret = on_end_kyoku(param1,(LONG*)param2);
+		break;
+	case MJPI_STARTGAME :
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("STARTGAME\n"));
+#endif
+		ret = on_start_game();
+		break;
+	case MJPI_ENDGAME :
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("ENDGAME %u %u\n"),param1,param2);
+#endif
+		ret = on_end_game(LOWORD(param1),(LONG)param2);
+		break;
+	case MJPI_ONEXCHANGE :
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("ONEXCHANGE %u %u\n"),param1,param2);
+#endif
+		ret = on_exchange(LOWORD(param1),param2);
+		break;
+	case MJPI_CREATEINSTANCE :
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("CREATEINSTANCE\n"));
+#endif
+		ret = sizeof(MahjongAI);
+		break;
+	case MJPI_INITIALIZE :
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("INITIALIZE\n"));
+#endif
+		MJSendMessage = (UINT (WINAPI *)(MahjongAI*,UINT,UINT,UINT))param2;
+		ret = 0;
+		break;
+	case MJPI_YOURNAME :
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("YOUENAME\n"));
+#endif
+		ret = (UINT)player_name;
+		break;
+	case MJPI_DESTROY :
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("DESTROY\n"));
+#endif
+		ret = 0;
+		break;
+	case MJPI_ISEXCHANGEABLE :
+#ifdef AIDUMP_COMMAND
+		fprintf(fp,TEXT("ISEXCHANGEABLE\n"));
+#endif
+		ret = 0; // 途中参加に対応する。対応したくない場合は0以外にする。
+		break;
+	}
+
+#ifdef AIDUMP
+	fclose(fp);
+#endif
+	return ret;
+}
+
+// インターフェース関数
+UINT WINAPI MJPInterfaceFunc(MahjongAI* inst,UINT message,UINT param1,UINT param2)
+{
+	if (inst) return inst->InterfaceFunc(message,param1,param2);
+	switch(message){
+	case MJPI_CREATEINSTANCE :
+		return sizeof(MahjongAI);
+	case MJPI_INITIALIZE :
+		MJSendMessage = (UINT (WINAPI *)(MahjongAI*,UINT,UINT,UINT))param2;
+		return 0;
+	case MJPI_YOURNAME :
+		return (UINT)player_name;
+	case MJPI_DESTROY :
+		return 0;
+	case MJPI_ISEXCHANGEABLE :
+		return 0; // 途中参加に対応する。対応したくない場合は0以外にする。
+	}
+	return MJR_NOTCARED;
+}

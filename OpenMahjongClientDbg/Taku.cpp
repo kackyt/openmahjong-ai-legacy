@@ -687,6 +687,7 @@ void CTaku::update(CTaku& value)
 						if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
 							m_members[ind].m_aTehai.RemoveAt(i);
 							i--;
+							num++;
 							break;
 						}
 					}
@@ -715,6 +716,7 @@ void CTaku::update(CTaku& value)
 						if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
 							m_members[ind].m_aTehai.RemoveAt(i);
 							i--;
+							num++;
 							break;
 						}
 					}

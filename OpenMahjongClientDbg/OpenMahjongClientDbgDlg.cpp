@@ -53,7 +53,11 @@ static UINT __cdecl syncFunc(LPVOID param)
 		pDlg->m_fileNormal.closeWaveFile();
 		pDlg->m_fileCommand.closeWaveFile();
 		pDlg->m_fileCommand.openWaveFile(_T("./wav/agari.wav"));
-		pDlg->m_agariDlg.DoModal();
+		if(pDlg->m_pCurTaku->m_event.m_command.m_iType == TYPE_KOUHAI){
+			AfxMessageBox(_T("r”v•½‹Ç"));
+		}else{
+			pDlg->m_agariDlg.DoModal();
+		}
 		pDlg->m_fileCommand.closeWaveFile();
 		pDlg->m_fileNormal.openWaveFile(_T("./wav/bgmnormal.wav"));
 		pDlg->SendMessage(WM_SNDCOMMAND,400,0);
@@ -1052,8 +1056,30 @@ void COpenMahjongClientDbgDlg::gameSync()
 						m_fileNormal.closeWaveFile();
 						m_fileNormal.openWaveFile(_T("./wav/bgmenemy.wav"));
 					}
-					if(code == CODE_PROGRESSED){
 
+					if(code != CODE_WAITSYNC){
+						switch(m_pCurTaku->m_event.m_command.m_iType){
+						case TYPE_DAHAI:
+							m_fileCommand.closeWaveFile();
+							m_fileCommand.openWaveFile(_T("./wav/dahai.wav"));
+							break;
+						case TYPE_TII:
+						case TYPE_PON:
+						case TYPE_DAIMINKAN:
+						case TYPE_ANKAN:
+						case TYPE_KUWAEKAN:
+							m_fileCommand.closeWaveFile();
+							m_fileCommand.openWaveFile(_T("./wav/naki.wav"));
+							break;
+						case TYPE_RIICHI:
+							m_fileCommand.closeWaveFile();
+							m_fileCommand.openWaveFile(_T("./wav/riichi.wav"));
+							break;
+						default:
+							break;
+						}
+					}
+					if(code == CODE_PROGRESSED){
 						m_btnMahjong.refresh(m_pCurTaku->getMemberIndex(&m_players[i]),*m_pCurTaku);
 					}else if(code == CODE_WAITCOMMAND){
 						int index = m_pCurTaku->getMemberIndex(&m_players[i]);
@@ -1829,7 +1855,7 @@ BOOL COpenMahjongClientDbgDlg::PreTranslateMessage(MSG* pMsg)
 		// •¶Žš‚Æ”Žš
 		switch(pMsg->wParam){
 			case VK_RETURN:
-				OnSndmes();
+				if(m_strSendText != _T("")) OnSndmes();
 			case VK_ESCAPE:
 				return TRUE;
 			case VK_TAB:

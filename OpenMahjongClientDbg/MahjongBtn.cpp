@@ -392,7 +392,7 @@ void CMahjongBtn::paintPai(CPaintDC &dc,CRect &rect,CString &str,CMember *member
 					pPaigaYoko->drawCurrentImage(dc,tmpx,tmpy+10);
 				}
 				if(j==member->m_aDahai.GetSize() - 1 && member->m_aDahai[j].m_bTsumogiri){
-					dc.Rectangle(tmpx,tmpy+10,tmpx-10+32,tmpy+24);
+					dc.Rectangle(tmpx,tmpy+10,tmpx+32,tmpy+34);
 				}
 				tmpx += 35;
 			}
@@ -480,7 +480,7 @@ void CMahjongBtn::paintPai(CPaintDC &dc,CRect &rect,CString &str,CMember *member
 		}
 		if(member->m_gamestate.m_bTsumo){
 			pPaiga->setState((UINT)member->m_aTehai[j]);
-			if(m_rule.m_iGlasshai == 1 && member->m_aTehai[j].m_iId != 4){
+			if(m_rule.m_iGlasshai == 1 && member->m_aTehai[j] != PAI_NIL && member->m_aTehai[j].m_iId != 4){
 				pPaiga->drawCurrentImage(dc,tmpx,tmpy,120);
 			}else{
 				pPaiga->drawCurrentImage(dc,tmpx,tmpy);

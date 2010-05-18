@@ -29,6 +29,8 @@ void CRuleDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CRuleDialog)
+	DDX_Control(pDX, IDC_CMBAOTENJO, m_cmbAotenjo);
+	DDX_Control(pDX, IDC_CMBAKADORA, m_cmbAka);
 	DDX_Control(pDX, IDC_CMBKUITAN, m_cmbKuitan);
 	DDX_Control(pDX, IDC_CMBGLASSHAI, m_cmbGlasshai);
 	//}}AFX_DATA_MAP
@@ -68,13 +70,19 @@ BOOL CRuleDialog::OnInitDialog()
 	if(m_bWritable){
 		m_cmbGlasshai.EnableWindow(TRUE);
 		m_cmbKuitan.EnableWindow(TRUE);
+		m_cmbAka.EnableWindow(TRUE);
+		m_cmbAotenjo.EnableWindow(TRUE);
 	}else{
 		m_cmbGlasshai.EnableWindow(FALSE);
 		m_cmbKuitan.EnableWindow(FALSE);
+		m_cmbAka.EnableWindow(FALSE);
+		m_cmbAotenjo.EnableWindow(FALSE);
 	}
 
 	m_cmbGlasshai.SetCurSel(m_rule.m_iGlasshai);
 	m_cmbKuitan.SetCurSel(m_rule.m_iKuitan);
+	m_cmbAka.SetCurSel(m_rule.m_iAka);
+	m_cmbAotenjo.SetCurSel(m_rule.m_iAotenjo);
 	
 	return TRUE;  // コントロールにフォーカスを設定しないとき、戻り値は TRUE となります
 	              // 例外: OCX プロパティ ページの戻り値は FALSE となります
@@ -87,6 +95,8 @@ void CRuleDialog::OnOK()
 	m_rule.m_bActive = TRUE;
 	m_rule.m_iGlasshai = m_cmbGlasshai.GetCurSel();
 	m_rule.m_iKuitan = m_cmbKuitan.GetCurSel();
+	m_rule.m_iAka = m_cmbAka.GetCurSel();
+	m_rule.m_iAotenjo = m_cmbAotenjo.GetCurSel();
 	
 	CDialog::OnOK();
 }

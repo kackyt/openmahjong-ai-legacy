@@ -143,7 +143,7 @@ int CTaku::getMemberIndex(CPlayer *player)
 
 	return -1;
 }
-void CTaku::getMJITehai(int index,MJITehai1 *pTehai)
+void CTaku::getMJITehai(int index,MJITehai1 *pTehai,CRule& rule)
 {
 	CMember& member = m_members[index];
 	int i,j,k;
@@ -163,6 +163,7 @@ void CTaku::getMJITehai(int index,MJITehai1 *pTehai)
 		
 		for(i=0;i<(int)pTehai->tehai_max;i++){
 			pTehai->tehai[i] = member.m_aTehai[i];
+			if(member.m_aTehai[i].isAka(rule)) pTehai->tehai[i] += 64;
 		}
 	}
 
@@ -182,6 +183,7 @@ void CTaku::getMJITehai(int index,MJITehai1 *pTehai)
 			for(j=0;j<mentsu.m_aPaiList.GetSize();j++){
 				if(j != (int)mentsu.getNakiPos()){
 					pTehai->minshun_hai[k++][pTehai->minshun_max] = mentsu.m_aPaiList[j];
+					if(mentsu.m_aPaiList[j].isAka(rule)) pTehai->minshun_hai[k++][pTehai->minshun_max] += 64;
 				}
 			}
 			pTehai->minshun_max++;
@@ -190,6 +192,7 @@ void CTaku::getMJITehai(int index,MJITehai1 *pTehai)
 			pTehai->minkou[pTehai->minkou_max] = mentsu.m_aPaiList[0];
 			for(j=0;j<mentsu.m_aPaiList.GetSize();j++){
 				pTehai->minkou_hai[j][pTehai->minkou_max] = mentsu.m_aPaiList[j];
+				if(mentsu.m_aPaiList[j].isAka(rule)) pTehai->minkou_hai[j][pTehai->minkou_max] += 64;
 			}
 			pTehai->minkou_max++;
 			break;
@@ -197,6 +200,7 @@ void CTaku::getMJITehai(int index,MJITehai1 *pTehai)
 			pTehai->minkan[pTehai->minkan_max] = mentsu.m_aPaiList[0];
 			for(j=0;j<mentsu.m_aPaiList.GetSize();j++){
 				pTehai->minkan_hai[j][pTehai->minkan_max] = mentsu.m_aPaiList[j];
+				if(mentsu.m_aPaiList[j].isAka(rule)) pTehai->minkan_hai[j][pTehai->minkan_max] += 64;
 			}
 			pTehai->minkan_max++;
 			break;
@@ -204,6 +208,7 @@ void CTaku::getMJITehai(int index,MJITehai1 *pTehai)
 			pTehai->ankan[pTehai->ankan_max] = mentsu.m_aPaiList[0];
 			for(j=0;j<mentsu.m_aPaiList.GetSize();j++){
 				pTehai->ankan_hai[j][pTehai->ankan_max] = mentsu.m_aPaiList[j];
+				if(mentsu.m_aPaiList[j].isAka(rule)) pTehai->ankan_hai[j][pTehai->ankan_max] += 64;
 			}
 			pTehai->ankan_max++;
 			break;
@@ -510,6 +515,12 @@ void CTaku::update(CTaku& value)
 	m_iTurn = value.m_iTurn;
 	m_iYama = value.m_iYama;
 
+	for(i=0;i<4;i++){
+		for(j=0;j<m_members[i].m_aDahai.GetSize();j++){
+			m_members[i].m_aDahai[j].m_bLast = FALSE;
+		}
+	}
+
 	// ƒCƒxƒ“ƒg‚ðˆ—‚·‚é
 	if(value.m_event.m_bActive){
 		if(m_event.m_iSeq != value.m_event.m_iSeq){
@@ -518,6 +529,7 @@ void CTaku::update(CTaku& value)
 			case TYPE_DAHAI:
 				ind = getMemberIndex(&value.m_event.m_command.m_player);
 				m_members[ind].m_aDahai.Add(value.m_event.m_command.m_pai);
+				m_members[ind].m_aDahai[m_members[ind].m_aDahai.GetUpperBound()].m_bLast = TRUE;
 				bDeleted = m_members[ind].m_aTehai.GetSize() == 0 ? TRUE : FALSE;
 				
 				for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
@@ -752,6 +764,7 @@ void CTaku::update(CTaku& value)
 			case TYPE_RIICHI:
 				ind = getMemberIndex(&value.m_event.m_command.m_player);
 				m_members[ind].m_aDahai.Add(value.m_event.m_command.m_pai);
+				m_members[ind].m_aDahai[m_members[ind].m_aDahai.GetUpperBound()].m_bLast = TRUE;
 				bDeleted = m_members[ind].m_aTehai.GetSize() == 0 ? TRUE : FALSE;
 				
 				for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){

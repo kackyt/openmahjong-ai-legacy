@@ -103,7 +103,7 @@ UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 		idx = (idx + param1) % 4;
 		pTehai = (MJITehai*)param2;
 		if(stmode == 1){
-			pDlg->m_pCurTaku->getMJITehai(idx,(MJITehai1*)pTehai);
+			pDlg->m_pCurTaku->getMJITehai(idx,(MJITehai1*)pTehai,pDlg->m_rule);
 		}else{
 			pDlg->m_pCurTaku->getMJITehai(idx,pTehai);
 		}
@@ -294,6 +294,22 @@ UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 		switch(param1){
 		case MJRL_KUITAN:
 			ret = pDlg->m_rule.m_iKuitan;
+			break;
+		case MJRL_AKA5:
+			if(pDlg->m_rule.m_iAka != 0){
+				ret = 1;
+			}else{
+				ret = 0;
+			}
+			break;
+		case MJRL_AKA5S:
+			if(pDlg->m_rule.m_iAka == 1){
+				ret = 0x111;
+			}else if(pDlg->m_rule.m_iAka == 2){
+				ret = 0x121;
+			}else{
+				ret = 0;
+			}
 			break;
 		default:
 			ret = ruleTable[param1-1];

@@ -24,6 +24,7 @@ CPai::CPai()
 	m_bTsumogiri = FALSE;
 	m_bRiichi = FALSE;
 	m_bNaki = FALSE;
+	m_bLast = FALSE;
 
 }
 
@@ -165,4 +166,24 @@ BOOL CPai::match(CPai& pai)
 	}else{
 		return FALSE;
 	}
+}
+
+BOOL CPai::isAka(CRule& rule)
+{
+	if(rule.m_iAka == 1){
+		if(m_iNo == 5 && m_iId == 4 && m_iCategory != PAI_ZIHAI){
+			return TRUE;
+		}
+	}else if(rule.m_iAka == 2){
+		if(m_iNo == 5 && m_iId == 4 && m_iCategory != PAI_ZIHAI){
+			return TRUE;
+		}
+
+		if(m_iCategory == PAI_PINZU && m_iNo == 5 && m_iId == 3){
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+
 }

@@ -14,15 +14,15 @@ Class2=COpenMahjongClientDbgDlg
 ResourceCount=6
 Resource1=IDR_MAINFRAME
 Class3=CMahjongWnd
-Resource2=IDD_CONNECT
+Resource2=IDD_DEBUG
 Class4=CConnectDlg
 Class5=CMahjongStatic
 Class6=CMahjongBtn
 Class7=CMyButton
-Resource3=IDD_AGARI
+Resource3=IDD_CONNECT
 Class8=CDebugDialog
 Class9=CMessageEdit
-Resource4=IDD_DEBUG
+Resource4=IDD_AGARI
 Class10=CAgariDialog
 Resource5=IDD_OPENMAHJONGCLIENTDBG_DIALOG
 Class11=CRuleDialog
@@ -231,7 +231,7 @@ LastObject=IDC_AGARIYAKU
 [DLG:IDD_RULE]
 Type=1
 Class=CRuleDialog
-ControlCount=12
+ControlCount=15
 Control1=IDOK,button,1342242817
 Control2=IDCANCEL,button,1342242816
 Control3=IDC_CMBGLASSHAI,combobox,1344339971
@@ -244,6 +244,9 @@ Control9=IDC_STATIC,static,1342308352
 Control10=IDC_CMBSUFURENDA,combobox,1344339971
 Control11=IDC_STATIC,static,1342308352
 Control12=IDC_CMBAKADORA,combobox,1344339971
+Control13=IDC_CMBAOTENJO,combobox,1344339971
+Control14=IDC_STATIC,static,1342308352
+Control15=IDC_STATIC,static,1342308352
 
 [CLS:CRuleDialog]
 Type=0
@@ -251,6 +254,6 @@ HeaderFile=RuleDialog.h
 ImplementationFile=RuleDialog.cpp
 BaseClass=CDialog
 Filter=D
-LastObject=IDOK
+LastObject=IDC_CMBAKADORA
 VirtualFilter=dWC
 

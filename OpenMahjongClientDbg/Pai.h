@@ -12,10 +12,13 @@
 
 #define PAI_NIL     (34)
 #define PAI_NOTINIT (63)
+#include "Rule.h"
 
 class CPai  
 {
 public:
+	BOOL m_bLast;
+	BOOL isAka(CRule&);
 	BOOL m_bNaki;
 	BOOL match(CPai&);
 	void set(UINT id);

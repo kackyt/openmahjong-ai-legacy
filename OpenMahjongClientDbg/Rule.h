@@ -12,6 +12,8 @@
 class CRule  
 {
 public:
+	int m_iAotenjo;
+	int m_iAka;
 	BOOL m_bActive;
 	void toXML(IXMLDOMDocumentPtr,IXMLDOMElementPtr);
 	void parseXML(IXMLDOMNodePtr);

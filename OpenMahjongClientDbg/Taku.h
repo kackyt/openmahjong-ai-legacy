@@ -9,6 +9,7 @@
 #include "Member.h"	// ClassView ‚É‚æ‚Á‚Ä’Ç‰Á‚³‚ê‚Ü‚µ‚½B
 #include "TakuEvent.h"	// ClassView ‚É‚æ‚Á‚Ä’Ç‰Á‚³‚ê‚Ü‚µ‚½B
 #include "MIPIface.h"
+#include "Rule.h"
 
 #if _MSC_VER > 1000
 #pragma once
@@ -18,7 +19,7 @@ class CTaku
 {
 public:
 	int getKawahaiEx(int,MJIKawahai*);
-	void getMJITehai(int,MJITehai1 *);
+	void getMJITehai(int,MJITehai1 *,CRule&);
 	void update(CTaku&);
 	CTaku& operator=(CTaku&);
 	void printState(int,CString&);

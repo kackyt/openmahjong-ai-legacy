@@ -60,6 +60,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 private:
+	UINT getPaiState(CPai&);
 	void paintPai(CPaintDC &dc,CRect &rect,CString &str,CMember *member,int count);
 	int m_iPlayerIndex;
 	CTaku m_taku;

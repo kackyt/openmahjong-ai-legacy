@@ -73,13 +73,8 @@ BOOL CRuleDialog::OnInitDialog()
 		m_cmbKuitan.EnableWindow(FALSE);
 	}
 
-	if(m_rule.m_bActive){
-		m_cmbGlasshai.SetCurSel(m_rule.m_iGlasshai);
-		m_cmbKuitan.SetCurSel(m_rule.m_iKuitan);
-	}else{
-		m_cmbGlasshai.SetCurSel(0);
-		m_cmbKuitan.SetCurSel(0);
-	}
+	m_cmbGlasshai.SetCurSel(m_rule.m_iGlasshai);
+	m_cmbKuitan.SetCurSel(m_rule.m_iKuitan);
 	
 	return TRUE;  // コントロールにフォーカスを設定しないとき、戻り値は TRUE となります
 	              // 例外: OCX プロパティ ページの戻り値は FALSE となります

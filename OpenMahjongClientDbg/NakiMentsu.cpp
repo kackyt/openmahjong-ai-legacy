@@ -74,10 +74,12 @@ UINT CNakiMentsu::getNakiPos()
 	if(m_aPaiList.GetSize() < 3){
 		return 999;
 	}
-	if((UINT)m_nakihai == m_aPaiList[0]){
+	if((UINT)m_nakihai == m_aPaiList[0] && m_nakihai.m_iId == m_aPaiList[0].m_iId){
 		return 0;
-	}else if((UINT)m_nakihai == m_aPaiList[1]){
+	}else if((UINT)m_nakihai == m_aPaiList[1] && m_nakihai.m_iId == m_aPaiList[1].m_iId){
 		return 1;
+	}else if(m_aPaiList.GetSize() == 4 && (UINT)m_nakihai == m_aPaiList[3] && m_nakihai.m_iId == m_aPaiList[3].m_iId){
+		return 3;
 	}else{
 		return 2;
 	}

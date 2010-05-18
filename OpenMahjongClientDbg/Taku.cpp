@@ -12,6 +12,8 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+#define GLASS_DEBUG (0)
+
 //////////////////////////////////////////////////////////////////////
 // ç\íz/è¡ñ≈
 //////////////////////////////////////////////////////////////////////
@@ -546,16 +548,16 @@ void CTaku::update(CTaku& value)
 					m_members[ind].m_aTehai.RemoveAt(m_members[ind].m_aTehai.GetUpperBound());
 					bInserted = FALSE;
 					
-					for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
-						if((UINT)pai <= (UINT)m_members[ind].m_aTehai[i]){
-							m_members[ind].m_aTehai.InsertAt(i,pai);
+					for(i=m_members[ind].m_aTehai.GetUpperBound();i>=0;i--){
+						if((UINT)pai >= (UINT)m_members[ind].m_aTehai[i]){
+							m_members[ind].m_aTehai.InsertAt(i+1,pai);
 							bInserted = TRUE;
 							break;
 						}
 					}
 					
 					if(!bInserted){
-						m_members[ind].m_aTehai.Add(pai);
+						m_members[ind].m_aTehai.InsertAt(0,pai);
 					}
 				}
 				
@@ -591,9 +593,12 @@ void CTaku::update(CTaku& value)
 						}
 					}
 				}
+
+#if GLASS_DEBUG
 				if(num < 2){
 					AfxDebugBreak();
 				}
+#endif
 
 				bTsumo = FALSE;
 				break;
@@ -629,9 +634,11 @@ void CTaku::update(CTaku& value)
 						}
 					}
 				}
+#if GLASS_DEBUG
 				if(num < 2){
 					AfxDebugBreak();
 				}
+#endif
 
 				bTsumo = FALSE;
 				break;
@@ -666,10 +673,12 @@ void CTaku::update(CTaku& value)
 						}
 					}
 				}
+#if GLASS_DEBUG
 
 				if(num < 3){
 					AfxDebugBreak();
 				}
+#endif
 
 				break;
 			case TYPE_KUWAEKAN:
@@ -703,9 +712,11 @@ void CTaku::update(CTaku& value)
 					}
 				}
 
+#if GLASS_DEBUG
 				if(num < 1){
 					AfxDebugBreak();
 				}
+#endif
 				break;
 			case TYPE_ANKAN:
 				ind = getMemberIndex(&value.m_event.m_command.m_player);
@@ -732,9 +743,11 @@ void CTaku::update(CTaku& value)
 					}
 				}
 
+#if GLASS_DEBUG
 				if(num < 4){
 					AfxDebugBreak();
 				}
+#endif
 				break;
 			case TYPE_RIICHI:
 				ind = getMemberIndex(&value.m_event.m_command.m_player);

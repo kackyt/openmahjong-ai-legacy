@@ -22,7 +22,7 @@ CRule::CRule()
 {
 	m_bActive = FALSE;
 	m_iGlasshai = 0;
-	m_iKuitan = 0;
+	m_iKuitan = 1;
 }
 
 CRule::~CRule()

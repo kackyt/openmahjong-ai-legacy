@@ -291,7 +291,14 @@ UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 #ifdef MJ_TRACE
 		TRACE("GETRULE");
 #endif
-		ret = ruleTable[param1-1];
+		switch(param1){
+		case MJRL_KUITAN:
+			ret = pDlg->m_rule.m_iKuitan;
+			break;
+		default:
+			ret = ruleTable[param1-1];
+			break;
+		}
 		break;
 	case MJMI_SETSTRUCTTYPE:
 		ret = MJR_NOTCARED;
@@ -1805,31 +1812,33 @@ void COpenMahjongClientDbgDlg::OnSndmes()
 
 	if(m_iPlayerIndex >= 0){
 		UpdateData(TRUE);
-		mes.m_strText = m_strSendText;
-		mes.m_playerFrom = m_pCurTaku->m_members[m_iPlayerIndex].m_player;
-
-		for(i=0;i<4;i++){
-			kaze = ieTable[m_pCurTaku->m_members[m_iPlayerIndex].m_gamestate.m_iZikaze - 1][m_pCurTaku->m_members[i].m_gamestate.m_iZikaze - 1];
-			if((kaze == 1 && (m_btnSndTo1.GetCheck() & 1))
-				|| (kaze == 2 && (m_btnSndTo2.GetCheck() & 1))
-				|| (kaze == 3 && (m_btnSndTo3.GetCheck() & 1))){
-				mes.m_aPlayerTo.Add(m_pCurTaku->m_members[i].m_player);
+		if(m_strSendText != _T("")){
+			mes.m_strText = m_strSendText;
+			mes.m_playerFrom = m_pCurTaku->m_members[m_iPlayerIndex].m_player;
+			
+			for(i=0;i<4;i++){
+				kaze = ieTable[m_pCurTaku->m_members[m_iPlayerIndex].m_gamestate.m_iZikaze - 1][m_pCurTaku->m_members[i].m_gamestate.m_iZikaze - 1];
+				if((kaze == 1 && (m_btnSndTo1.GetCheck() & 1))
+					|| (kaze == 2 && (m_btnSndTo2.GetCheck() & 1))
+					|| (kaze == 3 && (m_btnSndTo3.GetCheck() & 1))){
+					mes.m_aPlayerTo.Add(m_pCurTaku->m_members[i].m_player);
+				}
 			}
+			
+			queueMessage(mes);
+			
+			// ダミーメッセージを送信
+			sendCommand(com,echoText);
+			
+			// ローカルエコー送信
+			echoText.Format(_T("%s[%s]：%s\r\n"),m_pCurTaku->m_members[m_iPlayerIndex].m_player.m_strName,
+				ieStrTable[m_pCurTaku->m_members[m_iPlayerIndex].m_gamestate.m_iZikaze - 1],
+				m_strSendText);
+			
+			appendMessageText(echoText);
+			
+			m_strSendText = _T("");
 		}
-
-		queueMessage(mes);
-		
-		// ダミーメッセージを送信
-		sendCommand(com,echoText);
-
-		// ローカルエコー送信
-		echoText.Format(_T("%s[%s]：%s\r\n"),m_pCurTaku->m_members[m_iPlayerIndex].m_player.m_strName,
-			ieStrTable[m_pCurTaku->m_members[m_iPlayerIndex].m_gamestate.m_iZikaze - 1],
-			m_strSendText);
-
-		appendMessageText(echoText);
-
-		m_strSendText = _T("");
 
 		UpdateData(FALSE);
 	}
@@ -1855,7 +1864,7 @@ BOOL COpenMahjongClientDbgDlg::PreTranslateMessage(MSG* pMsg)
 		// 文字と数字
 		switch(pMsg->wParam){
 			case VK_RETURN:
-				if(m_strSendText != _T("")) OnSndmes();
+				OnSndmes();
 			case VK_ESCAPE:
 				return TRUE;
 			case VK_TAB:

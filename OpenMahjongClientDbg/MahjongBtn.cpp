@@ -19,7 +19,6 @@ CMahjongBtn::CMahjongBtn()
 	m_bActive = FALSE;
 	m_iSelMode = 0;
 	
-	/* 0 Å` 37 */
 	m_haigaList.loadImages(_T("haiga/man"),RGB(0,255,255),_T("gif"),1);
 	m_haigaList.loadImages(_T("haiga/pin"),RGB(0,255,255),_T("gif"),1);
 	m_haigaList.loadImages(_T("haiga/sou"),RGB(0,255,255),_T("gif"),1);
@@ -31,9 +30,16 @@ CMahjongBtn::CMahjongBtn()
 	m_haigaList.loadImages(_T("haiga/hatu"),RGB(0,255,255),_T("gif"),-1);
 	m_haigaList.loadImages(_T("haiga/tyun"),RGB(0,255,255),_T("gif"),-1);
 	m_haigaList.loadImages(_T("haiga/ura"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/man5red"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/pin5red"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/sou5red"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("haiga/manred"),RGB(0,255,255),_T("gif"),1);
+	m_haigaList.loadImages(_T("haiga/pinred"),RGB(0,255,255),_T("gif"),1);
+	m_haigaList.loadImages(_T("haiga/soured"),RGB(0,255,255),_T("gif"),1);
+	m_haigaList.loadImages(_T("haiga/tonred"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("haiga/nanred"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("haiga/shared"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("haiga/peired"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("haiga/hakured"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("haiga/hatured"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("haiga/tyun"),RGB(0,255,255),_T("gif"),-1);
 	
 	m_haigaList180.loadImages(_T("haiga/tman"),RGB(0,255,255),_T("gif"),1);
 	m_haigaList180.loadImages(_T("haiga/tpin"),RGB(0,255,255),_T("gif"),1);
@@ -46,10 +52,17 @@ CMahjongBtn::CMahjongBtn()
 	m_haigaList180.loadImages(_T("haiga/thatu"),RGB(0,255,255),_T("gif"),-1);
 	m_haigaList180.loadImages(_T("haiga/ttyun"),RGB(0,255,255),_T("gif"),-1);
 	m_haigaList180.loadImages(_T("haiga/tura"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList180.loadImages(_T("haiga/tman5red"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList180.loadImages(_T("haiga/tpin5red"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList180.loadImages(_T("haiga/tsou5red"),RGB(0,255,255),_T("gif"),-1);
-	/* 38 Å` */
+	m_haigaList180.loadImages(_T("haiga/tmanred"),RGB(0,255,255),_T("gif"),1);
+	m_haigaList180.loadImages(_T("haiga/tpinred"),RGB(0,255,255),_T("gif"),1);
+	m_haigaList180.loadImages(_T("haiga/tsoured"),RGB(0,255,255),_T("gif"),1);
+	m_haigaList180.loadImages(_T("haiga/ttonred"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList180.loadImages(_T("haiga/tnanred"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList180.loadImages(_T("haiga/tshared"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList180.loadImages(_T("haiga/tpeired"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList180.loadImages(_T("haiga/thakured"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList180.loadImages(_T("haiga/thatured"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList180.loadImages(_T("haiga/ttyun"),RGB(0,255,255),_T("gif"),-1);
+
 	m_haigaListYoko.loadImages(_T("haiga/yman"),RGB(0,255,255),_T("gif"),1);
 	m_haigaListYoko.loadImages(_T("haiga/ypin"),RGB(0,255,255),_T("gif"),1);
 	m_haigaListYoko.loadImages(_T("haiga/ysou"),RGB(0,255,255),_T("gif"),1);
@@ -61,9 +74,16 @@ CMahjongBtn::CMahjongBtn()
 	m_haigaListYoko.loadImages(_T("haiga/yhatu"),RGB(0,255,255),_T("gif"),-1);
 	m_haigaListYoko.loadImages(_T("haiga/ytyun"),RGB(0,255,255),_T("gif"),-1);
 	m_haigaListYoko.loadImages(_T("haiga/yura"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaListYoko.loadImages(_T("haiga/yman5red"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaListYoko.loadImages(_T("haiga/ypin5red"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaListYoko.loadImages(_T("haiga/ysou5red"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko.loadImages(_T("haiga/ymanred"),RGB(0,255,255),_T("gif"),1);
+	m_haigaListYoko.loadImages(_T("haiga/ypinred"),RGB(0,255,255),_T("gif"),1);
+	m_haigaListYoko.loadImages(_T("haiga/ysoured"),RGB(0,255,255),_T("gif"),1);
+	m_haigaListYoko.loadImages(_T("haiga/ytonred"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko.loadImages(_T("haiga/ynanred"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko.loadImages(_T("haiga/yshared"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko.loadImages(_T("haiga/ypeired"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko.loadImages(_T("haiga/yhakured"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko.loadImages(_T("haiga/yhatured"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko.loadImages(_T("haiga/ytyun"),RGB(0,255,255),_T("gif"),-1);
 	
 	m_haigaListYoko180.loadImages(_T("haiga/tyman"),RGB(0,255,255),_T("gif"),1);
 	m_haigaListYoko180.loadImages(_T("haiga/typin"),RGB(0,255,255),_T("gif"),1);
@@ -76,9 +96,16 @@ CMahjongBtn::CMahjongBtn()
 	m_haigaListYoko180.loadImages(_T("haiga/tyhatu"),RGB(0,255,255),_T("gif"),-1);
 	m_haigaListYoko180.loadImages(_T("haiga/tytyun"),RGB(0,255,255),_T("gif"),-1);
 	m_haigaListYoko180.loadImages(_T("haiga/tyura"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaListYoko180.loadImages(_T("haiga/tyman5red"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaListYoko180.loadImages(_T("haiga/typin5red"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaListYoko180.loadImages(_T("haiga/tysou5red"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko180.loadImages(_T("haiga/tymanred"),RGB(0,255,255),_T("gif"),1);
+	m_haigaListYoko180.loadImages(_T("haiga/typinred"),RGB(0,255,255),_T("gif"),1);
+	m_haigaListYoko180.loadImages(_T("haiga/tysoured"),RGB(0,255,255),_T("gif"),1);
+	m_haigaListYoko180.loadImages(_T("haiga/tytonred"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko180.loadImages(_T("haiga/tynanred"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko180.loadImages(_T("haiga/tyshared"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko180.loadImages(_T("haiga/typeired"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko180.loadImages(_T("haiga/tyhakured"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko180.loadImages(_T("haiga/tyhatured"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaListYoko180.loadImages(_T("haiga/tytyun"),RGB(0,255,255),_T("gif"),-1);
 }
 
 CMahjongBtn::~CMahjongBtn()
@@ -705,27 +732,19 @@ UINT CMahjongBtn::getPaiState(CPai& pai)
 {
 	if(m_rule.m_iAka == 1){
 		if(pai.m_iNo == 5 && pai.m_iId == 4){
-			if(pai.m_iCategory == PAI_MANZU){
-				return 35;
-			}else if(pai.m_iCategory == PAI_PINZU){
-				return 36;
-			}else if(pai.m_iCategory == PAI_SOUZU){
-				return 37;
-			}
+			return (UINT)pai+35;
 		}
 	}else if(m_rule.m_iAka == 2){
 		if(pai.m_iNo == 5 && pai.m_iId == 4){
-			if(pai.m_iCategory == PAI_MANZU){
-				return 35;
-			}else if(pai.m_iCategory == PAI_PINZU){
-				return 36;
-			}else if(pai.m_iCategory == PAI_SOUZU){
-				return 37;
-			}
+			return (UINT)pai+35;
 		}
 
 		if(pai.m_iCategory == PAI_PINZU && pai.m_iNo == 5 && pai.m_iId == 3){
-			return 36;
+			return (UINT)pai+35;
+		}
+	}else if(m_rule.m_iAka == 3){
+		if(pai.m_iId == 4){
+			return (UINT)pai+35;
 		}
 	}
 

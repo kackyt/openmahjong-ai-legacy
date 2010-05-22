@@ -561,7 +561,7 @@ void CTaku::update(CTaku& value)
 					bInserted = FALSE;
 					
 					for(i=m_members[ind].m_aTehai.GetUpperBound();i>=0;i--){
-						if((UINT)pai >= (UINT)m_members[ind].m_aTehai[i]){
+						if(pai >= m_members[ind].m_aTehai[i]){
 							m_members[ind].m_aTehai.InsertAt(i+1,pai);
 							bInserted = TRUE;
 							break;
@@ -795,9 +795,9 @@ void CTaku::update(CTaku& value)
 					m_members[ind].m_aTehai.RemoveAt(m_members[ind].m_aTehai.GetUpperBound());
 					bInserted = FALSE;
 					
-					for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
-						if((UINT)pai <= (UINT)m_members[ind].m_aTehai[i]){
-							m_members[ind].m_aTehai.InsertAt(i,pai);
+					for(i=m_members[ind].m_aTehai.GetUpperBound();i>=0;i--){
+						if(pai >= m_members[ind].m_aTehai[i]){
+							m_members[ind].m_aTehai.InsertAt(i+1,pai);
 							bInserted = TRUE;
 							break;
 						}
@@ -843,9 +843,9 @@ void CTaku::update(CTaku& value)
 						m_members[ind].m_aTehai.RemoveAt(m_members[ind].m_aTehai.GetUpperBound());
 						bInserted = FALSE;
 						
-						for(i=0;i<m_members[ind].m_aTehai.GetSize();i++){
-							if((UINT)pai <= (UINT)m_members[ind].m_aTehai[i]){
-								m_members[ind].m_aTehai.InsertAt(i,pai);
+						for(i=m_members[ind].m_aTehai.GetUpperBound();i>=0;i--){
+							if(pai >= m_members[ind].m_aTehai[i]){
+								m_members[ind].m_aTehai.InsertAt(i+1,pai);
 								bInserted = TRUE;
 								break;
 							}

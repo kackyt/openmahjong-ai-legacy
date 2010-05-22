@@ -14,7 +14,7 @@ Class2=COpenMahjongClientDbgDlg
 ResourceCount=6
 Resource1=IDR_MAINFRAME
 Class3=CMahjongWnd
-Resource2=IDD_OPENMAHJONGCLIENTDBG_DIALOG
+Resource2=IDD_CONNECT
 Class4=CConnectDlg
 Class5=CMahjongStatic
 Class6=CMahjongBtn
@@ -24,7 +24,7 @@ Class8=CDebugDialog
 Class9=CMessageEdit
 Resource4=IDD_AGARI
 Class10=CAgariDialog
-Resource5=IDD_CONNECT
+Resource5=IDD_OPENMAHJONGCLIENTDBG_DIALOG
 Class11=CRuleDialog
 Resource6=IDD_RULE
 

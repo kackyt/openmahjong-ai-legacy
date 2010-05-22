@@ -187,3 +187,20 @@ BOOL CPai::isAka(CRule& rule)
 	return FALSE;
 
 }
+
+int CPai::operator >=(CPai& pai)
+{
+	if(m_iCategory > pai.m_iCategory){
+		return TRUE;
+	}else if(m_iCategory == pai.m_iCategory){
+		if(m_iNo > pai.m_iNo){
+			return TRUE;
+		}else if(m_iNo == pai.m_iNo){
+			if(m_iId >= pai.m_iId){
+				return TRUE;
+			}
+		}
+	}
+
+	return FALSE;
+}

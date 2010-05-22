@@ -17,6 +17,7 @@
 class CPai  
 {
 public:
+	int operator >=(CPai&);
 	BOOL m_bLast;
 	BOOL isAka(CRule&);
 	BOOL m_bNaki;

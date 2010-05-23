@@ -82,6 +82,7 @@
 #define IDC_CMBAKADORA                  1072
 #define IDC_BTNRULE                     1072
 #define IDC_CMBAOTENJO                  1073
+#define IDC_CMBHAIPAI                   1074
 
 // Next default values for new objects
 // 

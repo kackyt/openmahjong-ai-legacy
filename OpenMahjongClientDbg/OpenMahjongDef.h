@@ -174,5 +174,6 @@ enum{
 #define TAG_KUITAN "kt"
 #define TAG_AKA "aka"
 #define TAG_AOTENJO "atj"
+#define TAG_HAIPAI "hp"
 
 #endif

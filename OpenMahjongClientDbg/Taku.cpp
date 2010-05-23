@@ -760,6 +760,25 @@ void CTaku::update(CTaku& value)
 					AfxDebugBreak();
 				}
 #endif
+				// Žè”v‚ð•À‚×’¼‚µ
+				if(m_members[ind].m_aTehai.GetSize() > 0){
+					pai = m_members[ind].m_aTehai[m_members[ind].m_aTehai.GetUpperBound()];
+					m_members[ind].m_aTehai.RemoveAt(m_members[ind].m_aTehai.GetUpperBound());
+					bInserted = FALSE;
+					
+					for(i=m_members[ind].m_aTehai.GetUpperBound();i>=0;i--){
+						if(pai >= m_members[ind].m_aTehai[i]){
+							m_members[ind].m_aTehai.InsertAt(i+1,pai);
+							bInserted = TRUE;
+							break;
+						}
+					}
+					
+					if(!bInserted){
+						m_members[ind].m_aTehai.InsertAt(0,pai);
+					}
+				}
+
 				break;
 			case TYPE_RIICHI:
 				ind = getMemberIndex(&value.m_event.m_command.m_player);

@@ -25,6 +25,7 @@ public:
 // ダイアログ データ
 	//{{AFX_DATA(CRuleDialog)
 	enum { IDD = IDD_RULE };
+	CComboBox	m_cmbHaipai;
 	CComboBox	m_cmbAotenjo;
 	CComboBox	m_cmbAka;
 	CComboBox	m_cmbKuitan;

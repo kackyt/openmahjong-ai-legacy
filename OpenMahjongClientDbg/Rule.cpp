@@ -25,6 +25,7 @@ CRule::CRule()
 	m_iKuitan = 1;
 	m_iAka = 0;
 	m_iAotenjo = 0;
+	m_iHaipai = 0;
 }
 
 CRule::~CRule()
@@ -71,6 +72,14 @@ void CRule::parseXML(IXMLDOMNodePtr pElem)
 		text = pStr;
 		m_iAotenjo = _tcstol((const TCHAR*)text,NULL,0);
 	}
+
+	pNode = pElem->selectSingleNode(_T(TAG_HAIPAI));
+
+	if(pNode != NULL){
+		pNode->get_text(&pStr);
+		text = pStr;
+		m_iHaipai = _tcstol((const TCHAR*)text,NULL,0);
+	}
 }
 
 void CRule::toXML(IXMLDOMDocumentPtr pDoc,IXMLDOMElementPtr pParent)
@@ -97,6 +106,11 @@ void CRule::toXML(IXMLDOMDocumentPtr pDoc,IXMLDOMElementPtr pParent)
 
 	pElemKey = pDoc->createElement(_T(TAG_AOTENJO));
 	str.Format(_T("%d"),m_iAotenjo);
+	pElemKey->appendChild(pDoc->createTextNode((LPCTSTR)str));
+	pElemRule->appendChild(pElemKey);
+
+	pElemKey = pDoc->createElement(_T(TAG_HAIPAI));
+	str.Format(_T("%d"),m_iHaipai);
 	pElemKey->appendChild(pDoc->createTextNode((LPCTSTR)str));
 	pElemRule->appendChild(pElemKey);
 

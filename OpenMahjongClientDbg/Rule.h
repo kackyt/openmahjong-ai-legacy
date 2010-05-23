@@ -12,6 +12,7 @@
 class CRule  
 {
 public:
+	int m_iHaipai;
 	int m_iAotenjo;
 	int m_iAka;
 	BOOL m_bActive;

@@ -100,6 +100,10 @@ SOURCE=.\MahjongAI.cpp
 
 SOURCE=.\MahjongAI.def
 # End Source File
+# Begin Source File
+
+SOURCE=..\AILib\MJ0.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -111,6 +115,10 @@ SOURCE=..\AILib\AILib.h
 # Begin Source File
 
 SOURCE=.\MIPIface.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\AILib\MJ0.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

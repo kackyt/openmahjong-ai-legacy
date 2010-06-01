@@ -731,11 +731,11 @@ void CMahjongBtn::paintPai(CPaintDC &dc,CRect &rect,CString &str,CMember *member
 UINT CMahjongBtn::getPaiState(CPai& pai)
 {
 	if(m_rule.m_iAka == 1){
-		if(pai.m_iNo == 5 && pai.m_iId == 4){
+		if(pai.m_iCategory != PAI_ZIHAI && pai.m_iNo == 5 && pai.m_iId == 4){
 			return (UINT)pai+35;
 		}
 	}else if(m_rule.m_iAka == 2){
-		if(pai.m_iNo == 5 && pai.m_iId == 4){
+		if(pai.m_iCategory != PAI_ZIHAI && pai.m_iNo == 5 && pai.m_iId == 4){
 			return (UINT)pai+35;
 		}
 

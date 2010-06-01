@@ -47,6 +47,8 @@ protected :
 	UINT sutehai_sub(int tsumohai);
 	double eval_Tehai_sub(int atama_flag);
 	double eval_Tehai_sub2(int atama_flag);
+	double eval_Tehai_sub3(int atama_flag,int remain,int shanten,int depth);
+	double eval_Tehai_recursion(int atama_flag,int remain,int shanten,int depth);
 	double eval_Tehai(void);
 	double eval_hai(int hai);
 	double eval_sutehai(int hai);
@@ -98,10 +100,53 @@ void MahjongAI::set_machi(void)
 	}
 }
 
+#include "MJ0.h"
+
 // è”v‚Ì•Ï”tehai‚Æte_cnt‚ğƒZƒbƒg‚·‚é
 void MahjongAI::set_Tehai(void)
 {
 	int i;
+#ifdef AIDUMP_1
+	MJITehai mjtehai[4];
+	MJ0PARAM param[4];
+	MJIKawahai kawahai[4][20];
+	UINT dora[8];
+	double nokori[34];
+	double mentsu1[27+34];
+	double mentsu2[27+34];
+	double mentsu3[27+34];
+	int doralen;
+
+	param[0].pTehai = (MJITehai1 *)&mjtehai[0];
+	param[1].pTehai = (MJITehai1 *)&mjtehai[1];
+	param[2].pTehai = (MJITehai1 *)&mjtehai[2];
+	param[3].pTehai = (MJITehai1 *)&mjtehai[3];
+	(*MJSendMessage)(this,MJMI_GETTEHAI,0,(UINT)&mjtehai[0]);
+	(*MJSendMessage)(this,MJMI_GETTEHAI,1,(UINT)&mjtehai[1]);
+	(*MJSendMessage)(this,MJMI_GETTEHAI,2,(UINT)&mjtehai[2]);
+	(*MJSendMessage)(this,MJMI_GETTEHAI,3,(UINT)&mjtehai[3]);
+	param[0].pKawahai = &kawahai[0][0];
+	param[1].pKawahai = &kawahai[1][0];
+	param[2].pKawahai = &kawahai[2][0];
+	param[3].pKawahai = &kawahai[3][0];
+	param[0].kawalength = (*MJSendMessage)(this,MJMI_GETKAWAEX,(20 << 16) + 0,(UINT)&kawahai[0][0]);
+	param[1].kawalength = (*MJSendMessage)(this,MJMI_GETKAWAEX,(20 << 16) + 1,(UINT)&kawahai[1][0]);
+	param[2].kawalength = (*MJSendMessage)(this,MJMI_GETKAWAEX,(20 << 16) + 2,(UINT)&kawahai[2][0]);
+	param[3].kawalength = (*MJSendMessage)(this,MJMI_GETKAWAEX,(20 << 16) + 3,(UINT)&kawahai[3][0]);
+
+	doralen = (*MJSendMessage)(this,MJMI_GETDORA,(UINT)dora,0);
+
+	MJ0(&param[0],(int*)dora,doralen,nokori,mentsu1,mentsu2,mentsu3);
+
+	fprintf(fp,TEXT("<NOKORI>"));
+
+	for(i=0;i<34;i++){
+		fprintf(fp,TEXT("[%.1f]"),nokori[i]);
+	}
+
+	fprintf(fp,TEXT("</NOKORI>"));
+#endif
+
 	(*MJSendMessage)(this,MJMI_GETTEHAI,0,(UINT)&tehai);
 #ifdef AIDUMP_COMMAND
 	fprintf(fp,TEXT("GET TEHAI\n"));
@@ -184,6 +229,129 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 	return hai|rchk;
 }
 
+/* Ä‹AŒvZ—p */
+double MahjongAI::eval_Tehai_recursion(int atama_flag,int remain,int shanten,int depth)
+{
+	int i;
+
+	// Ì‚Ä‚é”v‚ğˆê‚Âˆê‚Â‚µ‚Ä‚İ‚ÄA‚à‚Á‚Æ‚à•]‰¿’l‚Ì‚‚¢‚à‚Ì‚ğ‚Æ‚é
+	double sc_max = -1;
+	double sc;
+
+#ifdef AIDUMP_1
+	int j;
+	fprintf(fp,"<TEHAI> ");
+	for(i=0;i<34;i++){
+		for(j=0;j<te_cnt[i];j++){
+			fprintf(fp,"%d ",i);
+		}
+	}
+	fprintf(fp,"</TEHAI>");
+
+#endif
+
+	for(i=0;i<34;i++){
+		if (!te_cnt[i]) continue;
+#ifdef AIDUMP_1
+		fprintf(fp,"<SUTEHAI><NUM>%d</NUM>",i);
+#endif
+		te_cnt[i]--;
+		sc = eval_Tehai_sub3(atama_flag,remain,shanten,depth);
+#ifdef AIDUMP_1
+		fprintf(fp,"<TOTAL>%.3f</TOTAL>",sc);
+#endif
+		if (sc>sc_max){
+			sc_max = sc;
+		}
+		te_cnt[i]++;
+#ifdef AIDUMP_1
+		fprintf(fp,"</SUTEHAI>");
+#endif
+	}
+
+	return sc_max;
+}
+
+// è”v‚ğ•”•ª“I‚É•]‰¿‚·‚é
+double MahjongAI::eval_Tehai_sub3(int atama_flag,int remain,int shanten,int depth)
+{
+#define MAI_TENPAI_SIZE (20)
+	TENPAI_LIST list[MAI_TENPAI_SIZE];
+	int yukohai[34];
+	int yukonum;
+	int num;
+	int i,j;
+	int c;
+	int painum,pais;
+	double maxval,val;
+	int paiarray[14];
+	
+	painum = 0;
+
+#ifdef AIDUMP_1
+	fprintf(fp,"<TEHAI>");
+#endif
+	/* –Ê“|‚¾‚¯‚ÇA‚Ü‚½è”v‚Ì”z—ñ‚É–ß‚· (b’è) */
+	for(i=0;i<34;i++){
+		for(j=0;j<te_cnt[i];j++){
+			paiarray[painum++] = i;
+#ifdef AIDUMP_1
+			fprintf(fp,"%d ",i);
+#endif
+		}
+	}
+
+#ifdef AIDUMP_1
+	fprintf(fp,"</TEHAI>");
+#endif
+
+	memset(yukohai,0,sizeof(yukohai));
+	memset(list,0,sizeof(list));
+
+	maxval = 0.0;
+
+	num = search_tenpai(paiarray,painum,list,MAI_TENPAI_SIZE,shanten);
+
+	for(c=0;c<=shanten;c++){
+		for(i=0;i<num;i++){
+			if(list[i].shanten == c){
+				for(j=0;j<34;j++){
+					if(yukohai[j] < list[i].machi[j]){
+						yukohai[j] = list[i].machi[j];
+					}
+				}
+			}
+		}
+
+		yukonum = 0;
+		val = 0.0;
+		// —LŒø”v‚Ì‚¤‚¿AƒVƒƒƒ“ƒeƒ“”•ª‚ğ‚Á‚Ä‚­‚éŠm—¦‚ğ‹‚ß‚é
+		// (–Êq‚É‚È‚ç‚È‚¢‰Â”\«‚ª‚ ‚é‚ª‚±‚±‚Í‚¿‚å‚Á‚ÆŠÈ—ª‰»)
+		for(i=0;i<34;i++){
+			// ”v‚Ì”‚Å—LŒø”v‚ğƒ\[ƒg‚·‚é
+			if(yukohai[i] > 0){
+				pais = 4 - te_cnt[i] - (*MJSendMessage)(this,MJMI_GETVISIBLEHAIS,i,0);
+				if(c == 0 || depth == 0){
+					return probabilityFunction((double)pais / (double)remain,remain/4); // ƒeƒ“ƒpƒC
+				}else{
+					pais = remain/c;
+					te_cnt[i]++;
+					if(pais > 0){
+						val += probabilityFunction((double)pais / (double)remain,pais/4) * eval_Tehai_recursion(atama_flag,remain-pais,c-1,depth-1);
+					}
+					te_cnt[i]--;
+				}
+				yukonum++;
+			}
+		}
+
+		if(yukonum > 0) return val;
+
+	}
+
+	return 0.0;
+}
+
 // è”v‚ğ•”•ª“I‚É•]‰¿‚·‚é
 double MahjongAI::eval_Tehai_sub2(int atama_flag)
 {
@@ -192,7 +360,7 @@ double MahjongAI::eval_Tehai_sub2(int atama_flag)
 	int yukohai[34];
 	int yukonum;
 	int num;
-	int i,j,k;
+	int i,j;
 	int painum;
 	int shanten,remain;
 	int junremain;
@@ -375,12 +543,27 @@ double MahjongAI::eval_Tehai_sub(int atama_flag)
 // è”v‚ğ•]‰¿‚µ‚Ä•]‰¿’l‚ğ•Ô‚·
 double MahjongAI::eval_Tehai(void)
 {
-	double ret = eval_Tehai_sub2(0);
+	double ret;
+	int remain = (*MJSendMessage)(this,MJMI_GETHAIREMAIN,0,0);
+#ifdef AIDUMP_1
+	fprintf(fp,"<EVAL>");
+#endif
+	TENPAI_LIST list;
+	list.shanten = 8;
+#if 0
+	int num = search_tenpai((int*)tehai.tehai,tehai.tehai_max,&list,1,7);
+	ret = eval_Tehai_sub3(0,remain,list.shanten,1);
+#else
+	ret = eval_Tehai_sub(0);
+#endif
 	int i;
 	for(i=0;i<34;i++){
 		if (!te_cnt[i]) continue;
 		ret *= eval_hai(i); //*te_cnt[i];
 	}
+#ifdef AIDUMP_1
+	fprintf(fp,"</EVAL>");
+#endif
 	return ret;
 }
 
@@ -398,7 +581,7 @@ double MahjongAI::eval_hai(int hai)
 		tmp = (*MJSendMessage)(this,MJMI_GETVISIBLEHAIS,hai,0);
 	
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("GETVISIBLEHAIS %u"),tmp);
+		fprintf(fp,TEXT("GETVISIBLEHAIS %u\n"),tmp);
 #endif
 		if (hai>30 || hai==cha+27 || hai==kaze+27){
 			if(te_cnt[hai] >= 3){
@@ -450,39 +633,42 @@ int MahjongAI::calc_sutehai(void)
 
 #ifdef AIDUMP_1
 	int j;
-	fprintf(fp,"TEHAI ");
+	fprintf(fp,"<CALC><TEHAI>");
 	for(i=0;i<34;i++){
 		for(j=0;j<te_cnt[i];j++){
 			fprintf(fp,"%d ",i);
 		}
 	}
-	fprintf(fp,"\n");
+	fprintf(fp,"</TEHAI>");
 
 #endif
 
 	for(i=0;i<34;i++){
 		if (!te_cnt[i]) continue;
 #ifdef AIDUMP_1
-		fprintf(fp,"[%d] --> ",i);
+		fprintf(fp,"<SUTEHAI><NUM>%d</NUM>",i);
 #endif
 		te_cnt[i]--;
 		sthai = i;
 		sc = eval_Tehai();
 #ifdef AIDUMP_1
-		fprintf(fp," total = %.3f",sc);
+		fprintf(fp,"<TOTAL>%.3f</TOTAL>",sc);
 #endif
 		scc = eval_sutehai(i);
 #ifdef AIDUMP_1
-		fprintf(fp," sutehai = %.3f",scc);
+		fprintf(fp,"<SUTEHAI_VAL>%.3f</SUTEHAI_VAL>",scc);
+#endif
+#ifdef AIDUMP_1
+		fprintf(fp,"</SUTEHAI>");
 #endif
 
 		scc += sc;
 		if (scc>scc_max){ scc_max = scc; sc_max = sc; sh = i;}
 		te_cnt[i]++;
-#ifdef AIDUMP_1
-		fprintf(fp,"\n");
-#endif
 	}
+#ifdef AIDUMP_1
+		fprintf(fp,"</CALC>");
+#endif
 	tehai_score = sc_max;
 	ret = search(sh,0,0);
 
@@ -728,7 +914,7 @@ UINT MahjongAI::InterfaceFunc(UINT message,UINT param1,UINT param2)
 {
 	UINT ret = MJR_NOTCARED;
 #ifdef AIDUMP
-	fp = fopen(TEXT("./AIDUMP_COMMAND.txt"),TEXT("a"));
+	fp = fopen(TEXT("./AIDUMP_COMMAND.xml"),TEXT("a"));
 #endif
 
 	switch(message){

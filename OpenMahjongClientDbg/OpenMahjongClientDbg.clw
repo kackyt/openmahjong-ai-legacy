@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CRuleDialog
+LastClass=COpenMahjongClientDbgDlg
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "OpenMahjongClientDbg.h"
@@ -14,12 +14,12 @@ Class2=COpenMahjongClientDbgDlg
 ResourceCount=6
 Resource1=IDR_MAINFRAME
 Class3=CMahjongWnd
-Resource2=IDD_CONNECT
+Resource2=IDD_OPENMAHJONGCLIENTDBG_DIALOG
 Class4=CConnectDlg
 Class5=CMahjongStatic
 Class6=CMahjongBtn
 Class7=CMyButton
-Resource3=IDD_OPENMAHJONGCLIENTDBG_DIALOG
+Resource3=IDD_CONNECT
 Class8=CDebugDialog
 Class9=CMessageEdit
 Resource4=IDD_DEBUG
@@ -39,7 +39,7 @@ Type=0
 HeaderFile=OpenMahjongClientDbgDlg.h
 ImplementationFile=OpenMahjongClientDbgDlg.cpp
 Filter=D
-LastObject=IDC_SENDTEXT
+LastObject=IDC_CHKDEBUG
 BaseClass=CDialog
 VirtualFilter=dWC
 
@@ -48,7 +48,7 @@ VirtualFilter=dWC
 [DLG:IDD_OPENMAHJONGCLIENTDBG_DIALOG]
 Type=1
 Class=COpenMahjongClientDbgDlg
-ControlCount=32
+ControlCount=33
 Control1=IDC_BTNSYNC,button,1342242816
 Control2=IDC_BTNCONNECT,button,1342242816
 Control3=IDC_BTNTII,button,1476464643
@@ -81,6 +81,7 @@ Control29=IDC_SNDTOALL,button,1342242816
 Control30=IDC_STATIC,static,1342308352
 Control31=IDC_ABORT,button,1342242816
 Control32=IDC_BTNRULE,button,1342242816
+Control33=IDC_CHKDEBUG,button,1342242819
 
 [CLS:CMahjongWnd]
 Type=0

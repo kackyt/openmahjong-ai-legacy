@@ -509,6 +509,7 @@ void CTaku::update(CTaku& value)
 {
 	int i,j,num;
 	int ind;
+	int prevSeq;
 	CPai pai;
 	BOOL bInserted,bDeleted,bTsumo = TRUE;
 
@@ -524,6 +525,7 @@ void CTaku::update(CTaku& value)
 	// ƒCƒxƒ“ƒg‚ğˆ—‚·‚é
 	if(value.m_event.m_bActive){
 		if(m_event.m_iSeq != value.m_event.m_iSeq){
+			prevSeq = m_event.m_iSeq;
 			m_event = value.m_event;
 			switch(value.m_event.m_command.m_iType){
 			case TYPE_DAHAI:

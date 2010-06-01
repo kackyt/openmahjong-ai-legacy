@@ -148,6 +148,10 @@ SOURCE=.\MessageEdit.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\AILib\MJ0.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\MyButton.cpp
 # End Source File
 # Begin Source File
@@ -282,6 +286,10 @@ SOURCE=.\MessageEdit.h
 # Begin Source File
 
 SOURCE=.\MIPIface.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\AILib\MJ0.h
 # End Source File
 # Begin Source File
 

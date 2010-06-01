@@ -48,7 +48,7 @@ extern "C" {
 #define AI_TRUE         (1)
 #define AI_FALSE        (0)
 
-extern int search_tenpai(int *paiarray,int paiSize,TENPAI_LIST *pList,int listSize,int maxshanten);
+extern int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int listSize,int maxshanten);
 extern double probabilityFunction(double,int);
 extern int permutation(int m,int n);
 extern int factorial(int n);

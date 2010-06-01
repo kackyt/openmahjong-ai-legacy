@@ -106,6 +106,7 @@ public:
 	CString	m_strTakunum;
 	CString	m_strSyncTick;
 	CString	m_strSendText;
+	BOOL	m_bDebugPrint;
 	//}}AFX_DATA
 
 	// ClassWizard は仮想関数のオーバーライドを生成します。

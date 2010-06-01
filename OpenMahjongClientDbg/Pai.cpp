@@ -190,6 +190,8 @@ BOOL CPai::isAka(CRule& rule)
 
 int CPai::operator >=(CPai& pai)
 {
+	if((UINT)pai == PAI_NIL) return FALSE;
+	if((UINT)*this == PAI_NIL) return TRUE;
 	if(m_iCategory > pai.m_iCategory){
 		return TRUE;
 	}else if(m_iCategory == pai.m_iCategory){

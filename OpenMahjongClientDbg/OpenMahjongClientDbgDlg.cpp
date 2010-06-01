@@ -7,6 +7,7 @@
 #include "OpenMahjongClientDbgDlg.h"
 #include "AILib.h"
 #include "RuleDialog.h"
+#include "MJ0.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -21,7 +22,7 @@ static const UINT ruleTable[] =
 	1,0,0,0,
 	250,0,0,0,
 	0,0,0,1,
-	0,1,2,1,
+	0,1,2,0,
 	0,1,3,1,
 	1,0xf,0,0,
 	0,0
@@ -127,20 +128,12 @@ UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 		member = &pDlg->m_pCurTaku->m_members[idx];
 
 		if(param1 != 0){
-			TENPAI_LIST tlist[9];
-			int num,j;
+			TENPAI_LIST tlist;
+			int num;
 
 			pTehai = (MJITehai*)param1;
-			num = search_tenpai((int *)pTehai->tehai,pTehai->tehai_max,tlist,9,0);
+			num = search_tenpai((int *)pTehai->tehai,pTehai->tehai_max,(int *)p,&tlist,1,0);
 
-			for(i=0;i<num;i++){
-				for(j=0;j<34;j++){
-					if(tlist[i].machi[j] == AI_FLAG_MACHI){
-						p[j] = 1;
-					}
-				}
-			}
-			
 			ret = num > 0 ? 1 : 0;
 		}else{
 			for(i=0;i<member->m_aResultList.GetSize();i++){
@@ -370,6 +363,7 @@ COpenMahjongClientDbgDlg::COpenMahjongClientDbgDlg(CWnd* pParent /*=NULL*/)
 	m_strTakunum = _T("");
 	m_strSyncTick = _T("");
 	m_strSendText = _T("");
+	m_bDebugPrint = FALSE;
 	//}}AFX_DATA_INIT
 	// メモ: LoadIcon は Win32 の DestroyIcon のサブシーケンスを要求しません。
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -403,6 +397,7 @@ void COpenMahjongClientDbgDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_TAKUNUM, m_strTakunum);
 	DDX_Text(pDX, IDC_SYNCTICK, m_strSyncTick);
 	DDX_Text(pDX, IDC_SENDTEXT, m_strSendText);
+	DDX_Check(pDX, IDC_CHKDEBUG, m_bDebugPrint);
 	//}}AFX_DATA_MAP
 }
 
@@ -741,7 +736,7 @@ void COpenMahjongClientDbgDlg::gameSync()
 	CString text;
 	BSTR pStr;
 	UINT ret;
-	int i,j,code,type,ind,ind2,kaze1,kaze2,kaze3;
+	int i,j,code,type,ind,ind2,kaze1,kaze2,kaze3,rescom;
 	int aCode[4],iPlayerDlgIndex;
 	MSG msg;
 	LONG pointdiff[4];
@@ -971,18 +966,21 @@ void COpenMahjongClientDbgDlg::gameSync()
 								case MJPIR_TSUMO:
 									command.m_iId = ID_TSUMO;
 									if(!m_pCurTaku->m_members[ind].isExecutableCommand(command)){
+										AfxDebugBreak();
 										command.m_iId = ID_DAHAI + m_pCurTaku->m_members[m_pCurTaku->m_iTurn].m_aTehai.GetUpperBound();
 									}
 									break;
 								case MJPIR_NAGASHI:
 									command.m_iId = ID_TOUHAI;
 									if(!m_pCurTaku->m_members[ind].isExecutableCommand(command)){
+										AfxDebugBreak();
 										command.m_iId = ID_DAHAI + m_pCurTaku->m_members[m_pCurTaku->m_iTurn].m_aTehai.GetUpperBound();
 									}
 									break;
 								case MJPIR_KAN:
 									command.m_iId = ID_KAN + (ret & 0xFF);
 									if(!m_pCurTaku->m_members[ind].isExecutableCommand(command)){
+										AfxDebugBreak();
 										command.m_iId = ID_DAHAI + m_pCurTaku->m_members[m_pCurTaku->m_iTurn].m_aTehai.GetUpperBound();
 									}
 									break;
@@ -993,7 +991,6 @@ void COpenMahjongClientDbgDlg::gameSync()
 
 								while(sendCommand(command,recvMessage) < 0);
 							}else{
-								/* とりあえず全部パス */
 								switch(ret & 0xFFFFFF00){
 								case MJPIR_CHII1:
 									for(j=0;j<m_pCurTaku->m_members[ind].m_aCommandList.GetSize();j++){
@@ -1021,19 +1018,31 @@ void COpenMahjongClientDbgDlg::gameSync()
 									break;
 								case MJPIR_PON:
 									command.m_iId = ID_PON;
-									while(sendCommand(command,recvMessage) < 0);
+									do{
+										rescom = sendCommand(command,recvMessage);
+										if(rescom >= 0 && rescom != RESPONCE_OK) AfxDebugBreak();
+									}while(rescom < 0);
 									break;
 								case MJPIR_KAN:
 									command.m_iId = ID_DAIMINKAN;
-									while(sendCommand(command,recvMessage) < 0);
+									do{
+										rescom = sendCommand(command,recvMessage);
+										if(rescom >= 0 && rescom != RESPONCE_OK) AfxDebugBreak();
+									}while(rescom < 0);
 									break;
 								case MJPIR_RON:
 									command.m_iId = ID_RON;
-									while(sendCommand(command,recvMessage) < 0);
+									do{
+										rescom = sendCommand(command,recvMessage);
+										if(rescom >= 0 && rescom != RESPONCE_OK) AfxDebugBreak();
+									}while(rescom < 0);
 									break;
 								default:
 									command.m_iId = ID_PASS;
-									while(sendCommand(command,recvMessage) < 0);
+									do{
+										rescom = sendCommand(command,recvMessage);
+										if(rescom >= 0 && rescom != RESPONCE_OK) AfxDebugBreak();
+									}while(rescom < 0);
 									break;
 								}
 							}
@@ -1158,37 +1167,151 @@ void COpenMahjongClientDbgDlg::gameSync()
 							}
 						}
 
-						MJITehai tehai;
-						TENPAI_LIST tenpai_list;
-						CString mestext,tmptext,tmptext2;
-
-						m_pCurTaku->getMJITehai(index,&tehai);
-
-						if(m_pCurTaku->m_members[index].m_gamestate.m_bTsumo == TRUE){
-							search_tenpai((int *)tehai.tehai,tehai.tehai_max,&tenpai_list,1,99);
-							tmptext = _T("");
-							if(tenpai_list.shanten == 0){
-								for(j=0;j<34;j++){
-									if(tenpai_list.machi[j] == AI_FLAG_MACHI){
-										tmptext2.Format(_T(" %d"),j);
-										tmptext += tmptext2;
+						if(m_bDebugPrint){
+							MJITehai tehai;
+							int machihai[34];
+							TENPAI_LIST tenpai_list;
+							CString mestext,tmptext,tmptext2;
+							
+							m_pCurTaku->getMJITehai(index,&tehai);
+							
+							if(m_pCurTaku->m_members[index].m_gamestate.m_bTsumo == TRUE){
+								search_tenpai((int *)tehai.tehai,tehai.tehai_max,machihai,&tenpai_list,1,99);
+								tmptext = _T("");
+								if(tenpai_list.shanten == 0){
+									for(j=0;j<34;j++){
+										if(machihai[j]){
+											tmptext2.Format(_T(" %d"),j);
+											tmptext += tmptext2;
+										}
 									}
 								}
+								mestext.Format(_T("Debug：向聴数 %d %s\r\n"),tenpai_list.shanten,tmptext);
+								
+								appendMessageText(mestext);
+								
+								MJITehai1 mjtehai[4];
+								MJ0PARAM mjparam[4];
+								UINT dora[8];
+								MJIKawahai kawahai[4][20];
+								int doranum;
+								double nokori[34];
+								double kikenhai[34];
+								double dmentsu[27+34];
+								double dmentsu2[27+34];
+								double dmentsu3[27+34];
+								double dbest[3];
+								int ibest[3];
+								double dworst[3];
+								int iworst[3];
+								
+								dbest[0] = 0;
+								dbest[1] = 0;
+								dbest[2] = 0;
+								dworst[0] = 0;
+								dworst[1] = 0;
+								dworst[2] = 0;
+								
+								m_pCurTaku->getMJITehai(index,&mjtehai[0],m_rule);
+								m_pCurTaku->getMJITehai((index+1) & 3,&mjtehai[1],m_rule);
+								m_pCurTaku->getMJITehai((index+2) & 3,&mjtehai[2],m_rule);
+								m_pCurTaku->getMJITehai((index+3) & 3,&mjtehai[3],m_rule);
+								mjparam[0].pTehai = &mjtehai[0];
+								mjparam[1].pTehai = &mjtehai[1];
+								mjparam[2].pTehai = &mjtehai[2];
+								mjparam[3].pTehai = &mjtehai[3];
+								mjparam[0].kawalength = m_pCurTaku->getKawahaiEx((index) & 3,&kawahai[0][0]);
+								mjparam[1].kawalength = m_pCurTaku->getKawahaiEx((index+1) & 3,&kawahai[1][0]);
+								mjparam[2].kawalength = m_pCurTaku->getKawahaiEx((index+2) & 3,&kawahai[2][0]);
+								mjparam[3].kawalength = m_pCurTaku->getKawahaiEx((index+3) & 3,&kawahai[3][0]);
+								mjparam[0].pKawahai = &kawahai[0][0];
+								mjparam[1].pKawahai = &kawahai[1][0];
+								mjparam[2].pKawahai = &kawahai[2][0];
+								mjparam[3].pKawahai = &kawahai[3][0];
+								for(j=0;j<m_pCurTaku->m_aDora.GetSize();j++){
+									dora[j] = m_pCurTaku->m_aDora[i];
+								}
+								
+								doranum = m_pCurTaku->m_aDora.GetSize();
+								
+								MJ0(&mjparam[0],(int*)dora,doranum,nokori,kikenhai,dmentsu,dmentsu2,dmentsu3);
+								
+								for(j=0;j<34;j++){
+									if(dbest[0] < nokori[j]){
+										dbest[2] = dbest[1];
+										ibest[2] = ibest[1];
+										dbest[1] = dbest[0];
+										ibest[1] = ibest[0];
+										dbest[0] = nokori[j];
+										ibest[0] = j;
+									}else if(dbest[1] < nokori[j]){
+										dbest[2] = dbest[1];
+										ibest[2] = ibest[1];
+										dbest[1] = nokori[j];
+										ibest[1] = j;
+									}else if(dbest[2] < nokori[j]){
+										dbest[2] = nokori[j];
+										ibest[2] = j;
+									}
+									
+									if(dworst[0] < kikenhai[j]){
+										dworst[2] = dworst[1];
+										iworst[2] = iworst[1];
+										dworst[1] = dworst[0];
+										iworst[1] = iworst[0];
+										dworst[0] = kikenhai[j];
+										iworst[0] = j;
+									}else if(dworst[1] < kikenhai[j]){
+										dworst[2] = dworst[1];
+										iworst[2] = iworst[1];
+										dworst[1] = kikenhai[j];
+										iworst[1] = j;
+									}else if(dworst[2] < kikenhai[j]){
+										dworst[2] = kikenhai[j];
+										iworst[2] = j;
+									}
+								}
+								
+								
+								tmptext = _T("");
+								for(j=0;j<3;j++){
+									CPai pai;
+									CString str;
+									pai.set(ibest[j]);
+									pai.getName(str);
+									tmptext2.Format(_T("%d位[%s](%.1f枚) "),j+1,str,dbest[j]);
+									tmptext += tmptext2;
+								}
+								
+								mestext.Format(_T("Debug：ツモ予想 %s\r\n"),tmptext);
+								
+								appendMessageText(mestext);
+								
+								tmptext = _T("");
+								for(j=0;j<3;j++){
+									CPai pai;
+									CString str;
+									pai.set(iworst[j]);
+									pai.getName(str);
+									tmptext2.Format(_T("%d位[%s](%.1f%%) "),j+1,str,dworst[j] * 100);
+									tmptext += tmptext2;
+								}
+								
+								mestext.Format(_T("Debug：危険牌予想 %s\r\n"),tmptext);
+								
+								appendMessageText(mestext);
 							}
-							mestext.Format(_T("Debug：向聴数 %d %s\r\n"),tenpai_list.shanten,tmptext);
-							
-							appendMessageText(mestext);
 						}
-
+						
 						bPlayerCommand = TRUE;
 					}
-
+					
 				}
-
+				
 			}else{
 				break;
 			}
-
+			
 			i++;
 		}
 
@@ -1366,6 +1489,7 @@ void COpenMahjongClientDbgDlg::sendString(CString& sendMessage,CString& recvMess
 
 #ifdef DEBUGDUMP
 	m_strCUIMessage += sendMessage;
+	m_debugDlg.m_strCUI = _T("");
 #endif
 
 	inet.SetOption(INTERNET_OPTION_DATA_SEND_TIMEOUT,2000);
@@ -1414,6 +1538,7 @@ void COpenMahjongClientDbgDlg::sendString(CString& sendMessage,CString& recvMess
 						res = file->ReadString(strBuf);
 #ifdef DEBUGDUMP
 					m_strCUIMessage += strBuf;
+					m_debugDlg.m_strCUI += strBuf;
 #endif
 						recvMessage += strBuf;
 					}while(res);

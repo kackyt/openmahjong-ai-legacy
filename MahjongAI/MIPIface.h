@@ -1,6 +1,7 @@
 /* ‚Ü‚¤‚¶‚á‚ñ ‘Îí‘Šè—pƒ}ƒNƒ **
 **         version 12          **
 **                 Î”¨ ‹±•½   */
+#pragma once
 
 #define MJ_INTERFACE_VERSION 12
 
@@ -160,3 +161,4 @@ typedef struct {
 
 #define MJKS_REACH	1
 #define MJKS_NAKI	2
+

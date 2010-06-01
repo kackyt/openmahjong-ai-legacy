@@ -600,7 +600,7 @@ static int isatamamachi(PAICOUNT *paicountlist,int size,TENPAI_LIST *machilist){
 	}
 }
 
-int search_tenpai(int *paiarray,int paiSize,TENPAI_LIST *pList,int listSize,int maxshanten)
+int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int listSize,int maxshanten)
 {
     PAICOUNT paicountlist[AI_TEHAI_LIMIT + 1];
 	int notanki = 0;
@@ -615,10 +615,11 @@ int search_tenpai(int *paiarray,int paiSize,TENPAI_LIST *pList,int listSize,int 
 	int maxval,maxind;
 	TENPAI_LIST tenpai_list;
 
-	memset(pList,0,sizeof(TENPAI_LIST) * listSize);
+	if(pList != NULL && listSize > 0) memset(pList,0,sizeof(TENPAI_LIST) * listSize);
 	memset(&tenpai_list,0,sizeof(tenpai_list));
 	memset(mentsu_stack,0,sizeof(mentsu_stack));
 	memset(mentsu,0,sizeof(mentsu));
+	if(pMachi != NULL) memset(pMachi,0,sizeof(int)*34);
 	
     /* “ª‚ÌŒó•â‚ğ“¾‚é */
     resultcount = 0;
@@ -656,7 +657,7 @@ int search_tenpai(int *paiarray,int paiSize,TENPAI_LIST *pList,int listSize,int 
 			tenpai_list.shanten = 6 - atamaque_count;
 		}
 		memcpy(&tenpai_list.mentsuflag,mentsu,AI_TEHAI_LIMIT*sizeof(int));
-		if(tenpai_list.shanten < maxshanten){
+		if(pList != NULL && tenpai_list.shanten < maxshanten){
 			if(resultcount == listSize){
 				maxval = 0;
 				maxind = 0;
@@ -673,6 +674,12 @@ int search_tenpai(int *paiarray,int paiSize,TENPAI_LIST *pList,int listSize,int 
 			}else{
 				pList[resultcount] = tenpai_list;
 				resultcount++;
+			}
+		}
+
+		if(pMachi != NULL && tenpai_list.shanten == 0){
+			for(j=0;j<34;j++){
+				pMachi[j] = pMachi[j] || tenpai_list.machi[j];
 			}
 		}
 
@@ -735,7 +742,7 @@ int search_tenpai(int *paiarray,int paiSize,TENPAI_LIST *pList,int listSize,int 
 					/* ’TõI—¹ */
 					memcpy(&tenpai_list.mentsuflag,mentsu_stack[stackpos],AI_TEHAI_LIMIT*sizeof(int));
 					search_shanten(paicountlist,paicount_size,&tenpai_list,paiarray[atamapos]);
-					if(tenpai_list.shanten <= maxshanten){
+					if(pList != NULL && tenpai_list.shanten <= maxshanten){
 						if(resultcount == listSize){
 							maxval = 0;
 							maxind = 0;
@@ -760,19 +767,26 @@ int search_tenpai(int *paiarray,int paiSize,TENPAI_LIST *pList,int listSize,int 
 
             } else {
 				memcpy(&tenpai_list.mentsuflag,mentsu_stack[stackpos],AI_TEHAI_LIMIT*sizeof(int));
-				if(resultcount == listSize){
-					maxval = 0;
-					maxind = 0;
-					for(j=0;j<listSize;j++){
-						if(pList[j].shanten > maxval){
-							maxval = pList[j].shanten;
-							maxind = j;
-						}
+				if(pMachi != NULL){
+					for(j=0;j<34;j++){
+						pMachi[j] = pMachi[j] || tenpai_list.machi[j];
 					}
-					pList[maxind] = tenpai_list;
-				}else{
-					pList[resultcount] = tenpai_list;
-					resultcount++;
+				}
+				if(pList != NULL){
+					if(resultcount == listSize){
+						maxval = 0;
+						maxind = 0;
+						for(j=0;j<listSize;j++){
+							if(pList[j].shanten > maxval){
+								maxval = pList[j].shanten;
+								maxind = j;
+							}
+						}
+						pList[maxind] = tenpai_list;
+					}else{
+						pList[resultcount] = tenpai_list;
+						resultcount++;
+					}
 				}
 				memset(&tenpai_list,0,sizeof(tenpai_list));
 
@@ -828,7 +842,7 @@ int search_tenpai(int *paiarray,int paiSize,TENPAI_LIST *pList,int listSize,int 
 				/* ’TõI—¹ */
 				memcpy(&tenpai_list.mentsuflag,mentsu_stack[stackpos],AI_TEHAI_LIMIT*sizeof(int));
 				search_shanten_atamaless(paicountlist,paicount_size,&tenpai_list);
-				if(tenpai_list.shanten <= maxshanten){
+				if(pList != NULL && tenpai_list.shanten <= maxshanten){
 					if(resultcount == listSize){
 						maxval = 0;
 						maxind = 0;
@@ -853,19 +867,28 @@ int search_tenpai(int *paiarray,int paiSize,TENPAI_LIST *pList,int listSize,int 
 			
 		} else {
 			memcpy(&tenpai_list.mentsuflag,mentsu_stack[stackpos],AI_TEHAI_LIMIT*sizeof(int));
-			if(resultcount == listSize){
-				maxval = 0;
-				maxind = 0;
-				for(j=0;j<listSize;j++){
-					if(pList[j].shanten > maxval){
-						maxval = pList[j].shanten;
-						maxind = j;
-					}
+
+			if(pMachi != NULL){
+				for(j=0;j<34;j++){
+					pMachi[j] = pMachi[j] || tenpai_list.machi[j];
 				}
-				pList[maxind] = tenpai_list;
-			}else{
-				pList[resultcount] = tenpai_list;
-				resultcount++;
+			}
+
+			if(pList != NULL){ 
+				if(resultcount == listSize){
+					maxval = 0;
+					maxind = 0;
+					for(j=0;j<listSize;j++){
+						if(pList[j].shanten > maxval){
+							maxval = pList[j].shanten;
+							maxind = j;
+						}
+					}
+					pList[maxind] = tenpai_list;
+				}else{
+					pList[resultcount] = tenpai_list;
+					resultcount++;
+				}
 			}
 			memset(&tenpai_list,0,sizeof(tenpai_list));
 			

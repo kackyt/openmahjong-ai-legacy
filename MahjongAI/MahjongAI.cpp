@@ -130,6 +130,7 @@ void MahjongAI::set_Tehai(void)
 	MJIKawahai kawahai[4][20];
 	UINT dora[8];
 	double nokori[34];
+	double kikenhai[34];
 	double mentsu1[27+34];
 	double mentsu2[27+34];
 	double mentsu3[27+34];
@@ -154,7 +155,7 @@ void MahjongAI::set_Tehai(void)
 
 	doralen = (*MJSendMessage)(this,MJMI_GETDORA,(UINT)dora,0);
 
-	MJ0(&param[0],(int*)dora,doralen,nokori,mentsu1,mentsu2,mentsu3);
+	MJ0(&param[0],(int*)dora,doralen,nokori,kikenhai,mentsu1,mentsu2,mentsu3);
 
 	fprintf(fp,TEXT("<NOKORI>"));
 
@@ -303,6 +304,7 @@ double MahjongAI::eval_Tehai_sub3(int atama_flag,int remain,int shanten,int dept
 	int painum,pais;
 	double maxval,val;
 	int paiarray[14];
+	int machi[34];
 	
 	painum = 0;
 
@@ -328,7 +330,7 @@ double MahjongAI::eval_Tehai_sub3(int atama_flag,int remain,int shanten,int dept
 
 	maxval = 0.0;
 
-	num = search_tenpai(paiarray,painum,list,MAI_TENPAI_SIZE,shanten);
+	num = search_tenpai(paiarray,painum,machi,list,MAI_TENPAI_SIZE,shanten);
 
 	for(c=0;c<=shanten;c++){
 		for(i=0;i<num;i++){
@@ -376,6 +378,7 @@ double MahjongAI::eval_Tehai_sub2(int atama_flag)
 #define MAI_TENPAI_SIZE (20)
 	TENPAI_LIST list[MAI_TENPAI_SIZE];
 	int yukohai[34];
+	int machi[34];
 	int yukonum;
 	int num;
 	int i,j;
@@ -413,7 +416,7 @@ double MahjongAI::eval_Tehai_sub2(int atama_flag)
 	maxval = 0.0;
 
 	// ‚SƒVƒƒƒ“ƒeƒ“‚Ü‚ÅŒvŽZ‚·‚é
-	num = search_tenpai(paiarray,painum,list,MAI_TENPAI_SIZE,4);
+	num = search_tenpai(paiarray,painum,machi,list,MAI_TENPAI_SIZE,4);
 
 	for(shanten=1;shanten<=4;shanten++){
 		for(i=0;i<num;i++){

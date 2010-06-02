@@ -34,6 +34,7 @@ extern "C" {
 
 typedef unsigned int UINT;
 typedef unsigned short USHORT;
+#define WINAPI __stdcall
 #include "MIPIface.h"
 
 #define SIMU_SIZE (5000)

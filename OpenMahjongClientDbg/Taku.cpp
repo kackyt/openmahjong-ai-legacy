@@ -903,45 +903,43 @@ void CTaku::update(CTaku& value)
 			default:
 				break;
 			}
-		}
-	}
-	
-	if(m_aDora.GetSize() < value.m_aDora.GetSize()){
-		m_aDora.Copy(value.m_aDora);
-	}
-	
-	if(m_aUradora.GetSize() < value.m_aUradora.GetSize()){
-		m_aUradora.Copy(value.m_aUradora);
-	}
-	
-	// ツモ牌はコマンドリストから取得する
-	for(i=0;i<4;i++){
-		m_members[i].m_aCommandList.RemoveAll();
-		m_members[i].m_gamestate.m_bTsumo = value.m_members[i].m_gamestate.m_bTsumo;
-		
-		if(m_members[i].m_gamestate.m_bTsumo && value.m_members[i].m_tsumohai != PAI_NOTINIT){
-			m_members[i].m_aTehai.Add(value.m_members[i].m_tsumohai);
-			if(m_members[i].m_aTehai.GetSize() > 14){
-				AfxDebugBreak();
+
+			if(m_aDora.GetSize() < value.m_aDora.GetSize()){
+				m_aDora.Copy(value.m_aDora);
+			}
+			
+			if(m_aUradora.GetSize() < value.m_aUradora.GetSize()){
+				m_aUradora.Copy(value.m_aUradora);
+			}
+			// ツモ牌はコマンドリストから取得する
+			for(i=0;i<4;i++){
+				m_members[i].m_aCommandList.RemoveAll();
+				m_members[i].m_gamestate.m_bTsumo = value.m_members[i].m_gamestate.m_bTsumo;
+				
+				if(m_members[i].m_gamestate.m_bTsumo && value.m_members[i].m_tsumohai != PAI_NOTINIT){
+					m_members[i].m_aTehai.Add(value.m_members[i].m_tsumohai);
+					if(m_members[i].m_aTehai.GetSize() > 14){
+						AfxDebugBreak();
+					}
+				}
+				
+				for(j=0;j<value.m_members[i].m_aCommandList.GetSize();j++){
+					CCommand *pCom = &value.m_members[i].m_aCommandList[j];
+					m_members[i].m_aCommandList.Add(value.m_members[i].m_aCommandList[j]);
+				}
+				
+				if(value.m_members[i].m_aTehai.GetSize() > 0){
+					m_members[i].m_aTehai.RemoveAll();
+					m_members[i].m_aTehai.Copy(value.m_members[i].m_aTehai);
+				}
+				
+				m_members[i].m_aResultList.RemoveAll();
+				for(j=0;j<value.m_members[i].m_aResultList.GetSize();j++){
+					m_members[i].m_aResultList.Add(value.m_members[i].m_aResultList[j]);
+				}
 			}
 		}
-		
-		for(j=0;j<value.m_members[i].m_aCommandList.GetSize();j++){
-			CCommand *pCom = &value.m_members[i].m_aCommandList[j];
-			m_members[i].m_aCommandList.Add(value.m_members[i].m_aCommandList[j]);
-		}
-		
-		if(value.m_members[i].m_aTehai.GetSize() > 0){
-			m_members[i].m_aTehai.RemoveAll();
-			m_members[i].m_aTehai.Copy(value.m_members[i].m_aTehai);
-		}
-		
-		m_members[i].m_aResultList.RemoveAll();
-		for(j=0;j<value.m_members[i].m_aResultList.GetSize();j++){
-			m_members[i].m_aResultList.Add(value.m_members[i].m_aResultList[j]);
-		}
 	}
-	
 }
 
 

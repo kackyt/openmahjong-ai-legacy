@@ -999,11 +999,16 @@ void COpenMahjongClientDbgDlg::gameSync()
 									}
 									break;
 								case MJPIR_KAN:
-									command.m_iId = ID_KAN + (ret & 0xFF);
-									if(!m_pCurTaku->m_members[ind].isExecutableCommand(command)){
-										AfxDebugBreak();
-										command.m_iId = ID_DAHAI + m_pCurTaku->m_members[m_pCurTaku->m_iTurn].m_aTehai.GetUpperBound();
+									command.m_iId = ID_DAHAI + m_pCurTaku->m_members[m_pCurTaku->m_iTurn].m_aTehai.GetUpperBound();
+									if((ret & 0xFF) < m_pCurTaku->m_members[ind].m_aTehai.GetSize()){
+										CPai pai = m_pCurTaku->m_members[ind].m_aTehai[ret & 0xFF];
+										for(j=0;j<m_pCurTaku->m_members[ind].m_aCommandList.GetSize();j++){
+											if(((UINT)m_pCurTaku->m_members[ind].m_aCommandList[j].m_pai & 63) == ((UINT)pai & 63) && (m_pCurTaku->m_members[ind].m_aCommandList[j].m_iType == TYPE_ANKAN || m_pCurTaku->m_members[ind].m_aCommandList[j].m_iType == TYPE_KUWAEKAN)){
+												command = m_pCurTaku->m_members[ind].m_aCommandList[j];
+											}
+										}
 									}
+
 									break;
 								default:
 									command.m_iId = ID_DAHAI + m_pCurTaku->m_members[m_pCurTaku->m_iTurn].m_aTehai.GetUpperBound();

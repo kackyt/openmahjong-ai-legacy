@@ -24,6 +24,7 @@
 
 #include "stdafx.h"
 #include <time.h>
+#include <stdio.h>
 #include "OpenMahjongClientDbg.h"
 #include "OpenMahjongClientDbgDlg.h"
 #include "AILib.h"
@@ -564,12 +565,15 @@ HCURSOR COpenMahjongClientDbgDlg::OnQueryDragIcon()
 void COpenMahjongClientDbgDlg::OnBtnconnect() 
 {
 	int nResponse = m_connDlg.DoModal(),i;
+	int rescom;
 	CString text;
 	CCommand com;
 	IXMLDOMDocumentPtr pDoc;
 	IXMLDOMNodePtr pNode;
 	BSTR pStr;
 	UINT res;
+	FILE *pPidFile;
+	const TCHAR *pPidFileName = _T("privateid");
 
 	UpdateData(TRUE);
 
@@ -591,8 +595,16 @@ void COpenMahjongClientDbgDlg::OnBtnconnect()
 			/* デバッグ接続 */
 			com.m_iId = ID_DEBUG;
 			m_iSession = m_connDlg.m_iSession;
-			sendCommand(com,text);
+			do{
+				rescom = sendCommand(com,text);
+				if(rescom >= 0 && rescom != RESPONCE_OK){
+					AfxMessageBox(_T("接続に失敗しました。設定を確認してください"));
+					return;
+				}
+			}while(rescom < 0);
+			
 			pDoc.CreateInstance(CLSID_DOMDocument);
+
 			pDoc->loadXML((LPCTSTR)text);
 			pNode = pDoc->selectSingleNode(_T(TAG_OPENMAHJONGSERVER "/" TAG_TAKU));
 
@@ -634,6 +646,13 @@ void COpenMahjongClientDbgDlg::OnBtnconnect()
 			if(m_connDlg.m_iNewSess != 0){
 				m_iSession = m_connDlg.m_iSession;
 			}
+
+			if(m_connDlg.m_iNewSess <= 1){
+				remove(pPidFileName);
+				pPidFile = fopen(pPidFileName,_T("w"));
+			}else{
+				pPidFile = fopen(pPidFileName,_T("r"));
+			}
 			for(i=0;i<m_iPlayerNum+m_iCompNum;i++){
 				if(i== 0 && m_connDlg.m_iNewSess == 0){
 					/* 新しいセッションの作成 */
@@ -646,8 +665,21 @@ void COpenMahjongClientDbgDlg::OnBtnconnect()
 					/* 既存のセッションに接続 */
 					com.m_iId = ID_CONNECT;
 				}
+				if(m_connDlg.m_iNewSess <= 1){
+					m_players[i].m_iPrivateId = (DWORD)(rand() << 16 | rand()); // 暫定的な乱数発生
+					fprintf(pPidFile,_T("%s,%d\n"),m_players[i].m_strName,m_players[i].m_iPrivateId);
+				}else{
+					/* TODO */
+
+				}
 				com.m_player = m_players[i];
-				sendCommand(com,text);
+				do{
+					rescom = sendCommand(com,text);
+					if(rescom >= 0 && rescom != RESPONCE_OK){
+						AfxMessageBox(_T("接続に失敗しました。設定を確認してください"));
+						return;
+					}
+				}while(rescom < 0);
 				pDoc.CreateInstance(CLSID_DOMDocument);
 				pDoc->loadXML((LPCTSTR)text);
 				if(i== 0 && m_connDlg.m_iNewSess == 0){
@@ -675,6 +707,8 @@ void COpenMahjongClientDbgDlg::OnBtnconnect()
 					m_players[i].m_pFunc(m_players[i].m_pInst,MJPI_STARTGAME,0,0);
 				}
 			}
+
+			fclose(pPidFile);
 		}
 
 		m_strTakunum.Format(_T("卓番号 : %d"),m_iSession);
@@ -964,7 +998,8 @@ void COpenMahjongClientDbgDlg::gameSync()
 						int ind = m_pCurTaku->getMemberIndex(&m_players[i]);
 						command.m_player = m_players[i];
 						if(m_pCurTaku->m_members[ind].m_aCommandList[0].m_iId == ID_START){
-							sendCommand(m_pCurTaku->m_members[ind].m_aCommandList[0],recvMessage);
+							command.m_iId = ID_START;
+							while(sendCommand(command,recvMessage) < 0);
 						}else{
 							if(ind == m_pCurTaku->m_iTurn){
 								UINT paiID = m_pCurTaku->m_members[ind].m_gamestate.m_bTsumo ? m_pCurTaku->m_members[ind].m_aTehai[m_pCurTaku->m_members[ind].m_aTehai.GetUpperBound()] : 63;
@@ -1004,7 +1039,7 @@ void COpenMahjongClientDbgDlg::gameSync()
 										CPai pai = m_pCurTaku->m_members[ind].m_aTehai[ret & 0xFF];
 										for(j=0;j<m_pCurTaku->m_members[ind].m_aCommandList.GetSize();j++){
 											if(((UINT)m_pCurTaku->m_members[ind].m_aCommandList[j].m_pai & 63) == ((UINT)pai & 63) && (m_pCurTaku->m_members[ind].m_aCommandList[j].m_iType == TYPE_ANKAN || m_pCurTaku->m_members[ind].m_aCommandList[j].m_iType == TYPE_KUWAEKAN)){
-												command = m_pCurTaku->m_members[ind].m_aCommandList[j];
+												command.m_iId = m_pCurTaku->m_members[ind].m_aCommandList[j].m_iId;
 											}
 										}
 									}
@@ -1021,7 +1056,11 @@ void COpenMahjongClientDbgDlg::gameSync()
 								case MJPIR_CHII1:
 									for(j=0;j<m_pCurTaku->m_members[ind].m_aCommandList.GetSize();j++){
 										if(m_pCurTaku->m_members[ind].m_aCommandList[j].m_mentsu.getNakiPos() == 0){
-											while(sendCommand(m_pCurTaku->m_members[ind].m_aCommandList[j],recvMessage) < 0);
+											command.m_iId = m_pCurTaku->m_members[ind].m_aCommandList[j].m_iId;
+											do{
+												rescom = sendCommand(command,recvMessage);
+												if(rescom >= 0 && rescom != RESPONCE_OK) AfxDebugBreak();
+											}while(rescom < 0);
 											break;
 										}
 									}
@@ -1029,7 +1068,11 @@ void COpenMahjongClientDbgDlg::gameSync()
 								case MJPIR_CHII2:
 									for(j=0;j<m_pCurTaku->m_members[ind].m_aCommandList.GetSize();j++){
 										if(m_pCurTaku->m_members[ind].m_aCommandList[j].m_mentsu.getNakiPos() == 2){
-											while(sendCommand(m_pCurTaku->m_members[ind].m_aCommandList[j],recvMessage) < 0);
+											command.m_iId = m_pCurTaku->m_members[ind].m_aCommandList[j].m_iId;
+											do{
+												rescom = sendCommand(command,recvMessage);
+												if(rescom >= 0 && rescom != RESPONCE_OK) AfxDebugBreak();
+											}while(rescom < 0);
 											break;
 										}
 									}
@@ -1037,7 +1080,11 @@ void COpenMahjongClientDbgDlg::gameSync()
 								case MJPIR_CHII3:
 									for(j=0;j<m_pCurTaku->m_members[ind].m_aCommandList.GetSize();j++){
 										if(m_pCurTaku->m_members[ind].m_aCommandList[j].m_mentsu.getNakiPos() == 1){
-											while(sendCommand(m_pCurTaku->m_members[ind].m_aCommandList[j],recvMessage) < 0);
+											command.m_iId = m_pCurTaku->m_members[ind].m_aCommandList[j].m_iId;
+											do{
+												rescom = sendCommand(command,recvMessage);
+												if(rescom >= 0 && rescom != RESPONCE_OK) AfxDebugBreak();
+											}while(rescom < 0);
 											break;
 										}
 									}
@@ -1549,7 +1596,9 @@ void COpenMahjongClientDbgDlg::sendString(CString& sendMessage,CString& recvMess
 				finish = clock();
 
 				// 負荷調節のためにウェイトを少し入れる
+#if 0
 				Sleep(50);
+#endif
 
 #ifdef DEBUGDUMP
 				m_strCUIMessage += _T("\r\n------ responce --------\r\n");

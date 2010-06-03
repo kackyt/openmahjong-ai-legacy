@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=COpenMahjongClientDbgDlg
+LastClass=CConnectDlg
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "OpenMahjongClientDbg.h"
@@ -14,17 +14,17 @@ Class2=COpenMahjongClientDbgDlg
 ResourceCount=6
 Resource1=IDR_MAINFRAME
 Class3=CMahjongWnd
-Resource2=IDD_CONNECT
+Resource2=IDD_DEBUG
 Class4=CConnectDlg
 Class5=CMahjongStatic
 Class6=CMahjongBtn
 Class7=CMyButton
-Resource3=IDD_OPENMAHJONGCLIENTDBG_DIALOG
+Resource3=IDD_CONNECT
 Class8=CDebugDialog
 Class9=CMessageEdit
-Resource4=IDD_DEBUG
+Resource4=IDD_AGARI
 Class10=CAgariDialog
-Resource5=IDD_AGARI
+Resource5=IDD_OPENMAHJONGCLIENTDBG_DIALOG
 Class11=CRuleDialog
 Resource6=IDD_RULE
 
@@ -99,7 +99,7 @@ Control1=IDC_CONNECTDST,combobox,1344339970
 Control2=IDC_RADIONEW,button,1342308361
 Control3=IDC_RADIOAPPEND,button,1342177289
 Control4=IDC_DEBUG,button,1342177289
-Control5=IDC_SESSION,edit,1350631552
+Control5=IDC_SESSION,edit,1350762624
 Control6=IDC_PNAME,edit,1350631552
 Control7=IDC_CMBCOMP1,combobox,1344339971
 Control8=IDC_CMBCOMP2,combobox,1344339971
@@ -123,7 +123,7 @@ ImplementationFile=ConnectDlg.cpp
 BaseClass=CDialog
 Filter=D
 VirtualFilter=dWC
-LastObject=IDC_BTNRULE
+LastObject=CConnectDlg
 
 [CLS:CMahjongStatic]
 Type=0

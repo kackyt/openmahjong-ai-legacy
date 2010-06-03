@@ -132,6 +132,7 @@ enum{
 #define TAG_COMMAND "c"
 #define TAG_TYPE "tp"
 #define TAG_PLAYER "pl"
+#define TAG_PRIVATEID "pid"
 #define TAG_PAI "p"
 #define TAG_NO "no"
 #define TAG_TSUMOGIRI "tg"

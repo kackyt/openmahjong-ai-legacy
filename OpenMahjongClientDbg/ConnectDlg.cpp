@@ -53,6 +53,8 @@ void CConnectDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CConnectDlg)
+	DDX_Control(pDX, IDC_BTNRULE, m_btnRule);
+	DDX_Control(pDX, IDC_SESSION, m_editSess);
 	DDX_Control(pDX, IDC_CMBCOMP3, m_cmbComp3);
 	DDX_Control(pDX, IDC_CMBCOMP2, m_cmbComp2);
 	DDX_Control(pDX, IDC_CMBCOMP1, m_cmbComp1);
@@ -67,6 +69,9 @@ void CConnectDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CConnectDlg, CDialog)
 	//{{AFX_MSG_MAP(CConnectDlg)
 	ON_BN_CLICKED(IDC_BTNRULE, OnBtnrule)
+	ON_BN_CLICKED(IDC_DEBUG, OnDebug)
+	ON_BN_CLICKED(IDC_RADIONEW, OnRadionew)
+	ON_BN_CLICKED(IDC_RADIOAPPEND, OnRadioappend)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -109,6 +114,8 @@ BOOL CConnectDlg::OnInitDialog()
 		m_cmbComp3.AddString(pObj->compName[i]);
 	}
 
+	m_btnRule.EnableWindow(TRUE);
+	m_editSess.EnableWindow(FALSE);
 
 	UpdateData(FALSE);
 	
@@ -141,8 +148,25 @@ void CConnectDlg::OnOK()
 
 void CConnectDlg::OnBtnrule() 
 {
-	// TODO: この位置にコントロール通知ハンドラ用のコードを追加してください
 	m_ruleDlg.setAccessMode(TRUE);
 	m_ruleDlg.DoModal();
+}
+
+void CConnectDlg::OnDebug() 
+{
+	m_btnRule.EnableWindow(FALSE);
+	m_editSess.EnableWindow(TRUE);	
+}
+
+void CConnectDlg::OnRadionew() 
+{
+	m_btnRule.EnableWindow(TRUE);
+	m_editSess.EnableWindow(FALSE);
+}
+
+void CConnectDlg::OnRadioappend() 
+{
+	m_btnRule.EnableWindow(FALSE);
+	m_editSess.EnableWindow(TRUE);
 	
 }

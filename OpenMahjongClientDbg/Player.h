@@ -36,6 +36,7 @@
 class CPlayer  
 {
 public:
+	DWORD m_iPrivateId;
 	void toXML(IXMLDOMDocumentPtr,IXMLDOMElementPtr);
 	void parseXML(IXMLDOMNodePtr);
 	MJPIFunc m_pFunc;

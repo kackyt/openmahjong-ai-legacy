@@ -46,6 +46,8 @@ public:
 // ダイアログ データ
 	//{{AFX_DATA(CConnectDlg)
 	enum { IDD = IDD_CONNECT };
+	CButton	m_btnRule;
+	CEdit	m_editSess;
 	CComboBox	m_cmbComp3;
 	CComboBox	m_cmbComp2;
 	CComboBox	m_cmbComp1;
@@ -73,6 +75,9 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	afx_msg void OnBtnrule();
+	afx_msg void OnDebug();
+	afx_msg void OnRadionew();
+	afx_msg void OnRadioappend();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

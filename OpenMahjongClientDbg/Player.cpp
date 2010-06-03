@@ -46,6 +46,7 @@ CPlayer::CPlayer()
 	m_pFunc = NULL;
 	m_pInst = NULL;
 	m_strName = _T("");
+	m_iPrivateId = 0;
 
 }
 
@@ -75,6 +76,13 @@ void CPlayer::parseXML(IXMLDOMNodePtr pElem)
 		m_strName = pStr;
 	}
 
+	pNode = pElem->selectSingleNode(_T(TAG_PRIVATEID));
+
+	if(pNode != NULL){
+		pNode->get_text(&pStr);
+		text = pStr;
+		m_iPrivateId = _tcstol((const TCHAR*)text,NULL,0);
+	}
 }
 
 void CPlayer::toXML(IXMLDOMDocumentPtr pDoc,IXMLDOMElementPtr pParent)
@@ -92,6 +100,11 @@ void CPlayer::toXML(IXMLDOMDocumentPtr pDoc,IXMLDOMElementPtr pParent)
 	pElemName = pDoc->createElement(_T(TAG_NAME));
 	pElemName->appendChild(pDoc->createTextNode((LPCTSTR)m_strName));
 	pElemPlayer->appendChild(pElemName);
+
+	pElemID = pDoc->createElement(_T(TAG_PRIVATEID));
+	str.Format(_T("%d"),m_iPrivateId);
+	pElemID->appendChild(pDoc->createTextNode((LPCTSTR)str));
+	pElemPlayer->appendChild(pElemID);
 
 	pParent->appendChild(pElemPlayer);
 

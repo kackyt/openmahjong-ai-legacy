@@ -1596,7 +1596,7 @@ void COpenMahjongClientDbgDlg::sendString(CString& sendMessage,CString& recvMess
 				finish = clock();
 
 				// 負荷調節のためにウェイトを少し入れる
-#if 0
+#if 1
 				Sleep(50);
 #endif
 

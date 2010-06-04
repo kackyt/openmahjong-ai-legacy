@@ -846,7 +846,7 @@ void CTaku::update(CTaku& value)
 					}
 					
 					if(!bInserted){
-						m_members[ind].m_aTehai.Add(pai);
+						m_members[ind].m_aTehai.InsertAt(0,pai);
 					}
 				}
 				m_members[ind].m_gamestate.m_bRiichi = TRUE;
@@ -894,7 +894,7 @@ void CTaku::update(CTaku& value)
 						}
 						
 						if(!bInserted){
-							m_members[ind].m_aTehai.Add(pai);
+							m_members[ind].m_aTehai.InsertAt(0,pai);
 						}
 					}
 				}

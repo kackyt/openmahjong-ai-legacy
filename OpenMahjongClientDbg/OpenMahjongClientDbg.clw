@@ -19,12 +19,12 @@ Class4=CConnectDlg
 Class5=CMahjongStatic
 Class6=CMahjongBtn
 Class7=CMyButton
-Resource3=IDD_OPENMAHJONGCLIENTDBG_DIALOG
+Resource3=IDD_CONNECT
 Class8=CDebugDialog
 Class9=CMessageEdit
 Resource4=IDD_DEBUG
 Class10=CAgariDialog
-Resource5=IDD_CONNECT
+Resource5=IDD_OPENMAHJONGCLIENTDBG_DIALOG
 Class11=CRuleDialog
 Resource6=IDD_RULE
 

@@ -1648,6 +1648,8 @@ void COpenMahjongClientDbgDlg::sendString(CString& sendMessage,CString& recvMess
 		delete conn;
 	}
 
+	inet.Close();
+
 }
 
 void COpenMahjongClientDbgDlg::OnBtnsyncapl() 

@@ -25,6 +25,7 @@
 #include "stdafx.h"
 #include <time.h>
 #include <stdio.h>
+#include <math.h>
 #include "OpenMahjongClientDbg.h"
 #include "OpenMahjongClientDbgDlg.h"
 #include "AILib.h"
@@ -445,9 +446,11 @@ BEGIN_MESSAGE_MAP(COpenMahjongClientDbgDlg, CDialog)
 	ON_WM_DESTROY()
 	ON_WM_SETCURSOR()
 	ON_BN_CLICKED(IDC_ABORT, OnAbort)
+	ON_BN_CLICKED(IDC_BTNRULE, OnBtnrule)
 	ON_MESSAGE(WM_REFRESH,OnRefresh)
 	ON_MESSAGE(WM_SNDCOMMAND,OnSndCommand)
-	ON_BN_CLICKED(IDC_BTNRULE, OnBtnrule)
+	ON_MESSAGE(WM_SETVOLUME,OnSetVolume)
+	ON_BN_CLICKED(IDC_BTNVOL, OnBtnvol)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -483,8 +486,8 @@ BOOL COpenMahjongClientDbgDlg::OnInitDialog()
 	m_matrix.setMaxChannels(1);
 
 	m_fileNormal.setPlayer(&m_player);
-	m_matrix.appendChannel(&m_fileNormal,1);
-	m_matrix.appendChannel(&m_fileCommand,1);
+	m_hVolBGM = m_matrix.appendChannel(&m_fileNormal,1);
+	m_hVolSE1 = m_matrix.appendChannel(&m_fileCommand,1);
 	m_player.play();
 
 
@@ -2212,4 +2215,30 @@ void COpenMahjongClientDbgDlg::OnBtnrule()
 	ruleDialog.setAccessMode(FALSE);
 	
 	ruleDialog.DoModal();
+}
+
+void COpenMahjongClientDbgDlg::OnBtnvol() 
+{
+	// TODO: この位置にコントロール通知ハンドラ用のコードを追加してください
+	m_volDlg.DoModal();
+	
+}
+
+LRESULT COpenMahjongClientDbgDlg::OnSetVolume(WPARAM wParam,LPARAM lParam)
+{
+	if(wParam == 0){
+		if(lParam == -30){
+			m_matrix.setVolume(m_hVolBGM,0.0);
+		}else{
+			m_matrix.setVolume(m_hVolBGM,pow(10.0,(double)lParam/20.0));
+		}
+	}else if(wParam == 1){
+		if(lParam == -30){
+			m_matrix.setVolume(m_hVolSE1,0.0);
+		}else{
+			m_matrix.setVolume(m_hVolSE1,pow(10.0,(double)lParam/20.0));
+		}
+	}
+	return 0;
+
 }

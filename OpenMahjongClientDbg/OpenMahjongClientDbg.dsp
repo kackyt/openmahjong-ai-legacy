@@ -209,6 +209,10 @@ SOURCE=.\TakuEvent.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\VolumeDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\WaveFilePlayMethod.cpp
 # End Source File
 # Begin Source File
@@ -346,6 +350,10 @@ SOURCE=.\Taku.h
 # Begin Source File
 
 SOURCE=.\TakuEvent.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\VolumeDlg.h
 # End Source File
 # Begin Source File
 

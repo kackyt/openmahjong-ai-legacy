@@ -9,6 +9,7 @@
 #define IDD_DEBUG                       131
 #define IDD_AGARI                       132
 #define IDD_RULE                        133
+#define IDD_VOLUME                      135
 #define IDC_BTNSYNC                     1001
 #define IDC_BTNCONNECT                  1002
 #define IDC_BTNTII                      1003
@@ -84,14 +85,17 @@
 #define IDC_CMBAOTENJO                  1073
 #define IDC_CMBHAIPAI                   1074
 #define IDC_CHKDEBUG                    1074
+#define IDC_VOLBGM                      1075
+#define IDC_VOLSE1                      1076
+#define IDC_BTNVOL                      1078
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        135
+#define _APS_NEXT_RESOURCE_VALUE        136
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1075
+#define _APS_NEXT_CONTROL_VALUE         1079
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

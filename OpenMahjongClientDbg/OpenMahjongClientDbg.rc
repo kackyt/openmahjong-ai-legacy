@@ -77,9 +77,9 @@ IDD_OPENMAHJONGCLIENTDBG_DIALOG DIALOGEX 0, 0, 507, 384
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "ま～じゃん"
-FONT 9, "ＭＳ Ｐゴシック", 0, 0, 0x1
+FONT 9, "ＭＳ Ｐゴシック"
 BEGIN
-    PUSHBUTTON      "同期",IDC_BTNSYNC,341,15,45,19
+    PUSHBUTTON      "同期",IDC_BTNSYNC,341,15,42,19
     PUSHBUTTON      "接続",IDC_BTNCONNECT,341,50,43,19
     CONTROL         "チー",IDC_BTNTII,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | 
                     WS_DISABLED | WS_TABSTOP,13,347,35,24
@@ -98,7 +98,7 @@ BEGIN
     PUSHBUTTON      "送信",IDC_CMDSND,447,79,38,14
     EDITTEXT        IDC_CUI,480,200,20,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
                     WS_VISIBLE
-    LTEXT           "Static",IDC_TAKUNUM,409,52,58,8
+    LTEXT           "Static",IDC_TAKUNUM,442,52,58,8
     PUSHBUTTON      "Button2",IDC_BTNMAHJONG,7,7,323,330
     EDITTEXT        IDC_SYNCTICK,397,101,40,14,ES_AUTOHSCROLL
     LTEXT           "同期周期(ms)",IDC_STATIC,341,104,42,8
@@ -122,6 +122,7 @@ BEGIN
     PUSHBUTTON      "ルール確認",IDC_BTNRULE,459,15,41,20
     CONTROL         "デバッグ表示",IDC_CHKDEBUG,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,397,201,55,10
+    PUSHBUTTON      "ボリューム",IDC_BTNVOL,397,50,35,20
 END
 
 IDD_CONNECT DIALOG DISCARDABLE  0, 0, 279, 197
@@ -246,6 +247,20 @@ BEGIN
     LTEXT           "配牌",IDC_STATIC,7,100,15,8
 END
 
+IDD_VOLUME DIALOG DISCARDABLE  0, 0, 185, 160
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "ボリューム設定"
+FONT 9, "ＭＳ Ｐゴシック"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,128,7,50,14
+    CONTROL         "Slider1",IDC_VOLBGM,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,48,36,100,15
+    CONTROL         "Slider2",IDC_VOLSE1,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,48,63,100,15
+    LTEXT           "BGM",IDC_STATIC,7,39,15,8
+    LTEXT           "SE1(打牌、コマンド)",IDC_STATIC,7,66,32,18
+END
+
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -361,6 +376,15 @@ BEGIN
         VERTGUIDE, 50
         TOPMARGIN, 7
         BOTTOMMARGIN, 276
+    END
+
+    IDD_VOLUME, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 178
+        VERTGUIDE, 48
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 153
     END
 END
 #endif    // APSTUDIO_INVOKED

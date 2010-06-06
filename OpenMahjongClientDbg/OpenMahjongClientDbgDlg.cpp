@@ -80,6 +80,14 @@ static UINT __cdecl syncFunc(LPVOID param)
 		if(pDlg->m_pCurTaku->m_event.m_command.m_iType == TYPE_KOUHAI){
 			AfxMessageBox(_T("r”v•½‹Ç"));
 		}else{
+			if(pDlg->m_pCurTaku->m_event.m_command.m_iType == TYPE_RON){
+				pDlg->m_fileSE.closeWaveFile();
+				pDlg->m_fileSE.openWaveFile(_T("./wav/voice_ron.wav"));
+			}else if(pDlg->m_pCurTaku->m_event.m_command.m_iType == TYPE_TSUMO){
+				pDlg->m_fileSE.closeWaveFile();
+				pDlg->m_fileSE.openWaveFile(_T("./wav/voice_tsumo.wav"));
+			}
+
 			pDlg->m_agariDlg.DoModal();
 		}
 		pDlg->m_fileCommand.closeWaveFile();
@@ -488,6 +496,7 @@ BOOL COpenMahjongClientDbgDlg::OnInitDialog()
 	m_fileNormal.setPlayer(&m_player);
 	m_hVolBGM = m_matrix.appendChannel(&m_fileNormal,1);
 	m_hVolSE1 = m_matrix.appendChannel(&m_fileCommand,1);
+	m_hVolSE2 = m_matrix.appendChannel(&m_fileSE,1);
 	m_player.play();
 
 
@@ -1172,14 +1181,28 @@ void COpenMahjongClientDbgDlg::gameSync()
 							m_fileCommand.openWaveFile(_T("./wav/dahai.wav"));
 							break;
 						case TYPE_TII:
+							m_fileSE.closeWaveFile();
+							m_fileSE.openWaveFile(_T("./wav/voice_tii.wav"));
+							m_fileCommand.closeWaveFile();
+							m_fileCommand.openWaveFile(_T("./wav/naki.wav"));
+							break;
 						case TYPE_PON:
+							m_fileSE.closeWaveFile();
+							m_fileSE.openWaveFile(_T("./wav/voice_pon.wav"));
+							m_fileCommand.closeWaveFile();
+							m_fileCommand.openWaveFile(_T("./wav/naki.wav"));
+							break;
 						case TYPE_DAIMINKAN:
 						case TYPE_ANKAN:
 						case TYPE_KUWAEKAN:
+							m_fileSE.closeWaveFile();
+							m_fileSE.openWaveFile(_T("./wav/voice_kan.wav"));
 							m_fileCommand.closeWaveFile();
 							m_fileCommand.openWaveFile(_T("./wav/naki.wav"));
 							break;
 						case TYPE_RIICHI:
+							m_fileSE.closeWaveFile();
+							m_fileSE.openWaveFile(_T("./wav/voice_riichi.wav"));
 							m_fileCommand.closeWaveFile();
 							m_fileCommand.openWaveFile(_T("./wav/riichi.wav"));
 							break;
@@ -2237,6 +2260,12 @@ LRESULT COpenMahjongClientDbgDlg::OnSetVolume(WPARAM wParam,LPARAM lParam)
 			m_matrix.setVolume(m_hVolSE1,0.0);
 		}else{
 			m_matrix.setVolume(m_hVolSE1,pow(10.0,(double)lParam/20.0));
+		}
+	}else if(wParam == 2){
+		if(lParam == -30){
+			m_matrix.setVolume(m_hVolSE2,0.0);
+		}else{
+			m_matrix.setVolume(m_hVolSE2,pow(10.0,(double)lParam/20.0));
 		}
 	}
 	return 0;

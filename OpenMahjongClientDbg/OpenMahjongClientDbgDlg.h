@@ -57,6 +57,8 @@ class COpenMahjongClientDbgDlg : public CDialog
 {
 // ç\íz
 public:
+	CWaveFilePlayMethod m_fileSE;
+	int m_hVolSE2;
 	LRESULT OnSetVolume(WPARAM,LPARAM);
 	CVolumeDlg m_volDlg;
 	int m_hVolSE1;

@@ -207,7 +207,7 @@ BEGIN
     LTEXT           "Static",IDC_RESTIMR6,114,97,18,8
 END
 
-IDD_AGARI DIALOG DISCARDABLE  0, 0, 247, 236
+IDD_AGARI DIALOG DISCARDABLE  350, 0, 247, 236
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
 CAPTION "òaóπ"
 FONT 9, "ÇlÇr ÇoÉSÉVÉbÉN"
@@ -259,6 +259,12 @@ BEGIN
                     TBS_NOTICKS | WS_TABSTOP,48,63,100,15
     LTEXT           "BGM",IDC_STATIC,7,39,15,8
     LTEXT           "SE1(ë≈îvÅAÉRÉ}ÉìÉh)",IDC_STATIC,7,66,32,18
+    LTEXT           "SE2(î≠ê∫)",IDC_STATIC,7,99,31,8
+    CONTROL         "Slider1",IDC_VOLSE2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,48,96,100,15
+    LTEXT           "Static",IDC_STRVOLBGM,160,41,18,8
+    LTEXT           "Static",IDC_STRVOLSE1,160,67,18,8
+    LTEXT           "Static",IDC_STRVOLSE2,160,99,18,8
 END
 
 

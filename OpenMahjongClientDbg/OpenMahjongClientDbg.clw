@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=COpenMahjongClientDbgDlg
+LastClass=CVolumeDlg
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "OpenMahjongClientDbg.h"
@@ -14,21 +14,21 @@ Class2=COpenMahjongClientDbgDlg
 ResourceCount=7
 Resource1=IDR_MAINFRAME
 Class3=CMahjongWnd
-Resource2=IDD_OPENMAHJONGCLIENTDBG_DIALOG
+Resource2=IDD_VOLUME
 Class4=CConnectDlg
 Class5=CMahjongStatic
 Class6=CMahjongBtn
 Class7=CMyButton
-Resource3=IDD_DEBUG
+Resource3=IDD_OPENMAHJONGCLIENTDBG_DIALOG
 Class8=CDebugDialog
 Class9=CMessageEdit
-Resource4=IDD_AGARI
+Resource4=IDD_DEBUG
 Class10=CAgariDialog
-Resource5=IDD_RULE
+Resource5=IDD_CONNECT
 Class11=CRuleDialog
-Resource6=IDD_CONNECT
+Resource6=IDD_RULE
 Class12=CVolumeDlg
-Resource7=IDD_VOLUME
+Resource7=IDD_AGARI
 
 [CLS:COpenMahjongClientDbgApp]
 Type=0
@@ -266,12 +266,17 @@ VirtualFilter=dWC
 [DLG:IDD_VOLUME]
 Type=1
 Class=CVolumeDlg
-ControlCount=5
+ControlCount=10
 Control1=IDOK,button,1342242817
 Control2=IDC_VOLBGM,msctls_trackbar32,1342242840
 Control3=IDC_VOLSE1,msctls_trackbar32,1342242840
 Control4=IDC_STATIC,static,1342308352
 Control5=IDC_STATIC,static,1342308352
+Control6=IDC_STATIC,static,1342308352
+Control7=IDC_VOLSE2,msctls_trackbar32,1342242840
+Control8=IDC_STRVOLBGM,static,1342308352
+Control9=IDC_STRVOLSE1,static,1342308352
+Control10=IDC_STRVOLSE2,static,1342308352
 
 [CLS:CVolumeDlg]
 Type=0
@@ -279,6 +284,6 @@ HeaderFile=VolumeDlg.h
 ImplementationFile=VolumeDlg.cpp
 BaseClass=CDialog
 Filter=D
-LastObject=CVolumeDlg
+LastObject=IDC_STRVOLBGM
 VirtualFilter=dWC
 

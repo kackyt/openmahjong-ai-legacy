@@ -471,6 +471,8 @@ BOOL COpenMahjongClientDbgDlg::OnInitDialog()
 	CString dirPath = _T(".\\comp\\*.dll");
 	CFileFind find;
 
+	srand(time(NULL));
+
 	AfxOleInit();
 	CoInitialize(NULL);
 

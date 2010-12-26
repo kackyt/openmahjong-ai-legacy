@@ -396,9 +396,8 @@ int MJ0(/* inputs */
 						pKikenhai[k] += 1.0;
 					}
 				}
-				/* フリテンでない場合はループを抜ける */
-				break;
 			}
+			break;
 
 		}
 

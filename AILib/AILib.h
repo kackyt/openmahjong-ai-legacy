@@ -37,6 +37,11 @@ extern "C" {
 #define AI_FLAG_EFFECT_PENTAH   (1)   // —LŒø”v
 
 	typedef struct{
+		int tehai[14];
+		int tehai_max;
+	} AGARI_LIST;
+
+	typedef struct{
 		int mentsuflag[14];
 		int machi[34];
 		int shanten;
@@ -69,6 +74,7 @@ extern "C" {
 #define AI_TRUE         (1)
 #define AI_FALSE        (0)
 
+extern int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int listSize,int actualPaiSize);
 extern int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int listSize,int maxshanten);
 extern double probabilityFunction(double,int);
 extern int permutation(int m,int n);

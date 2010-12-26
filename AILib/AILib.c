@@ -621,6 +621,122 @@ static int isatamamachi(PAICOUNT *paicountlist,int size,TENPAI_LIST *machilist){
 	}
 }
 
+/* 上がりの組み合わせを探索する関数 */
+int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int listSize,int actualPaiSize)
+{
+    PAICOUNT paicountlist[AI_TEHAI_LIMIT + 20];
+    int atamaque[AI_TEHAI_LIMIT + 20];
+    int atamaque_count, atamapos;
+    int mentsu_stack[256][AI_TEHAI_LIMIT + 20];
+    int mentsu[AI_TEHAI_LIMIT + 20];
+    int stackpos;
+    int i, j, initresult, flag;
+	int paicount_size;
+	int paicount;
+	int resultcount;
+	AGARI_LIST agari_list;
+
+	if(pList != NULL && listSize > 0) memset(pList,0,sizeof(AGARI_LIST) * listSize);
+	memset(mentsu_stack,0,sizeof(mentsu_stack));
+	memset(mentsu,0,sizeof(mentsu));
+	memset(&agari_list,0,sizeof(agari_list));
+
+    /* 頭の候補を得る */
+    resultcount = 0;
+    atamaque_count = 0;
+
+	if(paiSize >= 2){
+		i = 0;
+		while(i<paiSize-1){
+			if(paiarray[i] == paiarray[i + 1]){
+				atamaque[atamaque_count] = i;
+				mentsu[i] = AI_ATAMA;
+				mentsu[i+1] = AI_ATAMA;
+				atamaque_count++;
+				i++;
+			}
+			i++;
+		}
+
+		/* 七対子の判定 */
+
+		if(atamaque_count >= 7 && actualPaiSize == 14){
+			j=0;
+			for(i=0;i<paiSize ;i++){
+				if(mentsu[i] == AI_ATAMA){
+					agari_list.tehai[j++] = mentsu[i];
+					if(j==14) break;
+				}
+			}
+			if(pList != NULL && resultcount < listSize){
+				pList[resultcount] = agari_list;
+			}
+			resultcount++;
+			if(resultcount >= listSize) return resultcount;
+			memset(&agari_list,0,sizeof(agari_list));
+		}
+
+	}
+
+    /* 頭として取ったあとで刻子/順子などの面子の状況を見る(両面、カンチャン、ペンチャン、シャンポン待ち) */
+    for (i = 0; i < atamaque_count; i++) {
+        atamapos = atamaque[i];
+		
+        /* 探索を開始する面子の初期状態を設定 */
+        initresult = setstartmentsu(paiarray, mentsu_stack[0],atamapos);
+        if (initresult != 0)
+            return initresult;
+        	
+        /* 探索 */
+        stackpos = 0;
+        do {
+            paicount_size = setpaicount(paicountlist, paiarray,paiSize, mentsu_stack[stackpos]);
+			paicount=0;
+			for(j=0;j<paiSize;j++){
+				if(mentsu_stack[stackpos][j] != AI_UKIHAI) paicount++;
+			}
+
+			if (paicount < actualPaiSize){
+                memcpy(mentsu, mentsu_stack[stackpos], sizeof(mentsu));
+                flag = setkoutsu(paicountlist, mentsu_stack[stackpos],paicount_size);
+                if (flag) {
+                    stackpos++;
+					
+                    /* 次に備えて待避しておいた内容をコピー */
+                    memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+                }
+
+                flag = setsyuntsu(paicountlist, mentsu_stack[stackpos],paicount_size);
+                if (flag) {
+                    stackpos++;
+                }
+
+            } else {
+				paicount=0;
+
+				for(j=0;j<paiSize;j++){
+					if(mentsu_stack[stackpos][j] != AI_UKIHAI){
+						agari_list.tehai[paicount++] = mentsu_stack[stackpos][j];
+					}
+				}
+
+				agari_list.tehai_max = actualPaiSize;
+
+				if(pList != NULL && resultcount < listSize){
+					pList[resultcount] = agari_list;
+				}
+
+				resultcount++;
+				if(resultcount >= listSize) return resultcount;
+				memset(&agari_list,0,sizeof(agari_list));
+
+            }
+            stackpos--;
+        } while(stackpos >= 0);
+    }
+    return resultcount;
+}
+
 int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int listSize,int maxshanten)
 {
     PAICOUNT paicountlist[AI_TEHAI_LIMIT + 1];
@@ -724,14 +840,14 @@ int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int l
             paicount_size = setpaicount(paicountlist, paiarray,paiSize, mentsu_stack[stackpos]);
             if (istenpai(paicountlist,paicount_size,&tenpai_list,paiarray[atamapos]) < 0) {  /* 浮き牌がまだある */
 				orflag = AI_FALSE;
-                memcpy(mentsu, mentsu_stack[stackpos], AI_TEHAI_LIMIT * sizeof(int));
+                memcpy(mentsu, mentsu_stack[stackpos], sizeof(mentsu));
                 flag = setkoutsu(paicountlist, mentsu_stack[stackpos],paicount_size);
 				orflag = orflag || flag;
                 if (flag) {
                     stackpos++;
 					
                     /* 次に備えて待避しておいた内容をコピー */
-                    memcpy(mentsu_stack[stackpos], mentsu, AI_TEHAI_LIMIT * sizeof(int));
+                    memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
                 }
 
                 flag = setkoutsul(paicountlist, mentsu_stack[stackpos],paicount_size);
@@ -740,7 +856,7 @@ int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int l
                     stackpos++;
 					
                     /* 次に備えて待避しておいた内容をコピー */
-                    memcpy(mentsu_stack[stackpos], mentsu, AI_TEHAI_LIMIT * sizeof(int));
+                    memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
                 }
 
                 flag = setsyuntsu(paicountlist, mentsu_stack[stackpos],paicount_size);
@@ -748,7 +864,7 @@ int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int l
                 if (flag) {
                     stackpos++;
                     /* 次に備えて待避しておいた内容をコピー */
-                    memcpy(mentsu_stack[stackpos], mentsu, AI_TEHAI_LIMIT * sizeof(int));
+                    memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
                 }
 
 				if(flag != 1){
@@ -824,14 +940,14 @@ int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int l
 		paicount_size = setpaicount(paicountlist, paiarray,paiSize, mentsu_stack[stackpos]);
 		if (isatamamachi(paicountlist,paicount_size,&tenpai_list) < 0) {  /* 浮き牌がまだある */
 			orflag = AI_FALSE;
-			memcpy(mentsu, mentsu_stack[stackpos], AI_TEHAI_LIMIT * sizeof(int));
+			memcpy(mentsu, mentsu_stack[stackpos], sizeof(mentsu));
 			flag = setkoutsu(paicountlist, mentsu_stack[stackpos],paicount_size);
 			orflag = orflag || flag;
 			if (flag) {
 				stackpos++;
 				
 				/* 次に備えて待避しておいた内容をコピー */
-				memcpy(mentsu_stack[stackpos], mentsu, AI_TEHAI_LIMIT * sizeof(int));
+				memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
 			}
 			
 			flag = setkoutsul(paicountlist, mentsu_stack[stackpos],paicount_size);
@@ -840,7 +956,7 @@ int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int l
 				stackpos++;
 				
 				/* 次に備えて待避しておいた内容をコピー */
-				memcpy(mentsu_stack[stackpos], mentsu, AI_TEHAI_LIMIT * sizeof(int));
+				memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
 			}
 			
 			flag = setsyuntsu(paicountlist, mentsu_stack[stackpos],paicount_size);
@@ -848,7 +964,7 @@ int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int l
 			if (flag) {
 				stackpos++;
 				/* 次に備えて待避しておいた内容をコピー */
-				memcpy(mentsu_stack[stackpos], mentsu, AI_TEHAI_LIMIT * sizeof(int));
+				memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
 			}
 			
 			if(flag != 1){

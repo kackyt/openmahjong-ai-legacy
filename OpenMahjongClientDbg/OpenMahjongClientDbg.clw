@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CVolumeDlg
+LastClass=CConnectDlg
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "OpenMahjongClientDbg.h"
@@ -14,15 +14,15 @@ Class2=COpenMahjongClientDbgDlg
 ResourceCount=7
 Resource1=IDR_MAINFRAME
 Class3=CMahjongWnd
-Resource2=IDD_CONNECT
+Resource2=IDD_RULE
 Class4=CConnectDlg
 Class5=CMahjongStatic
 Class6=CMahjongBtn
 Class7=CMyButton
-Resource3=IDD_RULE
+Resource3=IDD_AGARI
 Class8=CDebugDialog
 Class9=CMessageEdit
-Resource4=IDD_AGARI
+Resource4=IDD_CONNECT
 Class10=CAgariDialog
 Resource5=IDD_DEBUG
 Class11=CRuleDialog
@@ -97,27 +97,28 @@ VirtualFilter=WC
 [DLG:IDD_CONNECT]
 Type=1
 Class=CConnectDlg
-ControlCount=20
+ControlCount=21
 Control1=IDC_CONNECTDST,combobox,1344339970
 Control2=IDC_RADIONEW,button,1342308361
 Control3=IDC_RADIOAPPEND,button,1342177289
-Control4=IDC_DEBUG,button,1342177289
-Control5=IDC_SESSION,edit,1350762624
-Control6=IDC_PNAME,edit,1350631552
-Control7=IDC_CMBCOMP1,combobox,1344339971
-Control8=IDC_CMBCOMP2,combobox,1344339971
-Control9=IDC_CMBCOMP3,combobox,1344339971
-Control10=IDOK,button,1342242817
-Control11=IDCANCEL,button,1342242816
-Control12=IDC_STATIC,static,1342308352
+Control4=IDC_RESTART,button,1342177289
+Control5=IDC_DEBUG,button,1476395017
+Control6=IDC_SESSION,edit,1350762624
+Control7=IDC_PNAME,edit,1350631552
+Control8=IDC_CMBCOMP1,combobox,1344339971
+Control9=IDC_CMBCOMP2,combobox,1344339971
+Control10=IDC_CMBCOMP3,combobox,1344339971
+Control11=IDOK,button,1342242817
+Control12=IDCANCEL,button,1342242816
 Control13=IDC_STATIC,static,1342308352
-Control14=IDC_STATIC,button,1342177287
-Control15=IDC_STATIC,static,1342308352
+Control14=IDC_STATIC,static,1342308352
+Control15=IDC_STATIC,button,1342177287
 Control16=IDC_STATIC,static,1342308352
 Control17=IDC_STATIC,static,1342308352
 Control18=IDC_STATIC,static,1342308352
 Control19=IDC_STATIC,static,1342308352
-Control20=IDC_BTNRULE,button,1342242816
+Control20=IDC_STATIC,static,1342308352
+Control21=IDC_BTNRULE,button,1342242816
 
 [CLS:CConnectDlg]
 Type=0
@@ -126,7 +127,7 @@ ImplementationFile=ConnectDlg.cpp
 BaseClass=CDialog
 Filter=D
 VirtualFilter=dWC
-LastObject=CConnectDlg
+LastObject=IDC_RESTART
 
 [CLS:CMahjongStatic]
 Type=0

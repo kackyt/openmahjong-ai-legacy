@@ -72,6 +72,7 @@ BEGIN_MESSAGE_MAP(CConnectDlg, CDialog)
 	ON_BN_CLICKED(IDC_DEBUG, OnDebug)
 	ON_BN_CLICKED(IDC_RADIONEW, OnRadionew)
 	ON_BN_CLICKED(IDC_RADIOAPPEND, OnRadioappend)
+	ON_BN_CLICKED(IDC_RESTART, OnRestart)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -167,6 +168,11 @@ void CConnectDlg::OnRadionew()
 void CConnectDlg::OnRadioappend() 
 {
 	m_btnRule.EnableWindow(FALSE);
-	m_editSess.EnableWindow(TRUE);
-	
+	m_editSess.EnableWindow(TRUE);	
+}
+
+void CConnectDlg::OnRestart() 
+{
+	m_btnRule.EnableWindow(FALSE);
+	m_editSess.EnableWindow(FALSE);	
 }

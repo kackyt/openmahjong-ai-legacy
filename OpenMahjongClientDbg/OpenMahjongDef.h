@@ -89,6 +89,7 @@
 #define ID_AGARIYAME  401
 #define ID_CREATE  500
 #define ID_CONNECT  501
+#define ID_RECONNECT 503
 #define ID_DEBUG 600
 #define ID_REPEAT 601
 

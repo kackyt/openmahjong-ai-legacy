@@ -26,6 +26,8 @@
 #include <time.h>
 #include <stdio.h>
 #include <math.h>
+#include <afx.h>
+#include <afxtempl.h>
 #include "OpenMahjongClientDbg.h"
 #include "OpenMahjongClientDbgDlg.h"
 #include "AILib.h"
@@ -578,7 +580,7 @@ HCURSOR COpenMahjongClientDbgDlg::OnQueryDragIcon()
 
 void COpenMahjongClientDbgDlg::OnBtnconnect() 
 {
-	int nResponse = m_connDlg.DoModal(),i;
+	int nResponse = m_connDlg.DoModal(),i,j;
 	int rescom;
 	CString text;
 	CCommand com;
@@ -588,6 +590,7 @@ void COpenMahjongClientDbgDlg::OnBtnconnect()
 	UINT res;
 	FILE *pPidFile;
 	const TCHAR *pPidFileName = _T("privateid");
+	CMap<CString,LPCTSTR,unsigned long,unsigned long&> map;
 
 	UpdateData(TRUE);
 
@@ -605,7 +608,8 @@ void COpenMahjongClientDbgDlg::OnBtnconnect()
 		m_queMutex.Unlock();
 
 		m_strHostURL = m_connDlg.m_strDst;
-		if(m_connDlg.m_iNewSess == 2){
+		switch(m_connDlg.m_iNewSess){
+		case 3:
 			/* デバッグ接続 */
 			com.m_iId = ID_DEBUG;
 			m_iSession = m_connDlg.m_iSession;
@@ -638,7 +642,9 @@ void COpenMahjongClientDbgDlg::OnBtnconnect()
 					}
 				}
 			}
-		}else{
+			break;
+		case 0:
+		case 1:
 			/* プレーヤーの設定 */
 			m_players[0].m_bIsComp = FALSE;
 			m_players[0].m_strName = m_connDlg.m_playerName;
@@ -664,9 +670,8 @@ void COpenMahjongClientDbgDlg::OnBtnconnect()
 			if(m_connDlg.m_iNewSess <= 1){
 				remove(pPidFileName);
 				pPidFile = fopen(pPidFileName,_T("w"));
-			}else{
-				pPidFile = fopen(pPidFileName,_T("r"));
 			}
+
 			for(i=0;i<m_iPlayerNum+m_iCompNum;i++){
 				if(i== 0 && m_connDlg.m_iNewSess == 0){
 					/* 新しいセッションの作成 */
@@ -679,13 +684,7 @@ void COpenMahjongClientDbgDlg::OnBtnconnect()
 					/* 既存のセッションに接続 */
 					com.m_iId = ID_CONNECT;
 				}
-				if(m_connDlg.m_iNewSess <= 1){
-					m_players[i].m_iPrivateId = (DWORD)(rand() << 16 | rand()); // 暫定的な乱数発生
-					fprintf(pPidFile,_T("%s,%d\n"),m_players[i].m_strName,m_players[i].m_iPrivateId);
-				}else{
-					/* TODO */
-
-				}
+				m_players[i].m_iPrivateId = (DWORD)(rand() << 16 | rand()); // 暫定的な乱数発生
 				com.m_player = m_players[i];
 				do{
 					rescom = sendCommand(com,text);
@@ -720,9 +719,115 @@ void COpenMahjongClientDbgDlg::OnBtnconnect()
 				if(m_players[i].m_bIsComp){
 					m_players[i].m_pFunc(m_players[i].m_pInst,MJPI_STARTGAME,0,0);
 				}
+
+				fprintf(pPidFile,_T("%s#%d,%d\n"),m_players[i].m_strName,m_players[i].m_iId,m_players[i].m_iPrivateId);
 			}
 
+			fprintf(pPidFile,_T("session,%d\n"),m_iSession);
+
 			fclose(pPidFile);
+			break;
+		case 2:
+			/* 再接続 */
+			/* プレーヤーの設定 */
+			m_players[0].m_bIsComp = FALSE;
+			m_players[0].m_strName = m_connDlg.m_playerName;
+			m_iPlayerNum = 1;
+			m_iCompNum = 0;
+
+			if(m_connDlg.m_strComp1 != _T("なし")){
+				searchComp(m_connDlg.m_strComp1);
+			}
+			
+			if(m_connDlg.m_strComp2 != _T("なし")){
+				searchComp(m_connDlg.m_strComp2);
+			}
+
+			if(m_connDlg.m_strComp3 != _T("なし")){
+				searchComp(m_connDlg.m_strComp3);
+			}
+
+			pPidFile = fopen(pPidFileName,_T("r"));
+			if(pPidFile != NULL){
+				CStdioFile stdfile(pPidFile);
+				CString str;
+				int useid[4] = {0,0,0,0};
+				unsigned long val;
+				while(stdfile.ReadString(str)){
+					CString uname_id;
+					CString pid;
+					int pos = str.Find(',');
+					
+					uname_id = str.Left(pos);
+					pid = str.Mid(pos+1);
+					
+					map[uname_id] = _tcstoul((LPCTSTR)pid,NULL,0);
+				}
+
+				if(map.Lookup(_T("session"),val)){
+					m_iSession = val;
+				}else{
+					AfxMessageBox(_T("前回の設定ファイルが読み込めませんでした。新規作成からやり直してください。"));
+					return;
+				}
+				
+				for(i=0;i<m_iPlayerNum+m_iCompNum;i++){
+					for(j=0;j<4;j++){
+						if(useid[j] == 0){
+							str.Format(_T("%s#%d"),m_players[i].m_strName,j);
+							if(map.Lookup(str,m_players[i].m_iPrivateId)){
+								m_players[i].m_iId = j;
+								useid[j] = 1;
+								break;
+							}
+						}
+					}
+
+					com.m_iId = ID_RECONNECT;
+					com.m_player = m_players[i];
+					do{
+						rescom = sendCommand(com,text);
+						if(rescom >= 0 && rescom != RESPONCE_OK){
+							AfxMessageBox(_T("接続に失敗しました。設定を確認してください"));
+							return;
+						}
+					}while(rescom < 0);
+					pDoc.CreateInstance(CLSID_DOMDocument);
+					pDoc->loadXML((LPCTSTR)text);
+					if(i== 0 && m_connDlg.m_iNewSess == 0){
+						pNode = pDoc->selectSingleNode(_T(TAG_OPENMAHJONGSERVER))->Getattributes()->getNamedItem(_T("session"));
+						if(pNode != NULL){
+							text = pNode->GetnodeValue().bstrVal;
+							m_iSession = _tcstol((const TCHAR*)text,NULL,0);
+						}
+					}
+					pNode = pDoc->selectSingleNode(_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_COMMAND "/" TAG_PLAYER "/" TAG_ID));
+					
+					if(pNode != NULL){
+						pNode->get_text(&pStr);
+						text = pStr;
+					}
+					
+					if(m_connDlg.m_iNewSess != 0){
+						pNode = pDoc->selectSingleNode(_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_COMMAND "/" TAG_RULE));
+						m_rule.parseXML(pNode);
+						m_btnMahjong.m_rule = m_rule;
+					}
+					
+					if(m_players[i].m_bIsComp){
+						m_players[i].m_pFunc(m_players[i].m_pInst,MJPI_STARTGAME,0,0);
+					}
+				}
+				
+				fclose(pPidFile);
+			}else{
+				AfxMessageBox(_T("前回の設定ファイルが読み込めませんでした。新規作成からやり直してください。"));
+				return;
+			}
+
+			break;
+		default:
+			break;
 		}
 
 		m_strTakunum.Format(_T("卓番号 : %d"),m_iSession);

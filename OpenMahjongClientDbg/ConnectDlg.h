@@ -78,6 +78,7 @@ protected:
 	afx_msg void OnDebug();
 	afx_msg void OnRadionew();
 	afx_msg void OnRadioappend();
+	afx_msg void OnRestart();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

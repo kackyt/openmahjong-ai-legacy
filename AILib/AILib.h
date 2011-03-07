@@ -74,7 +74,7 @@ extern "C" {
 #define AI_TRUE         (1)
 #define AI_FALSE        (0)
 
-extern int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int listSize,int actualPaiSize);
+extern int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,void *inf,int (*getPoint)(AGARI_LIST*,void*));
 extern int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int listSize,int maxshanten);
 extern double probabilityFunction(double,int);
 extern int permutation(int m,int n);

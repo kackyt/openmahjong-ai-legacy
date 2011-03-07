@@ -96,10 +96,6 @@ SOURCE=.\AgariDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\AILib\AILib.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\Command.cpp
 # End Source File
 # Begin Source File
@@ -145,10 +141,6 @@ SOURCE=.\Message.cpp
 # Begin Source File
 
 SOURCE=.\MessageEdit.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\AILib\MJ0.c
 # End Source File
 # Begin Source File
 

@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "AILib"="..\AILib\AILib.dsp" - Package Owner=<4>
+Project: "AILib"=".\AILib.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -11,21 +11,6 @@ Package=<5>
 
 Package=<4>
 {{{
-}}}
-
-###############################################################################
-
-Project: "MahjongAI"=".\MahjongAI.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name AILib
-    End Project Dependency
 }}}
 
 ###############################################################################

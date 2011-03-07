@@ -90,23 +90,11 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\AILib\AILib.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\AILib\Isshoku.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\MahjongAI.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\MahjongAI.def
-# End Source File
-# Begin Source File
-
-SOURCE=..\AILib\MJ0.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -115,10 +103,6 @@ SOURCE=..\AILib\MJ0.c
 # Begin Source File
 
 SOURCE=..\AILib\AILib.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\AILib\Isshoku.h
 # End Source File
 # Begin Source File
 

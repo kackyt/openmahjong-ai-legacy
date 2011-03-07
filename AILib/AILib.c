@@ -622,7 +622,7 @@ static int isatamamachi(PAICOUNT *paicountlist,int size,TENPAI_LIST *machilist){
 }
 
 /* ã‚ª‚è‚Ì‘g‚Ý‡‚í‚¹‚ð’Tõ‚·‚éŠÖ” */
-int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int listSize,int actualPaiSize)
+int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,void *inf,int (*getPoint)(AGARI_LIST*,void*))
 {
     PAICOUNT paicountlist[AI_TEHAI_LIMIT + 20];
     int atamaque[AI_TEHAI_LIMIT + 20];
@@ -633,16 +633,15 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int listSize,int ac
     int i, j, initresult, flag;
 	int paicount_size;
 	int paicount;
-	int resultcount;
 	AGARI_LIST agari_list;
+	int pts,maxpts = 0;
 
-	if(pList != NULL && listSize > 0) memset(pList,0,sizeof(AGARI_LIST) * listSize);
+	if(pList != NULL) memset(pList,0,sizeof(AGARI_LIST));
 	memset(mentsu_stack,0,sizeof(mentsu_stack));
 	memset(mentsu,0,sizeof(mentsu));
 	memset(&agari_list,0,sizeof(agari_list));
 
     /* “ª‚ÌŒó•â‚ð“¾‚é */
-    resultcount = 0;
     atamaque_count = 0;
 
 	if(paiSize >= 2){
@@ -664,16 +663,19 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int listSize,int ac
 			j=0;
 			for(i=0;i<paiSize ;i++){
 				if(mentsu[i] == AI_ATAMA){
-					agari_list.tehai[j++] = mentsu[i];
+					agari_list.tehai[j++] = paiarray[i];
 					if(j==14) break;
 				}
 			}
-			if(pList != NULL && resultcount < listSize){
-				pList[resultcount] = agari_list;
+
+			agari_list.tehai_max = actualPaiSize;
+
+			pts = getPoint(&agari_list,inf);
+
+			if(maxpts < pts){
+				maxpts = pts;
+				if(pList != NULL) *pList = agari_list;
 			}
-			resultcount++;
-			if(resultcount >= listSize) return resultcount;
-			memset(&agari_list,0,sizeof(agari_list));
 		}
 
 	}
@@ -716,25 +718,25 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int listSize,int ac
 
 				for(j=0;j<paiSize;j++){
 					if(mentsu_stack[stackpos][j] != AI_UKIHAI){
-						agari_list.tehai[paicount++] = mentsu_stack[stackpos][j];
+						agari_list.tehai[paicount++] = paiarray[j];
 					}
 				}
-
+				
 				agari_list.tehai_max = actualPaiSize;
-
-				if(pList != NULL && resultcount < listSize){
-					pList[resultcount] = agari_list;
+				
+				pts = getPoint(&agari_list,inf);
+				
+				if(maxpts < pts){
+					maxpts = pts;
+					if(pList != NULL) *pList = agari_list;
 				}
-
-				resultcount++;
-				if(resultcount >= listSize) return resultcount;
-				memset(&agari_list,0,sizeof(agari_list));
 
             }
             stackpos--;
         } while(stackpos >= 0);
     }
-    return resultcount;
+
+    return maxpts;
 }
 
 int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int listSize,int maxshanten)

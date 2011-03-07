@@ -447,6 +447,15 @@ double MahjongAI::eval_Tehai2(void)
 	return ret;
 }
 
+static int getPoint(AGARI_LIST *pList,void *ptr)
+{
+	MJITehai resulthai;
+	memset(&resulthai,0,sizeof(resulthai));
+	memcpy(&resulthai.tehai,pList->tehai,sizeof(int)*pList->tehai_max);
+	resulthai.tehai_max = pList->tehai_max-1;
+	qsort(&resulthai.tehai,pList->tehai_max,sizeof(int),(int (*)(const void*, const void*))compare_int);
+	return (*MJSendMessage)((MahjongAI*)ptr,MJMI_GETAGARITEN,(UINT)&resulthai,(UINT)resulthai.tehai[pList->tehai_max-1]);
+}
 
 // è”v‚ğ•]‰¿‚µ‚Ä•]‰¿’l‚ğ•Ô‚·
 double MahjongAI::eval_Tehai(double max_val)
@@ -455,7 +464,7 @@ double MahjongAI::eval_Tehai(double max_val)
 	int remain = (*MJSendMessage)(this,MJMI_GETHAIREMAIN,0,0);
 	int i,j,k,nokorihais,index,res,painum,maxpts,pts;
 	double tmp,ret;
-#define AGARI_LIST_SIZE (10)
+#define AGARI_LIST_SIZE (1000)
 	AGARI_LIST list[AGARI_LIST_SIZE];
 	MJITehai resulthai;
 
@@ -505,21 +514,8 @@ double MahjongAI::eval_Tehai(double max_val)
 		/* ƒ\[ƒg‚·‚é */
 		qsort(simtehai,tehai.tehai_max+j,sizeof(int),(int (*)(const void*, const void*))compare_int);
 
-		res = search_agari(simtehai,tehai.tehai_max+j,&list[0],AGARI_LIST_SIZE,tehai.tehai_max+1);
-		maxpts = 0;
-
-		for(j=0;j<res;j++){
-			memcpy(&resulthai.tehai,&list[j].tehai,sizeof(int)*list[j].tehai_max);
-			resulthai.tehai_max = list[j].tehai_max-1;
-			qsort(&resulthai.tehai,list[j].tehai_max,sizeof(int),(int (*)(const void*, const void*))compare_int);
-			pts = (*MJSendMessage)(this,MJMI_GETAGARITEN,(UINT)&resulthai,(UINT)resulthai.tehai[list[j].tehai_max-1]);
-			if(pts > maxpts) maxpts = pts;
-		}
-
-		if(res > 0){
-
-			value += (double)maxpts/24000.0;
-		}
+		maxpts = search_agari(simtehai,tehai.tehai_max+j,NULL,tehai.tehai_max+1,this,getPoint);
+		value += (double)maxpts/2000.0;
 
 		/* ‚‘¬‰»‚Ì‚½‚ß‚ÌH•v */
 		if(i>SIMULATECOUNT/10 && 2.0 * value * SIMULATECOUNT / i < max_val) break;

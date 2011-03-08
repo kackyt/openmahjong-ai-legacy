@@ -634,12 +634,16 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,v
 	int paicount_size;
 	int paicount;
 	AGARI_LIST agari_list;
+	int prevagari[AI_TEHAI_LIMIT];
 	int pts,maxpts = 0;
+	int total = 0;
+	int resultcount = 0;
 
 	if(pList != NULL) memset(pList,0,sizeof(AGARI_LIST));
 	memset(mentsu_stack,0,sizeof(mentsu_stack));
 	memset(mentsu,0,sizeof(mentsu));
 	memset(&agari_list,0,sizeof(agari_list));
+	memset(prevagari,0,sizeof(prevagari));
 
     /* 頭の候補を得る */
     atamaque_count = 0;
@@ -676,6 +680,9 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,v
 				maxpts = pts;
 				if(pList != NULL) *pList = agari_list;
 			}
+
+			total += pts;
+			resultcount++;
 		}
 
 	}
@@ -683,6 +690,7 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,v
     /* 頭として取ったあとで刻子/順子などの面子の状況を見る(両面、カンチャン、ペンチャン、シャンポン待ち) */
     for (i = 0; i < atamaque_count; i++) {
         atamapos = atamaque[i];
+		memset(mentsu_stack[0],0,sizeof(int)*(AI_TEHAI_LIMIT + 20));
 		
         /* 探索を開始する面子の初期状態を設定 */
         initresult = setstartmentsu(paiarray, mentsu_stack[0],atamapos);
@@ -723,12 +731,17 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,v
 				}
 				
 				agari_list.tehai_max = actualPaiSize;
-				
-				pts = getPoint(&agari_list,inf);
-				
-				if(maxpts < pts){
-					maxpts = pts;
-					if(pList != NULL) *pList = agari_list;
+				if(memcmp(prevagari,&agari_list.tehai[0],actualPaiSize*sizeof(int))){
+					memcpy(prevagari,&agari_list.tehai[0],actualPaiSize*sizeof(int));
+					
+					pts = getPoint(&agari_list,inf);
+					
+					if(maxpts < pts){
+						maxpts = pts;
+						if(pList != NULL) *pList = agari_list;
+					}
+					total += pts;
+					resultcount++;
 				}
 
             }
@@ -736,7 +749,7 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,v
         } while(stackpos >= 0);
     }
 
-    return maxpts;
+	return total;
 }
 
 int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int listSize,int maxshanten)

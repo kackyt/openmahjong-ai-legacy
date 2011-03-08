@@ -30,21 +30,22 @@
 //#define AIDUMP
 //#define AIDUMP_1
 //#define AIDUMP_2
+//#define AIDUMP_3
 
-#define SIMULATECOUNT      (1000)
+#define SIMULATECOUNT      (2000)
 
 #define SCORE_KOUKEI_BIAS        (1.0)
 #define SCORE_MENTSU_BIAS        (1.0)
-#define SCORE_ANPAI              2 * (0.016) * SIMULATECOUNT
-#define SCORE_KIKENHAI           2 * (0.10) * SIMULATECOUNT
-#define SCORE_SUZI19             2 * (0.0029) * SIMULATECOUNT
-#define SCORE_SUZI28             2 * (0.0048) * SIMULATECOUNT
-#define SCORE_SUZI37             2 * (0.0055) * SIMULATECOUNT
-#define SCORE_ZIHAI              2 * (0.0034) * SIMULATECOUNT
-#define SCORE_19                 2 * (0.0063) * SIMULATECOUNT
-#define SCORE_28                 2 * (0.007) * SIMULATECOUNT
-#define SCORE_37                 2 * (0.0071) * SIMULATECOUNT
-#define SCORE_456                2 * (0.0123) * SIMULATECOUNT
+#define SCORE_ANPAI              2000 * (0.016)
+#define SCORE_KIKENHAI           2000 * (0.10)
+#define SCORE_SUZI19             2000 * (0.0029)
+#define SCORE_SUZI28             2000 * (0.0048)
+#define SCORE_SUZI37             2000 * (0.0055)
+#define SCORE_ZIHAI              2000 * (0.0034)
+#define SCORE_19                 2000 * (0.0063)
+#define SCORE_28                 2000 * (0.007)
+#define SCORE_37                 2000 * (0.0071)
+#define SCORE_456                2000 * (0.0123)
 
 #define SCORE_RIICHI_BIAS        (4.0) 
 #define SCORE_SUPAI_BIAS         (0.1)
@@ -450,11 +451,21 @@ double MahjongAI::eval_Tehai2(void)
 static int getPoint(AGARI_LIST *pList,void *ptr)
 {
 	MJITehai resulthai;
+	int val;
+	MahjongAI *obj=(MahjongAI*)ptr;
+
 	memset(&resulthai,0,sizeof(resulthai));
 	memcpy(&resulthai.tehai,pList->tehai,sizeof(int)*pList->tehai_max);
 	resulthai.tehai_max = pList->tehai_max-1;
 	qsort(&resulthai.tehai,pList->tehai_max,sizeof(int),(int (*)(const void*, const void*))compare_int);
-	return (*MJSendMessage)((MahjongAI*)ptr,MJMI_GETAGARITEN,(UINT)&resulthai,(UINT)resulthai.tehai[pList->tehai_max-1]);
+	val = (int)sqrt((*MJSendMessage)(obj,MJMI_GETAGARITEN,(UINT)&resulthai,(UINT)resulthai.tehai[pList->tehai_max-1]));
+	if(40000 - ((*MJSendMessage)(obj,MJMI_GETSCORE,0,0) + val*val) > 0){
+		return val;
+	}else if(40000 - (*MJSendMessage)(obj,MJMI_GETSCORE,0,0) > 0){
+		return sqrt(40000 - (*MJSendMessage)(obj,MJMI_GETSCORE,0,0));
+	}else{
+		return 10;
+	}
 }
 
 // Žè”v‚ð•]‰¿‚µ‚Ä•]‰¿’l‚ð•Ô‚·
@@ -467,6 +478,7 @@ double MahjongAI::eval_Tehai(double max_val)
 #define AGARI_LIST_SIZE (1000)
 	AGARI_LIST list[AGARI_LIST_SIZE];
 	MJITehai resulthai;
+	int paicount;
 
 	memcpy(&resulthai,&tehai,sizeof(resulthai));
 
@@ -484,6 +496,9 @@ double MahjongAI::eval_Tehai(double max_val)
 	if(remain/4 == 0){
 		return 0;
 	}
+
+	/* 5–‡ˆÈã‚Íƒcƒ‚‚ç‚È‚¢ */
+	paicount = remain/4 > 5 ? 5 : remain/4;
 	for(i=0;i<SIMULATECOUNT;i++){
 		/* –Ê“|‚¾‚¯‚ÇA‚Ü‚½Žè”v‚Ì”z—ñ‚É–ß‚· (Žb’è) */
 		painum = 0;
@@ -499,7 +514,7 @@ double MahjongAI::eval_Tehai(double max_val)
 
 		/* ƒcƒ‚”v‚ðƒVƒ~ƒ…ƒŒ[ƒg‚·‚é */
 		nokorihais = (int)tmp;
-		for(j=0;j<remain/4;j++){
+		for(j=0;j<paicount;j++){
 			index = rand() % nokorihais;
 			tmp=0.0;
 			for(k=0;k<34;k++){
@@ -512,13 +527,22 @@ double MahjongAI::eval_Tehai(double max_val)
 		}
 
 		/* ƒ\[ƒg‚·‚é */
-		qsort(simtehai,tehai.tehai_max+j,sizeof(int),(int (*)(const void*, const void*))compare_int);
+		qsort(simtehai,tehai.tehai_max+paicount,sizeof(int),(int (*)(const void*, const void*))compare_int);
 
-		maxpts = search_agari(simtehai,tehai.tehai_max+j,NULL,tehai.tehai_max+1,this,getPoint);
-		value += (double)maxpts/2000.0;
+		maxpts = search_agari(simtehai,tehai.tehai_max+paicount,NULL,tehai.tehai_max+1,this,getPoint);
+#ifdef AIDUMP_3
+		if(maxpts == 0){
+			fprintf(fp,"rem(%02d)",remain);
+			for(k=0;k<tehai.tehai_max+paicount;k++){
+				fprintf(fp,"%02d ",simtehai[k]);
+			}
+			fprintf(fp,"\n");
+		}
+#endif
+		value += (double)maxpts * maxpts * 20/SIMULATECOUNT;
 
 		/* ‚‘¬‰»‚Ì‚½‚ß‚ÌH•v */
-		if(i>SIMULATECOUNT/10 && 2.0 * value * SIMULATECOUNT / i < max_val) break;
+		//if(i>SIMULATECOUNT/10 && 10.0 * value * SIMULATECOUNT / i < max_val) break;
 
 	}
 	return value;

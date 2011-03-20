@@ -91,6 +91,10 @@ SOURCE=.\AILib.c
 
 SOURCE=.\MJ0.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\YakuCheck.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 

@@ -53,15 +53,53 @@ extern "C" {
 		int startpos;
 	} PAICOUNT;
 
+	typedef struct {
+		int category;
+		int pailist[3];
+	} t_mentsu;
+	
+	typedef struct {
+		t_mentsu mentsulist[7];
+		int mentsusize;
+		int han;
+		int fu;
+		int score;
+		int oyascore;
+		int coscore;
+		int machipos;
+		int machi;
+		int machihai;
+	} RESULT_ITEM;
+	
+	typedef struct {
+		t_mentsu nakilist[4];
+		int dorapai[8];
+		int dorasize;
+		int naki;
+		int count;
+		int tsumo;
+		int oya;
+		int riichi;
+		int bakaze;
+		int zikaze;
+		int endpai;
+		int kan;
+		int riichicount;
+		int membernaki;
+	} GAMESTATE;
+
 #define AI_UKIHAI          (0)
 #define AI_KOUTSU          (1)
+#define AI_SYUNTSU         (2)
 #define AI_SYUNTSU_START   (2)
 #define AI_SYUNTSU_MIDDLE  (3)
 #define AI_SYUNTSU_END     (4)
 #define AI_KANTSU          (5)
 #define AI_ATAMA           (6)
 #define AI_TOITSU          (7)
-#define AI_MENTSU_LIMIT    (8)
+#define AI_ANKAN           (8)
+#define AI_MINKAN          (9)
+#define AI_MENTSU_LIMIT    (10)
 
 #define AI_NIL_PAI         (63)
 
@@ -76,6 +114,8 @@ extern "C" {
 
 extern int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,void *inf,int (*getPoint)(AGARI_LIST*,void*));
 extern int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int listSize,int maxshanten);
+extern int search_score(int *paiarray,int paiSize,void *inf,int (*callback)(int*paiarray,int*mentsu,int length,int machi,void *inf));
+extern void make_resultitem(int *paiarray, int *mentsu, int length,RESULT_ITEM *item,GAMESTATE *gamestate,int agarihai,int machi);
 extern double probabilityFunction(double,int);
 extern int permutation(int m,int n);
 extern int factorial(int n);

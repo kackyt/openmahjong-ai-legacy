@@ -135,13 +135,13 @@ static int setstartmentsu(int *paiarray, int *mentsu,int atamapos)
         if ((i == atamapos) || (i == atamapos + 1))
             continue;
         if ((paicountlist[pos].pai != AI_NIL_PAI) &&
-            (paicountlist[pos].pai == paiarray[i])) {
+            (paicountlist[pos].pai == (paiarray[i] & 0xFF))) {
             paicountlist[pos].count++;
         } else {
             paicountlistcount++;
             if (paicountlist[pos].pai != AI_NIL_PAI)
                 pos++;
-            paicountlist[pos].pai = paiarray[i];
+            paicountlist[pos].pai = (paiarray[i] & 0xFF);
             paicountlist[pos].count = 1;
             paicountlist[pos].startpos = i;
         }
@@ -218,12 +218,12 @@ int setpaicount(PAICOUNT *paicountlist,int *paiarray,int paiSize, int *mentsu)
         if (mentsu[i] != AI_UKIHAI)
             continue;
         if ((paicountlist[pos].pai != AI_NIL_PAI) &&
-            (paicountlist[pos].pai == paiarray[i])) {
+            (paicountlist[pos].pai == (paiarray[i] & 0xFF))) {
             paicountlist[pos].count++;
         } else {
             if (paicountlist[pos].pai != AI_NIL_PAI)
                 pos++;
-            paicountlist[pos].pai = paiarray[i];
+            paicountlist[pos].pai = (paiarray[i] & 0xFF);
             paicountlist[pos].count = 1;
             paicountlist[pos].startpos = i;
         }
@@ -651,7 +651,7 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,v
 	if(paiSize >= 2){
 		i = 0;
 		while(i<paiSize-1){
-			if(paiarray[i] == paiarray[i + 1]){
+			if((paiarray[i] & 0xFF) == (paiarray[i + 1] & 0xFF)){
 				atamaque[atamaque_count] = i;
 				mentsu[i] = AI_ATAMA;
 				mentsu[i+1] = AI_ATAMA;
@@ -1052,6 +1052,165 @@ int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int l
     return resultcount;
 	
 }
+
+int search_score(int *paiarray,int paiSize,void *inf,int (*callback)(int*paiarray,int*mentsu,int length,int machi,void *inf))
+{
+    PAICOUNT paicountlist[AI_TEHAI_LIMIT + 1];
+	int notanki = 0;
+    int atamaque[AI_TEHAI_LIMIT];
+    int atamaque_count, atamapos;
+    int mentsu_stack[256][AI_TEHAI_LIMIT];
+    int mentsu[AI_TEHAI_LIMIT];
+    int stackpos;
+    int i,initresult, flag,orflag;
+	int paicount_size;
+	int maxval = 0,val;
+	int machi;
+	TENPAI_LIST tenpai_list; // dummy
+
+	memset(mentsu_stack,0,sizeof(mentsu_stack));
+	memset(mentsu,0,sizeof(mentsu));
+	
+    /* 頭の候補を得る */
+    atamaque_count = 0;
+
+	if(paiSize >= 4){
+		i = 0;
+		while(i<paiSize-1){
+			if(paiarray[i] == paiarray[i + 1]){
+				atamaque[atamaque_count] = i;
+				mentsu[i] = AI_ATAMA;
+				mentsu[i+1] = AI_ATAMA;
+				atamaque_count++;
+				i++;
+			}
+			i++;
+		}
+
+		/* 七対子の判定 */
+
+		if(atamaque_count == 6){
+			val = callback(paiarray,mentsu,paiSize,AI_MACHI_TANKI,inf);
+			if(val > maxval) maxval = val;
+		}
+
+	}
+
+   
+	
+    /* 頭として取ったあとで刻子/順子などの面子の状況を見る(両面、カンチャン、ペンチャン、シャンポン待ち) */
+    for (i = 0; i < atamaque_count; i++) {
+        atamapos = atamaque[i];
+		
+        /* 探索を開始する面子の初期状態を設定 */
+        initresult = setstartmentsu(paiarray, mentsu_stack[0],atamapos);
+        if (initresult != 0)
+            return 0;
+        	
+        /* 探索 */
+        stackpos = 0;
+        do {
+            paicount_size = setpaicount(paicountlist, paiarray,paiSize, mentsu_stack[stackpos]);
+            if ((machi = istenpai(paicountlist,paicount_size,&tenpai_list,paiarray[atamapos])) < 0) {  /* 浮き牌がまだある */
+				orflag = AI_FALSE;
+                memcpy(mentsu, mentsu_stack[stackpos], sizeof(mentsu));
+                flag = setkoutsu(paicountlist, mentsu_stack[stackpos],paicount_size);
+				orflag = orflag || flag;
+                if (flag) {
+                    stackpos++;
+					
+                    /* 次に備えて待避しておいた内容をコピー */
+                    memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+                }
+
+                flag = setkoutsul(paicountlist, mentsu_stack[stackpos],paicount_size);
+				orflag = orflag || flag;
+                if (flag) {
+                    stackpos++;
+					
+                    /* 次に備えて待避しておいた内容をコピー */
+                    memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+                }
+
+                flag = setsyuntsu(paicountlist, mentsu_stack[stackpos],paicount_size);
+				orflag = orflag || flag;
+                if (flag) {
+                    stackpos++;
+                    /* 次に備えて待避しておいた内容をコピー */
+                    memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+                }
+
+				if(flag != 1){
+					flag = setsyuntsul(paicountlist,mentsu_stack[stackpos],paicount_size);
+					orflag = orflag || flag;
+					if (flag) {
+						stackpos++;
+					}
+				}
+
+            } else {
+				val = callback(paiarray,mentsu_stack[stackpos],paiSize,machi,inf);
+				if(val > maxval) maxval = val;
+            }
+            stackpos--;
+        } while(stackpos >= 0);
+    }
+
+	memset(mentsu_stack,0,sizeof(mentsu_stack));
+
+	/* 探索 */
+	stackpos = 0;
+	do {
+		paicount_size = setpaicount(paicountlist, paiarray,paiSize, mentsu_stack[stackpos]);
+		if ((machi = isatamamachi(paicountlist,paicount_size,&tenpai_list)) < 0) {  /* 浮き牌がまだある */
+			orflag = AI_FALSE;
+			memcpy(mentsu, mentsu_stack[stackpos], sizeof(mentsu));
+			flag = setkoutsu(paicountlist, mentsu_stack[stackpos],paicount_size);
+			orflag = orflag || flag;
+			if (flag) {
+				stackpos++;
+				
+				/* 次に備えて待避しておいた内容をコピー */
+				memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+			}
+			
+			flag = setkoutsul(paicountlist, mentsu_stack[stackpos],paicount_size);
+			orflag = orflag || flag;
+			if (flag) {
+				stackpos++;
+				
+				/* 次に備えて待避しておいた内容をコピー */
+				memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+			}
+			
+			flag = setsyuntsu(paicountlist, mentsu_stack[stackpos],paicount_size);
+			orflag = orflag || flag;
+			if (flag) {
+				stackpos++;
+				/* 次に備えて待避しておいた内容をコピー */
+				memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+			}
+			
+			if(flag != 1){
+				flag = setsyuntsul(paicountlist,mentsu_stack[stackpos],paicount_size);
+				orflag = orflag || flag;
+				if (flag) {
+					stackpos++;
+				}
+			}
+
+		} else {
+			val = callback(paiarray,mentsu_stack[stackpos],paiSize,machi,inf);
+			if(val > maxval) maxval = val;
+		}
+		stackpos--;
+	} while(stackpos >= 0);
+
+
+    return maxval;
+	
+}
+
 
 double probabilityFunction(double base,int n){
 	double d = 1.0 - base;

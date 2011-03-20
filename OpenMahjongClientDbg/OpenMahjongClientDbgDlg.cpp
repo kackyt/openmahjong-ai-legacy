@@ -110,6 +110,19 @@ static UINT __cdecl syncFunc(LPVOID param)
 }
 
 //#define MJ_TRACE
+typedef struct {
+	GAMESTATE gamestate;
+	int agarihai;
+} MJ_GAMESTATE;
+
+static int scoreCallback(int*paiarray,int*mentsu,int length,int machi,void *inf)
+{
+	RESULT_ITEM item;
+	MJ_GAMESTATE *state = (MJ_GAMESTATE *)inf;
+	make_resultitem(paiarray,mentsu,length,&item,&state->gamestate,state->agarihai,machi);
+
+	return item.score;
+}
 
 UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 {
@@ -184,21 +197,60 @@ UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 		member = &pDlg->m_pCurTaku->m_members[idx];
 		score = 0;
 		if(param1 != 0){
-			CLibrary lib;
+			MJ_GAMESTATE gs;
 			pTehai = (MJITehai*)param1;
-			lib.setMember(LIBID_AGARITEN,*member,pTehai,(int)param2);
-			pDlg->sendLibrary(lib);
-			for(i=0;i<lib.m_aResultList.GetSize();i++){
-				CResult& result = lib.m_aResultList[i];
-				if(result.m_iHan == 0) continue;
-				idx = (UINT)result.m_machihai;
-				if(idx == (int)param2){
-					score = result.m_iScore;
-					break;
-				}
+
+			memset(&gs,0,sizeof(gs));
+
+			for(i=0;i<pTehai->ankan_max;i++){
+				gs.gamestate.nakilist[gs.gamestate.naki].category = AI_ANKAN;
+				gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->ankan[0];
+				gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->ankan[1];
+				gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->ankan[2];
+				gs.gamestate.naki++;
 			}
 
-			ret = score;
+			for(i=0;i<pTehai->minkan_max;i++){
+				gs.gamestate.nakilist[gs.gamestate.naki].category = AI_MINKAN;
+				gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->minkan[i];
+				gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->minkan[i];
+				gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->minkan[i];
+				gs.gamestate.naki++;
+			}
+
+			for(i=0;i<pTehai->minkou_max;i++){
+				gs.gamestate.nakilist[gs.gamestate.naki].category = AI_KOUTSU;
+				gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->minkou[i];
+				gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->minkou[i];
+				gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->minkou[i];
+				gs.gamestate.naki++;
+			}
+
+			for(i=0;i<pTehai->minshun_max;i++){
+				gs.gamestate.nakilist[gs.gamestate.naki].category = AI_SYUNTSU;
+				gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->minshun[i];
+				gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->minshun[i]+1;
+				gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->minshun[i]+2;
+				gs.gamestate.naki++;
+			}
+
+			p = (unsigned int *)&gs.gamestate.dorapai[0];
+			for(i=0;i<pDlg->m_pCurTaku->m_aDora.GetSize();i++){
+				*p = pDlg->m_pCurTaku->m_aDora[i];
+				p++;
+			}
+
+			gs.gamestate.dorasize = pDlg->m_pCurTaku->m_aDora.GetSize();
+			gs.gamestate.bakaze = pDlg->m_pCurTaku->m_iBakaze;
+			gs.gamestate.zikaze = member->m_gamestate.m_iZikaze;
+			gs.gamestate.count = member->m_gamestate.m_iCount;
+			gs.gamestate.riichi = member->m_gamestate.m_bRiichi;
+			gs.gamestate.oya = member->m_gamestate.m_bOya;
+
+			gs.agarihai = (int)param2;
+
+			ret = search_score((int *)pTehai->tehai,pTehai->tehai_max,&gs,scoreCallback);
+
 		}else{
 
 			for(i=0;i<member->m_aResultList.GetSize();i++){

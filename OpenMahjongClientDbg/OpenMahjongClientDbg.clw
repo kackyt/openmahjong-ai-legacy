@@ -19,16 +19,16 @@ Class4=CConnectDlg
 Class5=CMahjongStatic
 Class6=CMahjongBtn
 Class7=CMyButton
-Resource3=IDD_VOLUME
+Resource3=IDD_OPENMAHJONGCLIENTDBG_DIALOG
 Class8=CDebugDialog
 Class9=CMessageEdit
 Resource4=IDD_AGARI
 Class10=CAgariDialog
-Resource5=IDD_OPENMAHJONGCLIENTDBG_DIALOG
+Resource5=IDD_CONNECT
 Class11=CRuleDialog
 Resource6=IDD_RULE
 Class12=CVolumeDlg
-Resource7=IDD_CONNECT
+Resource7=IDD_VOLUME
 
 [CLS:COpenMahjongClientDbgApp]
 Type=0

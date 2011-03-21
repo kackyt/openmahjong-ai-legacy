@@ -870,9 +870,20 @@ void make_resultitem(int *paiarray, int *mentsu, int length,RESULT_ITEM *item,GA
             break;
         }
     }
-    machi_mentsu.pailist[mpos++] = agarihai;
 
-    qsort(&machi_mentsu.pailist,mpos,sizeof(int),(int (*)(const void*, const void*))compare_int);
+	if(machi_mentsu.category == AI_KOUTSU && (agarihai & 0x3F) != machi_mentsu.pailist[0]){
+		/* ƒVƒƒƒ“ƒ|ƒ“‘Ò‚¿ */
+		for(i=0;i<item->mentsusize;i++){
+			if(item->mentsulist[i].category == AI_TOITSU && item->mentsulist[i].pailist[0] == (agarihai & 0x3F)){
+				item->mentsulist[i].category = AI_KOUTSU;
+				item->mentsulist[i].pailist[2] = agarihai & 0xFF;
+				machi_mentsu.category = AI_TOITSU;
+			}
+		}
+	}else{
+		machi_mentsu.pailist[mpos++] = agarihai;
+		qsort(&machi_mentsu.pailist,mpos,sizeof(int),(int (*)(const void*, const void*))compare_int);
+	}
 
 	/* ã‚ª‚è‚Ì”»’è */
 	switch(machi_mentsu.category){

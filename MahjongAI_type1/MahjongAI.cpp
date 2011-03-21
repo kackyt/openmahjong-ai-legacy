@@ -36,18 +36,19 @@
 
 #define SCORE_KOUKEI_BIAS        (1.0)
 #define SCORE_MENTSU_BIAS        (1.0)
-#define SCORE_ANPAI              2000 * (0.016)
-#define SCORE_KIKENHAI           2000 * (0.10)
-#define SCORE_SUZI19             2000 * (0.0029)
-#define SCORE_SUZI28             2000 * (0.0048)
-#define SCORE_SUZI37             2000 * (0.0055)
-#define SCORE_ZIHAI              2000 * (0.0034)
-#define SCORE_19                 2000 * (0.0063)
-#define SCORE_28                 2000 * (0.007)
-#define SCORE_37                 2000 * (0.0071)
-#define SCORE_456                2000 * (0.0123)
+#define SCORE_ANPAI              2 * (16)
+#define SCORE_KIKENHAI           2 * (100)
+#define SCORE_SUZI19             2 * (29)
+#define SCORE_SUZI28             2 * (48)
+#define SCORE_SUZI37             2 * (55)
+#define SCORE_ZIHAI              2 * (34)
+#define SCORE_19                 2 * (63)
+#define SCORE_28                 2 * (70)
+#define SCORE_37                 2 * (71)
+#define SCORE_456                2 * (123)
 
-#define SCORE_RIICHI_BIAS        (4.0) 
+#define SCORE_RIICHI_BIAS        (100.0) 
+#define SCORE_IPPATSU_BIAS       (1000.0) 
 #define SCORE_SUPAI_BIAS         (0.1)
 #define SCORE_HANPAI_TRIPLE_BIAS (0.02)
 #define SCORE_HANPAI_BIAS        (0.01)
@@ -64,11 +65,13 @@ protected :
 #endif
 	int machi[34];
 	char reach_flag[4];
+	char ippatsu_flag[4];
 	int te_cnt[34];
 	int menzen;
 	MJITehai tehai;
 	int nakiok_flag;
 	int sthai;
+	int doranum;
 	double tehai_score;
 	double nokori[34];
 	double kikenhai[34];
@@ -303,6 +306,11 @@ void MahjongAI::set_Tehai(void)
 #endif
 	for(i=0;i<34;i++) te_cnt[i] = 0;
 	for(i=0;i<(int)tehai.tehai_max;i++) te_cnt[tehai.tehai[i]]++;
+
+	doranum = 0;
+	for(i=0;i<doralen;i++){
+		doranum += te_cnt[dora[i]];
+	}
 }
 
 static HAIPOINT hp[14];
@@ -451,20 +459,27 @@ double MahjongAI::eval_Tehai2(void)
 static int getPoint(AGARI_LIST *pList,void *ptr)
 {
 	MJITehai resulthai;
-	int val;
+	int val,i;
 	MahjongAI *obj=(MahjongAI*)ptr;
+	double coef = 4.0;
+	int remain = (*MJSendMessage)(obj,MJMI_GETHAIREMAIN,0,0)/4;
 
 	memset(&resulthai,0,sizeof(resulthai));
+	for(i=0;i<pList->tehai_max;i++){
+		if(pList->tehai[i] >> 8) coef -= 0.5;
+		if(--remain > 0) coef += 0.5;
+		pList->tehai[i] = pList->tehai[i] & 0xFF;
+	}
 	memcpy(&resulthai.tehai,pList->tehai,sizeof(int)*pList->tehai_max);
 	resulthai.tehai_max = pList->tehai_max-1;
 	qsort(&resulthai.tehai,pList->tehai_max,sizeof(int),(int (*)(const void*, const void*))compare_int);
-	val = (int)sqrt((*MJSendMessage)(obj,MJMI_GETAGARITEN,(UINT)&resulthai,(UINT)resulthai.tehai[pList->tehai_max-1]));
-	if(40000 - ((*MJSendMessage)(obj,MJMI_GETSCORE,0,0) + val*val) > 0){
-		return val;
+	val = (*MJSendMessage)(obj,MJMI_GETAGARITEN,(UINT)&resulthai,(UINT)resulthai.tehai[pList->tehai_max-1]);
+	if(40000 - ((*MJSendMessage)(obj,MJMI_GETSCORE,0,0) + val) > 0){
+		return val * coef;
 	}else if(40000 - (*MJSendMessage)(obj,MJMI_GETSCORE,0,0) > 0){
-		return sqrt(40000 - (*MJSendMessage)(obj,MJMI_GETSCORE,0,0));
+		return (40000 - (*MJSendMessage)(obj,MJMI_GETSCORE,0,0)) * coef;
 	}else{
-		return 10;
+		return 1000 * coef;
 	}
 }
 
@@ -473,16 +488,18 @@ double MahjongAI::eval_Tehai(double max_val)
 {
 	int simtehai[34];
 	int remain = (*MJSendMessage)(this,MJMI_GETHAIREMAIN,0,0);
-	int i,j,k,nokorihais,index,res,painum,maxpts,pts;
-	double tmp,ret;
+	int i,j,k,res,painum,maxpts,pts;
+	double tmp,ret,index;
 #define AGARI_LIST_SIZE (1000)
 	AGARI_LIST list[AGARI_LIST_SIZE];
 	MJITehai resulthai;
 	int paicount;
+	double nokorihais;
+	double nokoribuf[34];
 
 	memcpy(&resulthai,&tehai,sizeof(resulthai));
 
-	if(remain > 48){
+	if(remain > 60){
 		ret = eval_Tehai_sub(0) * 10;
 		for(i=0;i<34;i++){
 			if (!te_cnt[i]) continue;
@@ -494,33 +511,35 @@ double MahjongAI::eval_Tehai(double max_val)
 	double value = 0;
 
 	if(remain/4 == 0){
-		return 0;
+		paicount = 1;
+	}else{
+		/* 5枚以上はツモらない */
+		paicount = remain/4 > 5 ? 5 : remain/4;
 	}
-
-	/* 5枚以上はツモらない */
-	paicount = remain/4 > 5 ? 5 : remain/4;
 	for(i=0;i<SIMULATECOUNT;i++){
 		/* 面倒だけど、また手牌の配列に戻す (暫定) */
 		painum = 0;
 		for(j=0;j<34;j++){
 			for(k=0;k<te_cnt[j];k++){
-				simtehai[painum++] = j;
+				simtehai[painum++] = (j << 8);
 			}
 		}
 		tmp=0.0;
 		for(j=0;j<34;j++){
-			tmp+=nokori[j]*100.0;
+			tmp+=nokori[j];
 		}
+		nokorihais = tmp;
+		memcpy(nokoribuf,nokori,sizeof(nokoribuf));
 
-		/* ツモ牌をシミュレートする */
-		nokorihais = (int)tmp;
 		for(j=0;j<paicount;j++){
-			index = rand() % nokorihais;
+			index = (nokorihais + 1.0) * (double)rand() / (double)(1.0 + RAND_MAX);
 			tmp=0.0;
 			for(k=0;k<34;k++){
-				tmp+=nokori[k]*100.0;
+				tmp+=nokoribuf[k];
 				if(index < tmp){
-					simtehai[tehai.tehai_max+j]=k;
+					simtehai[tehai.tehai_max+j]=(k << 8) + 1;
+					nokoribuf[k]-=1.0;
+					nokorihais -= 1.0;
 					break;
 				}
 			}
@@ -528,6 +547,10 @@ double MahjongAI::eval_Tehai(double max_val)
 
 		/* ソートする */
 		qsort(simtehai,tehai.tehai_max+paicount,sizeof(int),(int (*)(const void*, const void*))compare_int);
+
+		for(k=0;k<tehai.tehai_max+paicount;k++){
+			simtehai[k] = (simtehai[k] >> 8) | ((simtehai[k] & 0xFF) << 8);
+		}
 
 		maxpts = search_agari(simtehai,tehai.tehai_max+paicount,NULL,tehai.tehai_max+1,this,getPoint);
 #ifdef AIDUMP_3
@@ -539,7 +562,7 @@ double MahjongAI::eval_Tehai(double max_val)
 			fprintf(fp,"\n");
 		}
 #endif
-		value += (double)maxpts * maxpts * 20/SIMULATECOUNT;
+		value += (double)maxpts * 20/SIMULATECOUNT;
 
 		/* 高速化のための工夫 */
 		//if(i>SIMULATECOUNT/10 && 10.0 * value * SIMULATECOUNT / i < max_val) break;
@@ -710,7 +733,10 @@ double MahjongAI::eval_sutehai(int hai)
 		}else{
 			tmp -= SCORE_ZIHAI + SCORE_ANPAI;
 		}
-		if (reach_flag[i]){
+		if(ippatsu_flag[i]){
+			tmp *= SCORE_IPPATSU_BIAS;
+			minus *= SCORE_IPPATSU_BIAS;
+		}else if (reach_flag[i]){
 			tmp *= SCORE_RIICHI_BIAS;
 			minus *= SCORE_RIICHI_BIAS;
 		}
@@ -882,8 +908,14 @@ UINT MahjongAI::koe_req(int no,int hai)
 	int chii_flag;
 	double sc;
 	int naki_ok;
+	int hanpai;
 	UINT tmp;
+	UINT dora[8];
+	int doralen;
+	int doraflag;
+	int i;
 
+	doralen = (*MJSendMessage)(this,MJMI_GETDORA,(UINT)dora,0);
 	set_Tehai();
 	set_machi();
 	chii_flag = (no == 3);
@@ -900,51 +932,36 @@ UINT MahjongAI::koe_req(int no,int hai)
 	}
 	if (tenpai_flag==1) return 0;
 	sthai = -1;
-#if 0
+
 	if (naki_ok&1){
 		if (hai>=27){
 			if (te_cnt[hai]==2){
-				if (hai>=31 || hai-27==cha || hai-27==kaze || nakiok_flag){
+				if ((doranum >= 2)&&(hai>=31 || hai-27==cha || hai-27==kaze)){
 					return MJPIR_PON;
 				}
 			}
 		} else {
-			if (nakiok_flag){
-				te_cnt[hai] -= 2;
-				sc = eval_Tehai();
-				te_cnt[hai] += 2;
-				if (sc+eval_hai(hai)*3+7>tehai_score) {
-					return MJPIR_PON;
+			hanpai = 0;
+			doraflag = 0;
+			for(i=27;i<34;i++){
+				if ((te_cnt[i] >= 3)&&(i>=31 || i-27==cha || i-27==kaze)){
+					hanpai++;
 				}
 			}
+
+			for(i=0;i<doralen;i++){
+				if(dora[i] == hai){
+					doraflag = 1;
+					break;
+				}
+			}
+
+			if(hanpai > 0 && doraflag >= 0){
+				return MJPIR_PON;
+			}
+
 		}
 	}
-	if (!nakiok_flag) return 0;
-	if (naki_ok&4){
-		te_cnt[hai+1]--; te_cnt[hai+2]--;
-		sc = eval_Tehai()+eval_hai(hai)+eval_hai(hai+1)+eval_hai(hai+2);
-		te_cnt[hai+1]++; te_cnt[hai+2]++;
-		if (sc+7>tehai_score){
-			return MJPIR_CHII1;
-		}
-	}
-	if (naki_ok&8){
-		te_cnt[hai-1]--; te_cnt[hai-2]--;
-		sc = eval_Tehai()+eval_hai(hai)+eval_hai(hai-1)+eval_hai(hai-2);
-		te_cnt[hai-1]++; te_cnt[hai-2]++;
-		if (sc+7>tehai_score){
-			return MJPIR_CHII2;
-		}
-	}
-	if (naki_ok&16){
-		te_cnt[hai-1]--; te_cnt[hai+1]--;
-		sc = eval_Tehai()+eval_hai(hai)+eval_hai(hai+1)+eval_hai(hai-1);
-		te_cnt[hai-1]++; te_cnt[hai+1]++;
-		if (sc+7>tehai_score){
-			return MJPIR_CHII3;
-		}
-	}
-#endif
 	return 0;
 }
 
@@ -966,7 +983,10 @@ UINT MahjongAI::on_start_kyoku(int k,int c)
 	nakiok_flag = 0;
 	jun = 0;
 	sthai = -1;
-	for(i=0;i<4;i++) reach_flag[i] = 0;
+	for(i=0;i<4;i++){
+		reach_flag[i] = 0;
+		ippatsu_flag[i] = 0;
+	}
 	tehai_score = eval_Tehai(0);
 	set_machi();
 
@@ -1042,9 +1062,12 @@ UINT MahjongAI::on_action(int player,int taishou,UINT action)
 
 	if (action & MJPIR_REACH){
 		reach_flag[player] = 1;
+		ippatsu_flag[player] = 1;
 		if(player == 0){
 			sendComment(AI_MESSAGE_RIICHI);
 		}
+	}else{
+		ippatsu_flag[player] = 0;
 	}
 
 	if(action & MJPIR_TSUMO){
@@ -1123,6 +1146,10 @@ UINT MahjongAI::on_exchange(UINT state,UINT option)
 		set_Tehai();
 		for(i=0;i<34;i++) {
 			for (j=0;j<4;j++) anpai[i][j] = 0;
+		}
+		for(i=0;i<4;i++){
+			reach_flag[i] = 0;
+			ippatsu_flag[i] = 0;
 		}
 
 		MJIKawahai kawa[30];

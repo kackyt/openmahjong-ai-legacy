@@ -815,6 +815,7 @@ int MahjongAI::calc_sutehai(void)
 	}
 
 	qsort(hp,index,sizeof(HAIPOINT),(int (*)(const void*, const void*))compare_hp);
+	/*
 
 	sethaitext(haitext,hp[0].no);
 	sethaitext(haitext2,hp[1].no);
@@ -826,6 +827,7 @@ int MahjongAI::calc_sutehai(void)
 		haitext3,hp[2].sc1,hp[2].sc2,hp[2].scc);
 
 	MJSendMessage(this,MJMI_FUKIDASHI,(UINT)comment,0);
+	*/
 
 	tehai_score = hp[0].sc;
 	ret = search(hp[0].no,0,0);

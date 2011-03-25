@@ -31,6 +31,7 @@
 //#define AIDUMP_1
 //#define AIDUMP_2
 //#define AIDUMP_3
+//#define DEBUG_MESSAGE
 
 #define SIMULATECOUNT      (2000)
 
@@ -54,10 +55,18 @@
 #define SCORE_HANPAI_BIAS        (0.01)
 #define SCORE_DORA_BIAS          (0.05)
 
+typedef struct {
+	double sc;
+	double sc1;
+	double sc2;
+	double scc;
+	int no;
+} HAIPOINT;
 
 class MahjongAI {
 public :
 	UINT InterfaceFunc(UINT message,UINT param1,UINT param2);
+	MJITehai tehai;
 
 protected :
 #ifdef AIDUMP
@@ -68,7 +77,6 @@ protected :
 	char ippatsu_flag[4];
 	int te_cnt[34];
 	int menzen;
-	MJITehai tehai;
 	int nakiok_flag;
 	int sthai;
 	int doranum;
@@ -81,10 +89,12 @@ protected :
 	static int kyoku,kaze;
 	int jun;
 	int kyokustate;
+	HAIPOINT hp[14];
 
 	int search(int obj,int start,int mask);
 	void set_machi(void);
 	void set_Tehai(void);
+	void select_Score(double sc_max,double scc_max);
 	UINT sutehai_sub(int tsumohai);
 	double eval_Tehai_sub(int atama_flag);
 	double eval_Tehai(double max_val);
@@ -173,13 +183,6 @@ static const TCHAR * type_table[] ={
 	TEXT("’†"),
 };
 
-typedef struct {
-	double sc;
-	double sc1;
-	double sc2;
-	double scc;
-	int no;
-} HAIPOINT;
 
 static void sethaitext(TCHAR *p,int no)
 {
@@ -260,8 +263,8 @@ void MahjongAI::set_machi(void)
 void MahjongAI::set_Tehai(void)
 {
 	int i;
-	MJITehai mjtehai[4];
 	MJ0PARAM param[4];
+	MJITehai mjtehai[4];
 	MJIKawahai kawahai[4][20];
 	UINT dora[8];
 	double mentsu1[27+34];
@@ -313,7 +316,6 @@ void MahjongAI::set_Tehai(void)
 	}
 }
 
-static HAIPOINT hp[14];
 
 // ŽÌ‚Ä”vŽž‚Ìˆ—
 // tsumohai : ¡‚Â‚à‚Á‚Ä‚«‚½”v
@@ -464,23 +466,27 @@ static int getPoint(AGARI_LIST *pList,void *ptr)
 	double coef = 4.0;
 	int remain = (*MJSendMessage)(obj,MJMI_GETHAIREMAIN,0,0)/4;
 
-	memset(&resulthai,0,sizeof(resulthai));
+	memcpy(&resulthai,&obj->tehai,sizeof(resulthai));
 	for(i=0;i<pList->tehai_max;i++){
-		if(pList->tehai[i] >> 8) coef -= 0.5;
-		if(--remain > 0) coef += 0.5;
+		if(pList->tehai[i] >> 8) coef *= 0.8;
+		if(--remain > 0) coef *= 1.2;
 		pList->tehai[i] = pList->tehai[i] & 0xFF;
 	}
 	memcpy(&resulthai.tehai,pList->tehai,sizeof(int)*pList->tehai_max);
 	resulthai.tehai_max = pList->tehai_max-1;
 	qsort(&resulthai.tehai,pList->tehai_max,sizeof(int),(int (*)(const void*, const void*))compare_int);
 	val = (*MJSendMessage)(obj,MJMI_GETAGARITEN,(UINT)&resulthai,(UINT)resulthai.tehai[pList->tehai_max-1]);
-	if(40000 - ((*MJSendMessage)(obj,MJMI_GETSCORE,0,0) + val) > 0){
-		return val * coef;
+
+
+	return 1000 * log(val * coef);
+#if 0
+
 	}else if(40000 - (*MJSendMessage)(obj,MJMI_GETSCORE,0,0) > 0){
 		return (40000 - (*MJSendMessage)(obj,MJMI_GETSCORE,0,0)) * coef;
 	}else{
 		return 1000 * coef;
 	}
+#endif
 }
 
 // Žè”v‚ð•]‰¿‚µ‚Ä•]‰¿’l‚ð•Ô‚·
@@ -746,6 +752,55 @@ double MahjongAI::eval_sutehai(int hai)
 	return plus - minus;
 }
 
+void MahjongAI::select_Score(double sc_max,double scc_max)
+{
+	int i;
+#if 0
+	for(i=0;i<14;i++){
+		hp[i].sc = hp[i].sc1;
+	}
+#else
+	int rnum = 0;
+	int shanten = 0;
+	TENPAI_LIST list;
+
+	/* ƒVƒƒƒ“ƒeƒ“”‚ð”‚¦‚é */
+	shanten = search_tenpai((int*)tehai.tehai,tehai.tehai_max,NULL,&list,1,6);
+
+	if(shanten != 0){
+		shanten = list.shanten;
+	}else{
+		shanten = 4;
+	}
+
+
+
+	/* ƒIƒŠ‚é‚©U‚ß‚é‚©‚Ì”»’f */
+	for(i=1;i<4;i++){
+		if(reach_flag[i]) rnum++;
+	}
+
+
+	if(rnum > 0 && rnum + shanten > 2){
+		for(i=0;i<14;i++){
+			hp[i].sc = hp[i].scc;
+		}
+	}else{
+		if(sc_max == 0.0){
+			for(i=0;i<14;i++){
+				hp[i].sc = hp[i].sc2;
+			}
+		}else{
+			for(i=0;i<14;i++){
+				hp[i].sc = hp[i].sc1;
+			}
+		}
+	}
+
+#endif
+
+}
+
 // ŽÌ‚Ä‚é”v‚ðŒˆ‚ß‚é
 int MahjongAI::calc_sutehai(void)
 {
@@ -800,8 +855,6 @@ int MahjongAI::calc_sutehai(void)
 #endif
 
 		hp[index].scc = scc;
-		scc = fabs(scc) > fabs(sc) ? scc : sc;
-		hp[index].sc = scc;
 
 		if(sc > sc_max){
 			sc_max = sc;
@@ -814,9 +867,11 @@ int MahjongAI::calc_sutehai(void)
 		index++;
 	}
 
-	qsort(hp,index,sizeof(HAIPOINT),(int (*)(const void*, const void*))compare_hp);
-	/*
+	select_Score(sc_max,scc_max);
 
+	qsort(hp,index,sizeof(HAIPOINT),(int (*)(const void*, const void*))compare_hp);
+	
+#ifdef DEBUG_MESSAGE
 	sethaitext(haitext,hp[0].no);
 	sethaitext(haitext2,hp[1].no);
 	sethaitext(haitext3,hp[2].no);
@@ -827,7 +882,7 @@ int MahjongAI::calc_sutehai(void)
 		haitext3,hp[2].sc1,hp[2].sc2,hp[2].scc);
 
 	MJSendMessage(this,MJMI_FUKIDASHI,(UINT)comment,0);
-	*/
+#endif	
 
 	tehai_score = hp[0].sc;
 	ret = search(hp[0].no,0,0);
@@ -867,7 +922,9 @@ int MahjongAI::nakability(int hai,int chii_flag)
 		}
 
 		if(furiten){
+#ifdef DEBUG_MESSAGE
 			(*MJSendMessage)(this,MJMI_FUKIDASHI,(UINT)TEXT("ƒtƒŠƒeƒ“"),0);
+#endif
 		}else{
 			ret |= 32;
 		}

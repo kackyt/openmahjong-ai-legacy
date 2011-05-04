@@ -749,7 +749,7 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,v
         } while(stackpos >= 0);
     }
 
-	return total;
+	return maxpts;
 }
 
 int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int listSize,int maxshanten)

@@ -313,13 +313,13 @@ static int isIttsu(GAMESTATE *gamestate, RESULT_ITEM *item)
     
     for(i=0;i<item->mentsusize;i++){
         if(item->mentsulist[i].category == AI_SYUNTSU && ((item->mentsulist[i].pailist[0] % 9) == 0)){
-            flagtable[gamestate->nakilist[i].pailist[0]/9][0]++;
+            flagtable[item->mentsulist[i].pailist[0]/9][0]++;
         }
         if(item->mentsulist[i].category == AI_SYUNTSU && ((item->mentsulist[i].pailist[0] % 9) == 3)){
-            flagtable[gamestate->nakilist[i].pailist[0]/9][1]++;
+            flagtable[item->mentsulist[i].pailist[0]/9][1]++;
         }
         if(item->mentsulist[i].category == AI_SYUNTSU && ((item->mentsulist[i].pailist[0] % 9) == 6)){
-            flagtable[gamestate->nakilist[i].pailist[0]/9][2]++;
+            flagtable[item->mentsulist[i].pailist[0]/9][2]++;
         }
     }
 
@@ -558,7 +558,7 @@ static int isHonroutou(GAMESTATE *gamestate, RESULT_ITEM *item)
 
 	if(count == 5 && jihai == 0){
 		return 13;
-	}else if(count + jihai >= 5){
+	}else if(count + jihai == 5 || count + jihai == 7){
 		return 2;
 	}else{
 		return 0;
@@ -916,6 +916,8 @@ void make_resultitem(int *paiarray, int *mentsu, int length,RESULT_ITEM *item,GA
 		if(i == 0 && han[i]) pinfu = 1;
     }
 
+	if(item->han < 1) return 0;
+
 	/* ƒhƒ‰ */
 	for(i=0;i<gamestate->dorasize;i++){
 		for(j=0;j<length;j++){
@@ -1070,6 +1072,14 @@ void make_resultitem(int *paiarray, int *mentsu, int length,RESULT_ITEM *item,GA
         }
     }else{
         pts = (item->fu * (gamestate->oya ? 6 : 4)) << (item->han+2);
+		/* Ø‚èã‚°–žŠÑ */
+		if(item->fu == 30 && item->han == 4){
+			if(gamestate->oya){
+				pts = 12000;
+			}else{
+				pts = 8000;
+			}
+		}
         /* –žŠÑ */
         if(gamestate->oya){
             if(pts >= 12000){

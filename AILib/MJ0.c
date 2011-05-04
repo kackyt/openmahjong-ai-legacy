@@ -65,8 +65,6 @@ int MJ0(/* inputs */
 	int aMentsu[3][5];
 	int aMachi[34];
 	
-	srand(time(NULL)); // —”‚ğ‰Šú‰»‚µ‚Ä‚¨‚­
-
 	iniMentsu[0] = 0;
 	iniMentsu[1] = 0;
 	iniMentsu[2] = 0;

@@ -35,14 +35,7 @@ static int isYaotyu(int pai)
 }
 
 static int isMenzen(GAMESTATE *gamestate, RESULT_ITEM *item){
-    int i;
-    for(i=0;i<gamestate->naki;i++){
-        if(gamestate->nakilist[i].category != AI_ANKAN){
-			return AI_FALSE;
-		}
-    }
-
-    return AI_TRUE;
+	return item->menzen ? AI_TRUE : AI_FALSE;
 }
 
 
@@ -416,7 +409,7 @@ static int isSananko(GAMESTATE *gamestate, RESULT_ITEM *item)
     }
     
     for(i=0;i<item->mentsusize;i++){
-        if(i != item->machipos && item->mentsulist[i].category == AI_KOUTSU){
+        if((gamestate->tsumo || i != item->machipos) && item->mentsulist[i].category == AI_KOUTSU){
             count++;
         }
     }
@@ -558,7 +551,7 @@ static int isHonroutou(GAMESTATE *gamestate, RESULT_ITEM *item)
 
 	if(count == 5 && jihai == 0){
 		return 13;
-	}else if(count + jihai == 5 || count + jihai == 7){
+	}else if(count + jihai == gamestate->naki + item->mentsusize){
 		return 2;
 	}else{
 		return 0;
@@ -795,6 +788,13 @@ void make_resultitem(int *paiarray, int *mentsu, int length,RESULT_ITEM *item,GA
     item->machi = machi;
     item->machihai = agarihai;
 	item->machipos = -1;
+    item->menzen = AI_TRUE;
+
+    for(i=0;i<gamestate->naki;i++){
+        if(gamestate->nakilist[i].category != AI_ANKAN){
+			item->menzen =  AI_FALSE;
+		}
+    }
 
     switch(machi){
       case AI_MACHI_KANCHAN:
@@ -875,12 +875,14 @@ void make_resultitem(int *paiarray, int *mentsu, int length,RESULT_ITEM *item,GA
 		/* ƒVƒƒƒ“ƒ|ƒ“‘Ò‚¿ */
 		for(i=0;i<item->mentsusize;i++){
 			if(item->mentsulist[i].category == AI_TOITSU && item->mentsulist[i].pailist[0] == (agarihai & 0x3F)){
+				pos = i;
 				item->mentsulist[i].category = AI_KOUTSU;
 				item->mentsulist[i].pailist[2] = agarihai & 0xFF;
 				machi_mentsu.category = AI_TOITSU;
 			}
 		}
 	}else{
+		pos = item->machipos;
 		machi_mentsu.pailist[mpos++] = agarihai;
 		qsort(&machi_mentsu.pailist,mpos,sizeof(int),(int (*)(const void*, const void*))compare_int);
 	}
@@ -908,6 +910,9 @@ void make_resultitem(int *paiarray, int *mentsu, int length,RESULT_ITEM *item,GA
 	}
 
     memcpy(&item->mentsulist[item->machipos],&machi_mentsu,sizeof(t_mentsu));
+
+	item->machipos = pos;
+
 
     /* –ð‚ÌŒvŽZ */
     for(i=0;i<sizeof(funcs)/sizeof(void*);i++){
@@ -1011,10 +1016,10 @@ void make_resultitem(int *paiarray, int *mentsu, int length,RESULT_ITEM *item,GA
         for(i=0;i<item->mentsusize;i++){
             switch(item->mentsulist[i].category){
               case AI_TOITSU:
-                item->fu += numHanpai(gamestate,gamestate->nakilist[i].pailist[0]) * 2;
+                item->fu += numHanpai(gamestate,item->mentsulist[i].pailist[0]) * 2;
                 break;
               case AI_KOUTSU:
-				  if(i == item->machipos){
+				  if(i == item->machipos && !gamestate->tsumo){
 					  item->fu += isYaotyu(item->mentsulist[i].pailist[0]) ? 4 : 2;
 				  }else{
 					  item->fu += isYaotyu(item->mentsulist[i].pailist[0]) ? 8 : 4;
@@ -1073,7 +1078,7 @@ void make_resultitem(int *paiarray, int *mentsu, int length,RESULT_ITEM *item,GA
     }else{
         pts = (item->fu * (gamestate->oya ? 6 : 4)) << (item->han+2);
 		/* Ø‚èã‚°–žŠÑ */
-		if(item->fu == 30 && item->han == 4){
+		if((item->fu == 30 && item->han == 4) || (item->fu == 60 && item->han == 3)){
 			if(gamestate->oya){
 				pts = 12000;
 			}else{

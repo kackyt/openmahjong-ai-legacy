@@ -69,6 +69,7 @@ extern "C" {
 		int machipos;
 		int machi;
 		int machihai;
+		int menzen;
 	} RESULT_ITEM;
 	
 	typedef struct {

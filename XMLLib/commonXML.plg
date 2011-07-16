@@ -1,0 +1,45 @@
+<html>
+<body>
+<pre>
+<h1>ﾋﾞﾙﾄﾞのﾛｸﾞ</h1>
+<h3>
+--------------------構成: commonXML - Win32 Release--------------------
+</h3>
+<h3>ｺﾏﾝﾄﾞ ﾗｲﾝ</h3>
+一時ﾌｧｲﾙ "E:\AppData\Local\Temp\RSPAF9D.tmp" を作成し、次の内容を記録します
+[
+/nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /Fp"Release/commonXML.pch" /Yu"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"E:\kakizaki\My_Documents\Program\VC++Projects\commonXML\Result.cpp"
+]
+Creating command line "cl.exe @E:\AppData\Local\Temp\RSPAF9D.tmp" 
+一時ﾌｧｲﾙ "E:\AppData\Local\Temp\RSPAF9E.tmp" を作成し、次の内容を記録します
+[
+/nologo /out:"Release\commonXML.lib" 
+".\Release\StdAfx.obj"
+".\Release\Command.obj"
+".\Release\GameState.obj"
+".\Release\Library.obj"
+".\Release\Member.obj"
+".\Release\Mentsu.obj"
+".\Release\Message.obj"
+".\Release\NakiMentsu.obj"
+".\Release\Pai.obj"
+".\Release\Player.obj"
+".\Release\Result.obj"
+".\Release\Rule.obj"
+".\Release\Taku.obj"
+".\Release\TakuEvent.obj"
+]
+ｺﾏﾝﾄﾞ ﾗｲﾝ "link.exe -lib @E:\AppData\Local\Temp\RSPAF9E.tmp" の作成中
+<h3>ｱｳﾄﾌﾟｯﾄ ｳｨﾝﾄﾞｳ</h3>
+ｺﾝﾊﾟｲﾙ中...
+Result.cpp
+ﾗｲﾌﾞﾗﾘを作成中...
+
+
+
+<h3>結果</h3>
+commonXML.lib - ｴﾗｰ 0、警告 0
+</pre>
+</body>
+</html>

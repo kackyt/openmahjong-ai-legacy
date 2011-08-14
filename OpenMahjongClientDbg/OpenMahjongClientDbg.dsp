@@ -96,10 +96,6 @@ SOURCE=.\AgariDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\Command.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\ConnectDlg.cpp
 # End Source File
 # Begin Source File
@@ -108,15 +104,7 @@ SOURCE=.\DebugDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\GameState.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\Komae.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Library.cpp
 # End Source File
 # Begin Source File
 
@@ -128,27 +116,11 @@ SOURCE=.\MahjongStatic.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\Member.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Mentsu.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Message.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\MessageEdit.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\MyButton.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\NakiMentsu.cpp
 # End Source File
 # Begin Source File
 
@@ -164,22 +136,6 @@ SOURCE=.\OpenMahjongClientDbgDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\Pai.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Player.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Result.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Rule.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\RuleDialog.cpp
 # End Source File
 # Begin Source File
@@ -190,14 +146,6 @@ SOURCE=.\StateButton.cpp
 
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
-# End Source File
-# Begin Source File
-
-SOURCE=.\Taku.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\TakuEvent.cpp
 # End Source File
 # Begin Source File
 
@@ -233,10 +181,6 @@ SOURCE=..\AILib\AILib.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Command.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\ConnectDlg.h
 # End Source File
 # Begin Source File
@@ -245,15 +189,7 @@ SOURCE=.\DebugDialog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\GameState.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\Komae.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\Library.h
 # End Source File
 # Begin Source File
 
@@ -262,18 +198,6 @@ SOURCE=.\MahjongBtn.h
 # Begin Source File
 
 SOURCE=.\MahjongStatic.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\Member.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\Mentsu.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\Message.h
 # End Source File
 # Begin Source File
 
@@ -293,6 +217,10 @@ SOURCE=.\NakiMentsu.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\Qt\OpenMahjongClient\common\OMXMLCommon.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\OpenMahjongClientDbg.h
 # End Source File
 # Begin Source File
@@ -305,23 +233,7 @@ SOURCE=.\OpenMahjongDef.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Pai.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\Player.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\Resource.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\Result.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\Rule.h
 # End Source File
 # Begin Source File
 
@@ -334,14 +246,6 @@ SOURCE=.\StateButton.h
 # Begin Source File
 
 SOURCE=.\StdAfx.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\Taku.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\TakuEvent.h
 # End Source File
 # Begin Source File
 

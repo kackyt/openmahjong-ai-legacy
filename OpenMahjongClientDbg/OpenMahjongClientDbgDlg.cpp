@@ -290,7 +290,10 @@ UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 		p = (UINT*)param1;
 
 		for(i=0;i<pDlg->m_pCurTaku->m_aDora.GetSize();i++){
-			*p = pDlg->m_pCurTaku->m_aDora[i];
+			CPai pai;
+			pDlg->m_pCurTaku->m_aDora[i].getDora(pai);
+
+			*p = pai;
 			p++;
 		}
 

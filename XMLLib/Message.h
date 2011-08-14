@@ -38,7 +38,7 @@ public:
         OMMessage& operator=(OMMessage&);
         void toXML(QDomDocument,QDomElement);
         void parseXML(QDomNode);
-        OM_DEFARRAY(OMPlayer,m_aPlayerTo);
+        OM_DEFARRAY(OMPlayer) m_aPlayerTo;
         QString m_strText;
         OMPlayer m_playerFrom;
         OMMessage();

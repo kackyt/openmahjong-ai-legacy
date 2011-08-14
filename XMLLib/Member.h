@@ -45,10 +45,10 @@ public:
         BOOL isExecutableCommand(OMCommand&);
         OMGameState m_gamestate;
         void parseXML(QDomNode);
-        OM_DEFARRAY(OMResult,m_aResultList);
-        OM_DEFARRAY(OMCommand,m_aCommandList);
-        OM_DEFARRAY(OMPai,m_aTehai);
-        OM_DEFARRAY(OMPai,m_aDahai);
+        OM_DEFARRAY(OMResult) m_aResultList;
+        OM_DEFARRAY(OMCommand) m_aCommandList;
+        OM_DEFARRAY(OMPai) m_aTehai;
+        OM_DEFARRAY(OMPai) m_aDahai;
 	int m_iState;
 	int m_iPoint;
         OMPlayer m_player;

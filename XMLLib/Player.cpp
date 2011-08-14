@@ -25,6 +25,8 @@
 
 #include "stdafx.h"
 #include "Player.h"
+#include "Taku.h"
+#include "Command.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -34,18 +36,26 @@ static char THIS_FILE[]=__FILE__;
 
 #pragma warning(disable:4786)
 
+const UINT OMPlayer::ieTable[][4] = {
+    { 0, 1, 2, 3},
+    { 3, 0, 1, 2},
+    { 2, 3, 0, 1},
+    { 1, 2, 3, 0},
+};
+
+
 //////////////////////////////////////////////////////////////////////
 // 構築/消滅
 //////////////////////////////////////////////////////////////////////
 
 OMPlayer::OMPlayer()
 {
-	m_iId = 0;
-	m_bIsComp = FALSE;
-	m_pFunc = NULL;
-	m_pInst = NULL;
-	m_strName = _T("");
-	m_iPrivateId = 0;
+    m_iId = 0;
+    m_bIsComp = FALSE;
+    m_pFunc = NULL;
+    m_pInst = NULL;
+    m_strName = _T("");
+    m_iPrivateId = 0;
 
 }
 
@@ -56,45 +66,259 @@ OMPlayer::~OMPlayer()
 
 void OMPlayer::parseXML(QDomNode pElem)
 {
-        QDomNode pNode;
-        BSTR pStr;
+    QDomNode pNode;
+    BSTR pStr;
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_ID));
+    pNode = OM_GETELEMENT(pElem,_T(TAG_ID));
 
-        OM_TOLONG(pNode,m_iId);
+    OM_TOLONG(pNode,m_iId);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_NAME));
+    pNode = OM_GETELEMENT(pElem,_T(TAG_NAME));
 
-        if(!OM_ISNULL(pNode)){
-                OM_GETTEXT(pNode,pStr);
-                m_strName = QString(pStr);
-        }
+    if(!OM_ISNULL(pNode)){
+        OM_GETTEXT(pNode,pStr);
+        m_strName = QString(pStr);
+    }
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_PRIVATEID));
-        OM_TOLONG(pNode,m_iPrivateId);
+    pNode = OM_GETELEMENT(pElem,_T(TAG_PRIVATEID));
+    OM_TOLONG(pNode,m_iPrivateId);
 }
 
 void OMPlayer::toXML(QDomDocument pDoc,QDomElement pParent)
 {
-        QDomElement pElemPlayer,pElemID,pElemName;
-        QString str;
+    QDomElement pElemPlayer,pElemID,pElemName;
+    QString str;
 
-        pElemPlayer = OM_EVAL(pDoc,createElement(_T(TAG_PLAYER)));
+    pElemPlayer = OM_EVAL(pDoc,createElement(_T(TAG_PLAYER)));
 
-        pElemID = OM_EVAL(pDoc,createElement(_T(TAG_ID)));
-	str.Format(_T("%d"),m_iId);
-        OM_EVAL(pElemID,appendChild(OM_CREATETEXT(pDoc,str)));
-        OM_EVAL(pElemPlayer,appendChild(pElemID));
+    pElemID = OM_EVAL(pDoc,createElement(_T(TAG_ID)));
+    str.Format(_T("%d"),m_iId);
+    OM_EVAL(pElemID,appendChild(OM_CREATETEXT(pDoc,str)));
+    OM_EVAL(pElemPlayer,appendChild(pElemID));
 
-        pElemName = OM_EVAL(pDoc,createElement(_T(TAG_NAME)));
-        OM_EVAL(pElemName,appendChild(OM_CREATETEXT(pDoc,m_strName)));
-        OM_EVAL(pElemPlayer,appendChild(pElemName));
+    pElemName = OM_EVAL(pDoc,createElement(_T(TAG_NAME)));
+    OM_EVAL(pElemName,appendChild(OM_CREATETEXT(pDoc,m_strName)));
+    OM_EVAL(pElemPlayer,appendChild(pElemName));
 
-        pElemID = OM_EVAL(pDoc,createElement(_T(TAG_PRIVATEID)));
-	str.Format(_T("%d"),m_iPrivateId);
-        OM_EVAL(pElemID,appendChild(OM_CREATETEXT(pDoc,str)));
-        OM_EVAL(pElemPlayer,appendChild(pElemID));
+    pElemID = OM_EVAL(pDoc,createElement(_T(TAG_PRIVATEID)));
+    str.Format(_T("%d"),m_iPrivateId);
+    OM_EVAL(pElemID,appendChild(OM_CREATETEXT(pDoc,str)));
+    OM_EVAL(pElemPlayer,appendChild(pElemID));
 
-        OM_EVAL(pParent,appendChild(pElemPlayer));
+    OM_EVAL(pParent,appendChild(pElemPlayer));
 
+}
+
+/* コンピュータのアクションを計算 */
+UINT OMPlayer::onPlayerAction(OMTaku *pTaku, OMPlayerActionParam &param)
+{
+    UINT ret = 0;
+    int i;
+    int ind = pTaku->getMemberIndex(this);
+    bool bAction = false;
+    int kaze3;
+    LONG pointdiff[4] = { 0 };
+    int ieparam;
+
+    switch(param.m_iType){
+    case TYPE_TII:
+    case TYPE_PON:
+    case TYPE_RON:
+    case TYPE_DAIMINKAN:
+        /* 相手のあるアクション */
+        kaze3 = pTaku->m_members[pTaku->m_event.m_command.m_mentsu.m_iAite].m_gamestate.m_iZikaze - 1;
+        ieparam = (ieTable[param.m_iKaze1][kaze3] << 16) | ieTable[param.m_iKaze1][param.m_iKaze2];
+        break;
+    default:
+        /* 相手のないアクション */
+        ieparam = ieTable[param.m_iKaze1][param.m_iKaze2];
+        break;
+    }
+
+
+    switch(param.m_iType){
+    case TYPE_KOUHAI:
+        m_pFunc(m_pInst,MJPI_ENDKYOKU,MJEK_RYUKYOKU,(UINT)pointdiff);
+        break;
+    case TYPE_START:
+        m_pFunc(m_pInst,MJPI_STARTKYOKU,pTaku->m_iKyokuCount,pTaku->m_members[ind].m_gamestate.m_iZikaze - 1);
+        break;
+    case TYPE_DAHAI:
+        bAction = true;
+        ret = m_pFunc(m_pInst,MJPI_ONACTION,ieparam,MJPIR_SUTEHAI | (UINT)pTaku->m_event.m_command.m_pai);
+        break;
+    case TYPE_TII:
+        switch(pTaku->m_event.m_command.m_mentsu.getNakiPos()){
+        case 0:
+            ret = m_pFunc(m_pInst,MJPI_ONACTION,ieparam,MJPIR_CHII1 | (UINT)pTaku->m_event.m_command.m_pai);
+            break;
+        case 1:
+            ret = m_pFunc(m_pInst,MJPI_ONACTION,ieparam,MJPIR_CHII2 | (UINT)pTaku->m_event.m_command.m_pai);
+            break;
+        case 2:
+            ret = m_pFunc(m_pInst,MJPI_ONACTION,ieparam,MJPIR_CHII3 | (UINT)pTaku->m_event.m_command.m_pai);
+        default:
+            break;
+        }
+
+        break;
+    case TYPE_PON:
+        ret = m_pFunc(m_pInst,MJPI_ONACTION,ieparam,MJPIR_PON | (UINT)pTaku->m_event.m_command.m_pai);
+        break;
+    case TYPE_RON:
+        ret = m_pFunc(m_pInst,MJPI_ONACTION,ieparam,MJPIR_RON | (UINT)pTaku->m_event.m_command.m_pai);
+        pointdiff[ieTable[param.m_iKaze1][kaze3]] = -(pTaku->m_event.m_result.m_iScore + pTaku->m_iTsumibou * 300);
+        pointdiff[ieTable[param.m_iKaze1][param.m_iKaze2]] = (pTaku->m_event.m_result.m_iScore + pTaku->m_iTsumibou * 300 + pTaku->m_iRiichibou * 1000);
+        m_pFunc(m_pInst,MJPI_ENDKYOKU,MJEK_AGARI,(UINT)pointdiff);
+        break;
+    case TYPE_TSUMO:
+        ret = m_pFunc(m_pInst,MJPI_ONACTION,ieparam,MJPIR_TSUMO | (UINT)pTaku->m_event.m_command.m_pai);
+        if(param.m_iKaze2 == 0){
+            /* 親のツモアガリ */
+            for(i=0;i<4;i++){
+                if(i==(int)ieparam){
+                    pointdiff[i] = (pTaku->m_event.m_result.m_iKoScore + pTaku->m_iTsumibou * 100) * 3 + pTaku->m_iRiichibou * 1000;
+                }else{
+                    pointdiff[i] = -(pTaku->m_event.m_result.m_iKoScore + pTaku->m_iTsumibou * 100);
+                }
+            }
+        }else{
+            /* 子のツモアガリ */
+            for(i=0;i<4;i++){
+                if(i==(int)ieparam){
+                    pointdiff[i] = (pTaku->m_event.m_result.m_iKoScore + pTaku->m_iTsumibou * 100) * 2 + (pTaku->m_event.m_result.m_iOyaScore + pTaku->m_iTsumibou * 100) + pTaku->m_iRiichibou * 1000;
+                }else if((param.m_iKaze1 + i) % 4 == 0){
+                    pointdiff[i] = -(pTaku->m_event.m_result.m_iOyaScore + pTaku->m_iTsumibou * 100);
+                }else{
+                    pointdiff[i] = -(pTaku->m_event.m_result.m_iKoScore + pTaku->m_iTsumibou * 100);
+                }
+            }
+        }
+        m_pFunc(m_pInst,MJPI_ENDKYOKU,MJEK_AGARI,(UINT)pointdiff);
+        break;
+    case TYPE_RIICHI:
+        bAction = true;
+        ret = m_pFunc(m_pInst,MJPI_ONACTION,ieparam,MJPIR_REACH | (UINT)pTaku->m_event.m_command.m_pai);
+        break;
+    case TYPE_ANKAN:
+        ret = m_pFunc(m_pInst,MJPI_ONACTION,ieparam,MJPIR_ANKAN | (UINT)pTaku->m_event.m_command.m_pai);
+        break;
+    case TYPE_KUWAEKAN:
+        ret = m_pFunc(m_pInst,MJPI_ONACTION,ieparam,MJPIR_MINKAN | (UINT)pTaku->m_event.m_command.m_pai);
+        break;
+    case TYPE_DAIMINKAN:
+        ret = m_pFunc(m_pInst,MJPI_ONACTION,ieparam,MJPIR_MINKAN | (UINT)pTaku->m_event.m_command.m_pai);
+        break;
+    default:
+        break;
+    }
+
+
+    return ret;
+
+}
+
+void OMPlayer::setCommand(UINT id,OMTaku *pTaku, OMCommand &command)
+{
+    int i;
+    int ind = pTaku->getMemberIndex(this);
+    switch(id & 0xFFFFFF00){
+    case MJPIR_CHII1:
+        for(i=0;i<pTaku->m_members[ind].m_aCommandList.size();i++){
+            if(pTaku->m_members[ind].m_aCommandList[i].m_mentsu.getNakiPos() == 0){
+                command.m_iId = pTaku->m_members[ind].m_aCommandList[i].m_iId;
+                break;
+            }
+        }
+        break;
+    case MJPIR_CHII2:
+        for(i=0;i<pTaku->m_members[ind].m_aCommandList.size();i++){
+            if(pTaku->m_members[ind].m_aCommandList[i].m_mentsu.getNakiPos() == 2){
+                command.m_iId = pTaku->m_members[ind].m_aCommandList[i].m_iId;
+                break;
+            }
+        }
+        break;
+    case MJPIR_CHII3:
+        for(i=0;i<pTaku->m_members[ind].m_aCommandList.size();i++){
+            if(pTaku->m_members[ind].m_aCommandList[i].m_mentsu.getNakiPos() == 1){
+                command.m_iId = pTaku->m_members[ind].m_aCommandList[i].m_iId;
+                break;
+            }
+        }
+        break;
+    case MJPIR_PON:
+        command.m_iId = ID_PON;
+        break;
+    case MJPIR_KAN:
+        command.m_iId = ID_DAIMINKAN;
+        break;
+    case MJPIR_RON:
+        command.m_iId = ID_RON;
+        break;
+    default:
+        command.m_iId = ID_PASS;
+        break;
+    }
+}
+
+UINT OMPlayer::onSutehai(OMTaku *pTaku, OMCommand &command)
+{
+    UINT ret = 0;
+    int ind = pTaku->getMemberIndex(this);
+    UINT paiID;
+    int i;
+    if(pTaku->m_members[ind].m_gamestate.m_bTsumo){
+        paiID = pTaku->m_members[ind].m_aTehai[pTaku->m_members[ind].m_aTehai.size()-1];
+    }else{
+        paiID = 63;
+    }
+
+    ret = m_pFunc(m_pInst,MJPI_SUTEHAI,(UINT)paiID,0);
+    switch(ret & 0xFFFFFF00){
+    case MJPIR_SUTEHAI:
+            if((ret & 0xFF) == 13){
+                    command.m_iId = ID_DAHAI + pTaku->m_members[pTaku->m_iTurn].m_aTehai.size() -1;
+            }else{
+                    command.m_iId = ID_DAHAI + (ret & 0xFF);
+            }
+            break;
+    case MJPIR_REACH:
+            command.m_iId = ID_RIICHI + (ret & 0xFF);
+            if(!pTaku->m_members[ind].isExecutableCommand(command)){
+                    command.m_iId = ID_DAHAI + (ret & 0xFF);
+            }
+            break;
+    case MJPIR_TSUMO:
+            command.m_iId = ID_TSUMO;
+            if(!pTaku->m_members[ind].isExecutableCommand(command)){
+                    AfxDebugBreak();
+                    command.m_iId = ID_DAHAI + pTaku->m_members[pTaku->m_iTurn].m_aTehai.size() -1;
+            }
+            break;
+    case MJPIR_NAGASHI:
+            command.m_iId = ID_TOUHAI;
+            if(!pTaku->m_members[ind].isExecutableCommand(command)){
+                    AfxDebugBreak();
+                    command.m_iId = ID_DAHAI + pTaku->m_members[pTaku->m_iTurn].m_aTehai.size() -1;
+            }
+            break;
+    case MJPIR_KAN:
+            command.m_iId = ID_DAHAI + pTaku->m_members[pTaku->m_iTurn].m_aTehai.size() -1;
+            if((ret & 0xFF) < pTaku->m_members[ind].m_aTehai.size()){
+                    OMPai pai = pTaku->m_members[ind].m_aTehai[ret & 0xFF];
+                    for(i=0;i<pTaku->m_members[ind].m_aCommandList.size();i++){
+                            if(((UINT)pTaku->m_members[ind].m_aCommandList[i].m_pai & 63) == ((UINT)pai & 63) && (pTaku->m_members[ind].m_aCommandList[i].m_iType == TYPE_ANKAN || pTaku->m_members[ind].m_aCommandList[i].m_iType == TYPE_KUWAEKAN)){
+                                    command.m_iId = pTaku->m_members[ind].m_aCommandList[i].m_iId;
+                            }
+                    }
+            }
+
+            break;
+    default:
+            command.m_iId = ID_DAHAI + pTaku->m_members[pTaku->m_iTurn].m_aTehai.size() -1;
+            break;
+    }
+
+    return ret;
 }

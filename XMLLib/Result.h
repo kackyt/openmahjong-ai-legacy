@@ -38,7 +38,7 @@ public:
 	int m_iFu;
 	BOOL m_bActive;
 #ifdef _MSC_VER
-        OMResult& operator=(OMResult& value);
+        CResult& operator=(CResult& value);
 #else
         OMResult& operator=(const OMResult& value);
 #endif
@@ -52,7 +52,7 @@ public:
 	int m_iScore;
 	int m_iMangan;
 	int m_iHan;
-        OM_DEFARRAY(QString,m_aYaku);
+        OM_DEFARRAY(QString) m_aYaku;
         OMResult();
         virtual ~OMResult();
 

@@ -25,7 +25,6 @@
 
 #if !defined(AFX_PLAYER_H__521B1B37_B5BC_4B85_A9EC_F41883A29BE7__INCLUDED_)
 #define AFX_PLAYER_H__521B1B37_B5BC_4B85_A9EC_F41883A29BE7__INCLUDED_
-
 #include "OMXMLCommon.h"
 #include "MIPIface.h"
 
@@ -33,20 +32,38 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+class OMTaku;
+class OMCommand;
+
+typedef struct
+{
+    int m_iType;
+    int m_iIndex1;
+    int m_iIndex2;
+    int m_iKaze1;
+    int m_iKaze2;
+} OMPlayerActionParam;
+
 
 class OMPlayer
 {
 public:
-        int m_iPrivateId;
-        void toXML(QDomDocument,QDomElement);
-        void parseXML(QDomNode);
-	MJPIFunc m_pFunc;
-        void* m_pInst;
-	BOOL m_bIsComp;
-        QString m_strName;
-	int m_iId;
-        OMPlayer();
-        virtual ~OMPlayer();
+    static const UINT ieTable[][4];
+    int m_iPrivateId;
+    void toXML(QDomDocument,QDomElement);
+    void parseXML(QDomNode);
+    UINT onPlayerAction(OMTaku *,OMPlayerActionParam&);
+    UINT onSutehai(OMTaku *,OMCommand&);
+
+    void setCommand(UINT,OMTaku *,OMCommand&);
+
+    MJPIFunc m_pFunc;
+    void* m_pInst;
+    BOOL m_bIsComp;
+    QString m_strName;
+    int m_iId;
+    OMPlayer();
+    virtual ~OMPlayer();
 
 };
 

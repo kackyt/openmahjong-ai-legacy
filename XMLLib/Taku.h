@@ -57,8 +57,8 @@ public:
 	int m_iRiichibou;
 	int m_iKyokuCount;
 	int m_iBakaze;
-        OM_DEFARRAY(OMPai,m_aUradora);
-        OM_DEFARRAY(OMPai,m_aDora);
+        OM_DEFARRAY(OMPai) m_aUradora;
+        OM_DEFARRAY(OMPai) m_aDora;
 	int m_iTurn;
         OMTaku();
         virtual ~OMTaku();

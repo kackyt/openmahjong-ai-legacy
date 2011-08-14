@@ -40,8 +40,8 @@ class OMLibrary
 public:
         OMGameState m_gamestate;
         void setMember(int id,OMMember& member,MJITehai* pTehai,int agarihai);
-        OM_DEFARRAY(OMResult,m_aResultList);
-        OM_DEFARRAY(OMPai,m_aTehai);
+        OM_DEFARRAY(OMResult) m_aResultList;
+        OM_DEFARRAY(OMPai) m_aTehai;
         OMPai m_agarihai;
 	int m_iId;
         OMPlayer m_player;

@@ -40,7 +40,7 @@ public:
 	int m_iCount;
         OMGameState& operator =(OMGameState&);
         void parseXML(QDomNode);
-        OM_DEFARRAY(OMNakiMentsu,m_aNakiList);
+        OM_DEFARRAY(OMNakiMentsu) m_aNakiList;
 	BOOL m_bRiichi;
 	BOOL m_bTsumo;
 	BOOL m_bIppatsu;

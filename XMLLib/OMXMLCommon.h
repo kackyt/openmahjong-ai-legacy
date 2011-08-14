@@ -31,7 +31,9 @@
 #define QDomDocument IXMLDOMDocumentPtr
 #define QDomNodeList IXMLDOMNodeListPtr
 #define QString CString
-#define OM_DEFARRAY(type,inst) CArray<type,type&> inst
+#define OM_DEFARRAY(type) CArray<type,type&>
+#define OM_CREATEDOCUMENT(inst) (inst).CreateInstance(CLSID_DOMDocument)
+#define OM_LOADXML(inst,str) (inst)->loadXML((LPCTSTR)str)
 #define clear() RemoveAll()
 #define append(item) Add(item)
 #define size() GetSize()
@@ -49,12 +51,21 @@
 #define OM_ISNULL(inst) ((inst) == NULL)
 #define OM_ISEMPTY(inst) ((inst) == NULL)
 #define OM_COPYARRAY(dst,src) ((src).Copy(dst))
+#define OM_SLEEP(tim) Sleep(tim)
+#define OM_TOXML(inst,str)  { \
+    BSTR bstr;\
+    (inst)->get_xml(&bstr);\
+    str = _T("<?xml version=\"1.0\" encoding=\"Shift_JIS\" ?>");\
+    str += bstr;\
+    }
 
 
 #else
 #include <QtXml>
-#define OM_DEFARRAY(type,inst) QVector<type> inst
+#define OM_DEFARRAY(type) QVector<type>
 #define OM_EVAL(inst,func)  (inst).func
+#define OM_CREATEDOCUMENT(inst)
+#define OM_LOADXML(inst,str) (inst).setContent(str)
 #define OM_LISTLENGTH(inst) (inst).size()
 #define OM_LISTITEM(inst,index) (inst).item(index)
 #define OM_GETELEMENT(inst,name) OM_EVAL(inst,firstChildElement(name))
@@ -66,18 +77,30 @@
 #define OM_ISNULL(inst) ((inst).isNull())
 #define OM_ISEMPTY(inst) ((inst).isEmpty())
 #define OM_COPYARRAY(dst,src) ((dst) = (src))
+#define OM_TOXML(inst,str) (str = (inst).toString(-1))
+#define OM_GETATTRIBUTE
+
 #define _T(str) (str)
 #define Format sprintf
 typedef QChar *BSTR;
 typedef char TCHAR;
-typedef bool BOOL;
+typedef int BOOL;
 typedef uint UINT;
+typedef long LONG;
 typedef ushort USHORT;
 typedef void* LPVOID;
 #define WINAPI __stdcall
-#define TRUE true
-#define FALSE false
+//#define TRUE (1)
+//#define FALSE (0)
 #define AfxDebugBreak()
+#define OM_SLEEP(tim) { \
+    QMutex mutex;\
+    QWaitCondition wc;\
+    mutex.lock();\
+    wc.wait(&mutex,(tim));\
+    mutex.unlock();\
+    }
+
 
 #endif
 
@@ -98,3 +121,4 @@ typedef void* LPVOID;
         text = QString(pStr);\
         val = (text == _T("true")) ? TRUE : FALSE;\
     }
+

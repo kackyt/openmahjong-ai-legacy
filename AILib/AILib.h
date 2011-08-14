@@ -117,6 +117,7 @@ extern int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPa
 extern int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int listSize,int maxshanten);
 extern int search_score(int *paiarray,int paiSize,void *inf,int (*callback)(int*paiarray,int*mentsu,int length,int machi,void *inf));
 extern void make_resultitem(int *paiarray, int *mentsu, int length,RESULT_ITEM *item,GAMESTATE *gamestate,int agarihai,int machi);
+extern void make_resultitem_bh(RESULT_ITEM *item,GAMESTATE *gamestate);
 extern double probabilityFunction(double,int);
 extern int permutation(int m,int n);
 extern int factorial(int n);

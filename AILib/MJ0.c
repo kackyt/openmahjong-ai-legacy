@@ -31,6 +31,7 @@
 #include <string.h>
 #include <time.h>
 #include "MJ0.h"
+#include "AILib.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,6 +41,51 @@ typedef struct{
 	int num;
 	int sum;
 } MJ0_COMBI;
+
+static int MJ0_getPoint(MJITehai *pTehai,int *pMentsu,int mentsulen,int pos,int machi){
+    RESULT_ITEM item;
+    GAMESTATE state;
+    int i,j;
+    int hai;
+
+    memset(&item,0x00,sizeof(item));
+    memset(&state,0x00,sizeof(state));
+
+    state.tsumo = 1;
+
+    item.machi = machi;
+
+    for(i=0;i<mentsulen;i++){
+        if(pMentsu[i] < 21){
+            hai = (pMentsu[i] / 7) * 9 + pMentsu[i] % 7;
+        }else{
+            hai = pMentsu[i] - 21;
+        }
+        for(j=0;j<=i;j++){
+            if(item.mentsulist[j].category == 0x00 || item.mentsulist[j].pailist[0] > hai){
+                memmove(&item.mentsulist[i+1],&item.mentsulist[i],sizeof(t_mentsu)*(7-i));
+            }
+            if(pMentsu[i] < 21){
+                item.mentsulist[j].category = AI_SYUNTSU;
+                item.mentsulist[j].pailist[0] = hai;
+                item.mentsulist[j].pailist[1] = hai + 1;
+                item.mentsulist[j].pailist[2] = hai + 2;
+                
+            }else{
+                item.mentsulist[j].category = AI_KOUTSU;
+                item.mentsulist[j].pailist[0] = hai;
+                item.mentsulist[j].pailist[1] = hai;
+                item.mentsulist[j].pailist[2] = hai;
+            }
+        }
+    }
+
+    make_resultitem_bh(&item,&state);
+
+    return item.score;
+}
+
+
 
 int MJ0(/* inputs */
 		MJ0PARAM *pParam,int *pDora,int dlength,
@@ -298,6 +344,7 @@ int MJ0(/* inputs */
 			if(mindex >= (4 - iniMentsu[j]) * 3){
 				/* ’P‹R‘Ò‚¿ */
 				aMachi[aMentsu[j][4]] = 1;
+          
 
 				if(aMentsu[j][4] < 27){
 					/* ‰„‚×’P‹R */

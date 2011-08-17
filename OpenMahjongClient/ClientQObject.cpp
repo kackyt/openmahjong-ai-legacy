@@ -1,6 +1,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include "ClientQObject.h"
+#include "ClientThread.h"
 
 OMClientQObject::OMClientQObject(QObject *parent) :
     QObject(parent)
@@ -9,19 +10,9 @@ OMClientQObject::OMClientQObject(QObject *parent) :
 
 void OMClientQObject::sendString(QString &sendMessage, QString &recvMessage)
 {
-    QNetworkRequest request;
-    QNetworkReply *pReply;
-    QByteArray recvByte;
+    OMClientThread *clThread = new OMClientThread();
 
-    request.setUrl(m_dstUrl);
-
-    pReply = m_naManager.post(request,sendMessage.toLocal8Bit());
-
-    while(pReply->waitForReadyRead(-1)){
-        recvByte += pReply->readAll();
-    }
-
-    recvMessage = QString::fromLocal8Bit(recvByte.constData());
+    clThread->sendString(m_dstUrl,sendMessage,recvMessage);
 }
 
 void OMClientQObject::selectPai(OMPai &pai)
@@ -40,6 +31,21 @@ void OMClientQObject::clientStart()
 }
 
 void OMClientQObject::clientStop()
+{
+
+}
+
+void OMClientQObject::confirmCommand()
+{
+
+}
+
+void OMClientQObject::setDestination(QUrl &url)
+{
+    m_dstUrl = url;
+}
+
+void OMClientQObject::takuUpdate()
 {
 
 }

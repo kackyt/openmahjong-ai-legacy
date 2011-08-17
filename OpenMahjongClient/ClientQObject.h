@@ -18,11 +18,14 @@ class OMClientQObject : public QObject,public OMGenericClient,public QRunnable
     } SELECT_STATE;
 public:
     explicit OMClientQObject(QObject *parent = 0);
-    void sendString(QString &sendMessage, QString &recvMessage);
+    void setDestination(QUrl &url);
     void run();
+protected:
+    void sendString(QString &sendMessage, QString &recvMessage);
 private:
     QUrl m_dstUrl;
     QNetworkAccessManager m_naManager;
+    QWidget *m_pTakuWidget;
 
 
 signals:
@@ -32,7 +35,8 @@ public slots:
     void clientStart();
     void clientStop();
     void selectPai(OMPai &pai);
-
+    void confirmCommand();
+    void takuUpdate();
 };
 
 #endif // CLIENTQOBJECT_H

@@ -46,7 +46,7 @@
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QRadioButton" name="radioButton">
+     <widget class="QRadioButton" name="rdCreate">
       <property name="text">
        <string>新規作成</string>
       </property>
@@ -56,21 +56,21 @@
      </widget>
     </item>
     <item>
-     <widget class="QRadioButton" name="radioButton_2">
+     <widget class="QRadioButton" name="rdConnect">
       <property name="text">
        <string>既存の卓に接続</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QRadioButton" name="radioButton_3">
+     <widget class="QRadioButton" name="rdReconnect">
       <property name="text">
        <string>再接続</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QRadioButton" name="radioButton_4">
+     <widget class="QRadioButton" name="rdDebug">
       <property name="enabled">
        <bool>false</bool>
       </property>
@@ -84,7 +84,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="btnRule">
    <property name="geometry">
     <rect>
      <x>230</x>
@@ -97,7 +97,7 @@
     <string>ルール</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -132,13 +132,13 @@
      </widget>
     </item>
     <item row="2" column="0">
-     <widget class="QComboBox" name="comboBox_2"/>
+     <widget class="QComboBox" name="cmbComp1"/>
     </item>
     <item row="2" column="1">
-     <widget class="QComboBox" name="comboBox_3"/>
+     <widget class="QComboBox" name="cmbComp2"/>
     </item>
     <item row="2" column="2">
-     <widget class="QComboBox" name="comboBox_4"/>
+     <widget class="QComboBox" name="cmbComp3"/>
     </item>
     <item row="0" column="0" colspan="2">
      <widget class="QLabel" name="label_4">
@@ -149,12 +149,12 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>341</width>
+     <width>361</width>
      <height>22</height>
     </rect>
    </property>
@@ -167,7 +167,13 @@
      </widget>
     </item>
     <item>
-     <widget class="QComboBox" name="comboBox">
+     <widget class="QComboBox" name="cmbUrl">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="editable">
        <bool>true</bool>
       </property>
@@ -190,7 +196,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -208,7 +214,7 @@
      </widget>
     </item>
     <item row="0" column="1">
-     <widget class="QLineEdit" name="lineEdit"/>
+     <widget class="QLineEdit" name="edTakuNum"/>
     </item>
     <item row="1" column="0">
      <widget class="QLabel" name="label_3">
@@ -218,27 +224,16 @@
      </widget>
     </item>
     <item row="1" column="1">
-     <widget class="QLineEdit" name="lineEdit_2"/>
+     <widget class="QLineEdit" name="edPlayerName"/>
     </item>
    </layout>
   </widget>
+  <zorder>layoutWidget</zorder>
+  <zorder>layoutWidget</zorder>
+  <zorder>layoutWidget</zorder>
   <zorder>buttonBox</zorder>
-  <zorder>comboBox</zorder>
-  <zorder>label</zorder>
   <zorder>groupBox</zorder>
-  <zorder>label_2</zorder>
-  <zorder>label_3</zorder>
-  <zorder>lineEdit</zorder>
-  <zorder>lineEdit_2</zorder>
-  <zorder>pushButton</zorder>
-  <zorder>label_4</zorder>
-  <zorder>label_5</zorder>
-  <zorder>label_6</zorder>
-  <zorder>label_7</zorder>
-  <zorder>comboBox_2</zorder>
-  <zorder>comboBox_3</zorder>
-  <zorder>comboBox_4</zorder>
-  <zorder>label_4</zorder>
+  <zorder>btnRule</zorder>
  </widget>
  <resources/>
  <connections>

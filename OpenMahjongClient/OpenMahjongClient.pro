@@ -29,7 +29,12 @@ SOURCES += main.cpp\
     common/ClientListener.cpp \
     PaiButton.cpp \
     ConnectDialog.cpp \
-    ClientQObject.cpp
+    ClientQObject.cpp \
+    common/Exception.cpp \
+    common/ConnectionException.cpp \
+    common/IllegalParamException.cpp \
+    common/IllegalStateException.cpp \
+    ClientThread.cpp
 
 HEADERS  += openmahjongclient.h \
     common/OMXMLCommon.h \
@@ -52,7 +57,12 @@ HEADERS  += openmahjongclient.h \
     common/ClientListener.h \
     PaiButton.h \
     ConnectDialog.h \
-    ClientQObject.h
+    ClientQObject.h \
+    common/Exception.h \
+    common/ConnectionException.h \
+    common/IllegalParamException.h \
+    common/IllegalStateException.h \
+    ClientThread.h
 
 FORMS    += openmahjongclient.ui \
     ConnectDialog.ui

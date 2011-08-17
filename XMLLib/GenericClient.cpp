@@ -1,14 +1,23 @@
 #include "GenericClient.h"
 #include "Player.h"
 #include "Message.h"
+#include "ConnectionException.h"
+#include "IllegalParamException.h"
+#include "IllegalStateException.h"
 
 static const TCHAR *ieStrTable[] = {_T("東"),_T("南"),_T("西"),_T("北")};
 static const TCHAR *posStrTable[] = {_T("自分"),_T("下家"),_T("対面"),_T("上家")};
 
+OMGenericClient::OMGenericClient()
+    : m_gamestate(OM_GAME_STATE_STOP)
+{
+
+}
+
 void OMGenericClient::connect(OM_CONNECTION_TYPE contype,int session)
 {
     int i,rescom;
-    QString text;
+    QString text,errmessage;
     OMCommand com;
     QDomDocument doc;
     QDomNode node;
@@ -20,7 +29,9 @@ void OMGenericClient::connect(OM_CONNECTION_TYPE contype,int session)
         do {
             rescom = sendCommand(com,text);
             if(rescom >= 0 && rescom != RESPONCE_OK) {
-                /* 接続失敗(TODO) */
+                /* 接続失敗 */
+                errmessage.arg("error connection responce code = %1",rescom);
+                throw OMConnectionException(errmessage);
             }
         }while(rescom < 0);
 
@@ -54,10 +65,34 @@ void OMGenericClient::connect(OM_CONNECTION_TYPE contype,int session)
             do {
                 rescom = sendCommand(com,text);
                 if(rescom >= 0 && rescom != RESPONCE_OK) {
-                    /* 接続失敗(TODO) */
+                    /* 接続失敗 */
+                    errmessage.arg("error connection responce code = %1",rescom);
+                    throw OMConnectionException(errmessage);
                 }
             }while(rescom < 0);
 
+            OM_CREATEDOCUMENT(doc);
+            OM_LOADXML(doc,text);
+
+            if(i==0 && contype == OM_CONNECTION_TYPE_CREATE){
+                QDomElement elem = OM_GETELEMENT(doc,_T(TAG_OPENMAHJONGSERVER));
+                QString sesStr;
+                OM_GETATTRIBUTE(elem,_T("session"),sesStr);
+                m_iSession = OM_STRTOL(sesStr);
+
+            }
+
+            if(i==0 && contype == OM_CONNECTION_TYPE_CONNECT){
+                QDomElement elem = OM_GETELEMENT(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_COMMAND "/" TAG_RULE));
+                m_rule.parseXML(elem);
+            }
+
+            node = OM_GETELEMENT(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_COMMAND "/" TAG_PLAYER "/" TAG_ID));
+            OM_TOLONG(node,m_players[i].m_iId);
+
+            if(m_players[i].m_bIsComp){
+                m_players[i].m_pFunc(m_players[i].m_pInst,MJPI_STARTGAME,0,0);
+            }
 
         }
 
@@ -528,14 +563,17 @@ int OMGenericClient::sendCommand(OMCommand &command, QString &recvMessage)
         command.toXML(doc,elemRoot);
     }
 
-    /* キューに入ったメッセージを送信 */
+    /* キューに入ったメッセージを送信(TODO) */
 
 
 
-    OM_TOXML(doc,str);
+    OM_TOXML(doc,sendMessage);
 
+    try{
+        sendString(sendMessage,recvMessage);
+    }catch(...){
 
-    sendString(sendMessage,recvMessage);
+    }
 
     /* 受信メッセージをパース */
     OM_LOADXML(doc,recvMessage);
@@ -545,4 +583,38 @@ int OMGenericClient::sendCommand(OMCommand &command, QString &recvMessage)
     OM_TOLONG(node,code);
 
     return code;
+}
+
+void OMGenericClient::setPlayerName(OM_DEFARRAY(QString) &playernames, OM_DEFARRAY(QString)&compnames)
+{
+    int i;
+
+    if(m_gamestate != OM_GAME_STATE_STOP){
+        QString mes = QString("setPlayerName called when state is not stopped.");
+        throw OMIllegalStateException(mes);
+    }
+    m_iPlayerNum = playernames.size();
+    m_iCompNum = compnames.size();
+
+    if(m_iPlayerNum + m_iCompNum > 4){
+        /* パラメータが不正 */
+        QString mes("playernum + compnum > 4");
+        throw OMIllegalParamException(mes);
+    }
+
+    for(i=0;i<m_iPlayerNum;i++){
+        m_players[i].m_strName = playernames[i];
+        m_players[i].m_bIsComp = false;
+        m_players[i].m_pFunc = NULL;
+        m_players[i].m_pInst = NULL;
+    }
+
+    for(i=0;i<m_iCompNum;i++){
+        m_players[i + m_iPlayerNum].m_strName = compnames[i];
+        m_players[i + m_iPlayerNum].m_bIsComp = true;
+        m_players[i + m_iPlayerNum].m_pFunc = NULL;
+        m_players[i + m_iPlayerNum].m_pInst = NULL;
+    }
+
+    m_gamestate = OM_GAME_STATE_PLAYERSETNAME;
 }

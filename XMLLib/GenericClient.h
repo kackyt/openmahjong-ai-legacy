@@ -20,6 +20,8 @@ typedef enum {
 } OM_SYNC_STATE;
 
 typedef enum {
+    OM_GAME_STATE_CREATED,
+    OM_GAME_STATE_PLAYERSETNAME,
     OM_GAME_STATE_STOP,
     OM_GAME_STATE_START
 } OM_GAME_STATE;
@@ -27,6 +29,7 @@ typedef enum {
 class OMGenericClient
 {
 public:
+    OMGenericClient();
     virtual ~OMGenericClient() {}
     OM_SYNC_STATE gameSync();
     void gameStart();
@@ -35,9 +38,9 @@ public:
     void sendCommand(OM_DEFARRAY(OMCommand)&,QString&);
     int sendCommand(OMCommand&,QString&);
     void connect(OM_CONNECTION_TYPE contype,int session = 0);
-    /* HTTPによりサーバーに文字列を送受信するメソッドをサブクラスで実装してください */
-    virtual void sendString(QString& sendMessage,QString& recvMessage) = 0;
     void setClientListener(OMClientListener *pListener);
+    void setPlayerName(OM_DEFARRAY(QString)&playernames,OM_DEFARRAY(QString)&compnames);
+    void getPlayerName(OM_DEFARRAY(QString)&playernames) const;
 protected:
     OMRule m_rule;
     BOOL m_bBusy;
@@ -54,8 +57,8 @@ protected:
     OMPlayer *m_pCurPlayer;
     OMClientListener *m_pListener;
     OM_GAME_STATE m_gamestate;
-
-
+    /* HTTPによりサーバーに文字列を送受信するメソッドをサブクラスで実装してください */
+    virtual void sendString(QString& sendMessage,QString& recvMessage) = 0;
 
 };
 

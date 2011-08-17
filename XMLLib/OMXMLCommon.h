@@ -59,6 +59,12 @@
     str += bstr;\
     }
 
+static inline void OM_GETATTRIBUTE(QDomNode inst,LPCTSTR name,QString &text){
+    QDomNode pNode = inst->Getattributes()->getNamedItem(name);
+    if(OM_ISNULL(pNode)){
+        text = pNode->GetnodeValue().bstrVal;
+    }
+}
 
 #else
 #include <QtXml>
@@ -68,9 +74,42 @@
 #define OM_LOADXML(inst,str) (inst).setContent(str)
 #define OM_LISTLENGTH(inst) (inst).size()
 #define OM_LISTITEM(inst,index) (inst).item(index)
-#define OM_GETELEMENT(inst,name) OM_EVAL(inst,firstChildElement(name))
-#define OM_GETELEMENTLIST(inst,name) OM_EVAL(inst.toElement(),elementsByTagName(name))
-#define OM_GETTEXT(inst,str) (str = (inst).firstChild().nodeValue().data())
+static inline QDomElement OM_GETELEMENT(QDomNode inst,QString name) {
+    QStringList list = name.split("/");
+    QDomElement node;
+    bool isFirst = true;
+    while(!list.isEmpty()){
+        QString nm = list.takeFirst();
+        if(isFirst){
+            node = inst.firstChildElement(nm);
+            isFirst = false;
+        }else{
+            node = node.firstChildElement(nm);
+        }
+        if(node.isNull()) break;
+    }
+    return node;
+}
+
+static inline QDomNodeList OM_GETELEMENTLIST(QDomNode inst,QString name) {
+    QStringList list = name.split("/");
+    QDomElement node = inst.toElement();
+    QDomNodeList nodelist;
+    QString nm;
+    while(list.size() > 1 && !node.isNull()){
+        nm = list.takeFirst();
+        node = node.firstChildElement(nm);
+    }
+
+    if(!node.isNull()){
+        nm = list.takeFirst();
+        nodelist = node.elementsByTagName(nm);
+    }
+
+    return nodelist;
+}
+
+#define OM_GETTEXT(inst,str) (str = (inst).firstChild().nodeValue())
 #define OM_CREATETEXT(inst,str) OM_EVAL(inst,createTextNode(str))
 #define OM_STRTOL(str) ((str).toLong())
 #define OM_NUMTOSTR(str,val) ((str) = (str).sprintf(_T("%d"),val))
@@ -78,11 +117,11 @@
 #define OM_ISEMPTY(inst) ((inst).isEmpty())
 #define OM_COPYARRAY(dst,src) ((dst) = (src))
 #define OM_TOXML(inst,str) (str = (inst).toString(-1))
-#define OM_GETATTRIBUTE
+#define OM_GETATTRIBUTE(inst,name,text) (text = inst.attribute(name))
 
 #define _T(str) (str)
 #define Format sprintf
-typedef QChar *BSTR;
+typedef QString BSTR;
 typedef char TCHAR;
 typedef int BOOL;
 typedef uint UINT;
@@ -101,9 +140,18 @@ typedef void* LPVOID;
     mutex.unlock();\
     }
 
-
 #endif
 
+static inline void OM_TOLONG(QDomNode inst,int &val)
+{
+    if(!OM_ISNULL(inst)){
+        QString text;
+        text = inst.firstChild().nodeValue();
+        val = OM_STRTOL(text);
+    }
+}
+
+#if 0
 #define OM_TOLONG(inst,val) \
     if(!OM_ISNULL(inst)){\
         BSTR pStr;\
@@ -112,6 +160,7 @@ typedef void* LPVOID;
         text = QString(pStr);\
         val = OM_STRTOL(text);\
     }
+#endif
 
 #define OM_TOBOOL(inst,val) \
     if(!OM_ISNULL(inst)){\

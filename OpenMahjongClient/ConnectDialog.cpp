@@ -29,7 +29,7 @@ OM_CONNECTION_TYPE ConnectDialog::getConnectionType() const
     return conType;
 }
 
-void ConnectDialog::getPlayerName(QVector<QString> &playernames) const
+void ConnectDialog::getPlayerName(OMArray<OMString> &playernames) const
 {
     if(ui->edPlayerName->text() != ""){
         playernames.clear();
@@ -37,7 +37,7 @@ void ConnectDialog::getPlayerName(QVector<QString> &playernames) const
     }
 }
 
-void ConnectDialog::getCompName(QVector<QString> &compnames) const
+void ConnectDialog::getCompName(OMArray<OMString> &compnames) const
 {
     compnames.clear();
 

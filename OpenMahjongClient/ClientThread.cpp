@@ -35,7 +35,7 @@ void OMClientThread::sendString(QUrl &dst, QString &sendString, QString &recvStr
 {
     bool enableSend;
     bool sendCondition;
-    QString errMessage;
+    OMString errMessage;
 
     m_mutex.lock();
     if(m_clientState != OM_CLIENT_STATE_STARTED){
@@ -48,7 +48,7 @@ void OMClientThread::sendString(QUrl &dst, QString &sendString, QString &recvStr
 
     if(!enableSend){
         /* 2つ以上のリクエストを送ることはできないため例外を発生 */
-        errMessage = QString("Client cannot send multiple request.");
+        errMessage = OMString("Client cannot send multiple request.");
         throw OMIllegalStateException(errMessage);
     }
 
@@ -71,7 +71,7 @@ void OMClientThread::sendString(QUrl &dst, QString &sendString, QString &recvStr
 
     if(!sendCondition){
         /* エラーの発生 */
-        errMessage = QString("Connection error occured.");
+        errMessage = OMString("Connection error occured.");
         throw OMConnectionException(errMessage);
     }
 

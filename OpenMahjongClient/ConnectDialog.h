@@ -17,8 +17,8 @@ public:
     explicit ConnectDialog(QWidget *parent = 0);
     ~ConnectDialog();
     OM_CONNECTION_TYPE getConnectionType() const;
-    void getPlayerName(QVector<QString> &playernames) const;
-    void getCompName(QVector<QString> &compnames) const;
+    void getPlayerName(OMArray<OMString> &playernames) const;
+    void getCompName(OMArray<OMString> &compnames) const;
     int getSessionNum() const;
     void getUrl(QUrl& url) const;
 private:

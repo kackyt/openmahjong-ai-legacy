@@ -1,6 +1,6 @@
 #include "IllegalParamException.h"
 
-OMIllegalParamException::OMIllegalParamException(QString &message)
+OMIllegalParamException::OMIllegalParamException(OMString &message)
     : OMException(message)
 {
 }

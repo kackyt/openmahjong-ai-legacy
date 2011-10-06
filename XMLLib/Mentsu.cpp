@@ -46,26 +46,26 @@ OMMentsu::~OMMentsu()
 
 }
 
-void OMMentsu::parseXML(QDomNode pElem)
+void OMMentsu::parseXML(OMDomNode pElem)
 {
-        QDomNode pNode;
-        QDomNodeList pNodeList;
+        OMDomNode pNode;
+        OMDomNodeList pNodeList;
 	int i;
 
 	/* ÉXÉJÉâÅ[ÉfÅ[É^ÇÃäiî[ */
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_CATEGORY));
+        pNode = OMGetElement(pElem,_T(TAG_CATEGORY));
 
-        OM_TOLONG(pNode,m_iCategory);
+        OMToNum(pNode,m_iCategory);
 
 	/* îvÇÃäiî[ */
         m_aPaiList.clear();
-        pNodeList = OM_GETELEMENTLIST(pElem,_T(TAG_TEHAI "/" TAG_PAI));
+        pNodeList = OMGetElementList(pElem,_T(TAG_TEHAI "/" TAG_PAI));
 
-        if(!OM_ISEMPTY(pNodeList)){
-            for(i=0;i<OM_LISTLENGTH(pNodeList);i++){
+        if(!OMIsEmpty(pNodeList)){
+            for(i=0;i<OMListLength(pNodeList);i++){
                 OMPai pai;
-                pNode = OM_LISTITEM(pNodeList,i);
+                pNode = OMListItem(pNodeList,i);
                 pai.parseXML(pNode);
                 m_aPaiList.append(pai);
             }
@@ -76,7 +76,7 @@ void OMMentsu::parseXML(QDomNode pElem)
 OMMentsu& OMMentsu::operator=(OMMentsu& value)
 {
 	m_iCategory = value.m_iCategory;
-        OM_COPYARRAY(m_aPaiList,value.m_aPaiList);
+        m_aPaiList.copy(value.m_aPaiList);
 
 	return *this;
 }

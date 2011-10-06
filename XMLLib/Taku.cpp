@@ -25,6 +25,7 @@
 
 #include "stdafx.h"
 #include "Taku.h"
+#include "TakuListener.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -39,6 +40,7 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 
 OMTaku::OMTaku()
+    : m_pListener(NULL)
 {
 
 }
@@ -48,52 +50,52 @@ OMTaku::~OMTaku()
 
 }
 
-void OMTaku::parseXML(QDomNode pElem)
+void OMTaku::parseXML(OMDomNode pElem)
 {
-        QDomNode pNode;
-        QDomNodeList pNodeList;
+        OMDomNode pNode;
+        OMDomNodeList pNodeList;
 	int i;
 
 	/* スカラーデータの格納 */
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_YAMA "/" TAG_COUNT));
+        pNode = OMGetElement(pElem,_T(TAG_YAMA "/" TAG_COUNT));
 
-        OM_TOLONG(pElem,m_iYama);
+        OMToNum(pNode,m_iYama);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_BAKAZE));
+        pNode = OMGetElement(pElem,_T(TAG_BAKAZE));
 
-        OM_TOLONG(pElem,m_iBakaze);
+        OMToNum(pNode,m_iBakaze);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_KYOKUCOUNT));
+        pNode = OMGetElement(pElem,_T(TAG_KYOKUCOUNT));
 
-        OM_TOLONG(pElem,m_iKyokuCount);
+        OMToNum(pNode,m_iKyokuCount);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_RIICHIBOU));
+        pNode = OMGetElement(pElem,_T(TAG_RIICHIBOU));
 
-        OM_TOLONG(pElem,m_iRiichibou);
+        OMToNum(pNode,m_iRiichibou);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_TSUMIBOU));
+        pNode = OMGetElement(pElem,_T(TAG_TSUMIBOU));
 
-        OM_TOLONG(pElem,m_iTsumibou);
+        OMToNum(pNode,m_iTsumibou);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_TURN));
+        pNode = OMGetElement(pElem,_T(TAG_TURN));
 
-        OM_TOLONG(pElem,m_iTurn);
+        OMToNum(pNode,m_iTurn);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_EVENT));
+        pNode = OMGetElement(pElem,_T(TAG_EVENT));
 
-        if(!OM_ISNULL(pNode)){
+        if(!OMIsNull(pNode)){
 		m_event.parseXML(pNode);
 	}
 
 	/* ドラ牌の格納 */
         m_aDora.clear();
-        pNodeList = OM_GETELEMENTLIST(pElem,_T(TAG_YAKU));
+        pNodeList = OMGetElementList(pElem,_T(TAG_DORA "/" TAG_PAI));
 
-        if(!OM_ISEMPTY(pNodeList)){
-            for(i=0;i<OM_LISTLENGTH(pNodeList);i++){
+        if(!OMIsEmpty(pNodeList)){
+            for(i=0;i<OMListLength(pNodeList);i++){
                         OMPai pai;
-                        pNode = OM_LISTITEM(pNodeList,i);
+                        pNode = OMListItem(pNodeList,i);
 			pai.parseXML(pNode);
                         m_aDora.append(pai);
 		}
@@ -101,22 +103,22 @@ void OMTaku::parseXML(QDomNode pElem)
 
         m_aUradora.clear();
 
-        pNodeList = OM_GETELEMENTLIST(pElem,_T(TAG_YAKU));
+        pNodeList = OMGetElementList(pElem,_T(TAG_URADORA "/" TAG_PAI));
 
-        if(!OM_ISEMPTY(pNodeList)){
-            for(i=0;i<OM_LISTLENGTH(pNodeList);i++){
+        if(!OMIsEmpty(pNodeList)){
+            for(i=0;i<OMListLength(pNodeList);i++){
                         OMPai pai;
-                        pNode = OM_LISTITEM(pNodeList,i);
+                        pNode = OMListItem(pNodeList,i);
 			pai.parseXML(pNode);
                         m_aUradora.append(pai);
 		}
 	}
 
-        pNodeList = OM_GETELEMENTLIST(pElem,_T(TAG_YAKU));
+        pNodeList = OMGetElementList(pElem,_T(TAG_MEMBER));
 
-        if(!OM_ISEMPTY(pNodeList)){
-            for(i=0;i<OM_LISTLENGTH(pNodeList);i++){
-                        pNode = OM_LISTITEM(pNodeList,i);
+        if(!OMIsEmpty(pNodeList)){
+            for(i=0;i<OMListLength(pNodeList);i++){
+                        pNode = OMListItem(pNodeList,i);
 			m_members[i].parseXML(pNode);
 		}
 	}
@@ -319,14 +321,14 @@ int OMTaku::getVisibleHais(UINT num,int iPlayerIndex)
 
 }
 
-void OMTaku::printState(int index,QString& text)
+void OMTaku::printState(int index,OMString& text)
 {
 	const TCHAR *kyokuTable[] = { _T("東一局"),_T("東二局"),_T("東三局"),_T("東四局"),_T("南一局"),_T("南二局"),_T("南三局"),_T("南四局") };
 	const TCHAR *ieTable[] = {_T("東家"),_T("南家"),_T("西家"),_T("北家")};
 	const TCHAR *eventTable[] = { _T("打牌"),_T("チー"),_T("ポン"),_T("カン"),_T("カン"),_T("カン"),_T("ロン"),
 		_T("ツモ"),_T("リーチ"),_T("パス"),_T("九種九牌倒牌"),_T("四風子連打"),
 		_T("四人リーチ"),_T("荒牌"),_T("四カンツ流れ"),_T("三家和"),_T("半荘終了"),_T("局開始") };
-        QString str;
+        OMString str;
 	int i,j;
 
 	if(m_event.m_command.m_iType >= 100){
@@ -481,8 +483,8 @@ void OMTaku::printState(int index,QString& text)
 OMTaku& OMTaku::operator =(OMTaku& value)
 {
 	int i;
-        OM_COPYARRAY(m_aDora,value.m_aDora);
-        OM_COPYARRAY(m_aUradora,value.m_aUradora);
+        m_aDora.copy(value.m_aDora);
+        m_aUradora.copy(value.m_aUradora);
 	m_event = value.m_event;
 	m_iBakaze = value.m_iBakaze;
 	m_iKyokuCount = value.m_iKyokuCount;
@@ -501,418 +503,284 @@ OMTaku& OMTaku::operator =(OMTaku& value)
 
 void OMTaku::update(OMTaku& value)
 {
-	int i,j,num;
-	int ind;
-	int prevSeq;
-        OMPai pai;
-	BOOL bInserted,bDeleted,bTsumo = TRUE;
+    int i,j,num;
+    int ind,pais;
+    int prevSeq;
+    OMPai pai;
+    BOOL bInserted,bDeleted,bTsumo = TRUE;
 
-	m_iTurn = value.m_iTurn;
-	m_iYama = value.m_iYama;
+    m_iTurn = value.m_iTurn;
+    m_iYama = value.m_iYama;
 
-	for(i=0;i<4;i++){
-                for(j=0;j<m_members[i].m_aDahai.size();j++){
-			m_members[i].m_aDahai[j].m_bLast = FALSE;
-		}
-	}
+    for(i=0;i<4;i++){
+        for(j=0;j<m_members[i].m_aDahai.size();j++){
+            m_members[i].m_aDahai[j].m_bLast = FALSE;
+        }
+    }
 
-	// イベントを処理する
-	if(value.m_event.m_bActive){
-		if(m_event.m_iSeq != value.m_event.m_iSeq){
-			prevSeq = m_event.m_iSeq;
-			m_event = value.m_event;
-			switch(value.m_event.m_command.m_iType){
-			case TYPE_DAHAI:
-				ind = getMemberIndex(&value.m_event.m_command.m_player);
-                                m_members[ind].m_aDahai.append(value.m_event.m_command.m_pai);
-                                m_members[ind].m_aDahai[m_members[ind].m_aDahai.size()-1].m_bLast = TRUE;
-                                bDeleted = m_members[ind].m_aTehai.size() == 0 ? TRUE : FALSE;
-				
-                                for(i=0;i<m_members[ind].m_aTehai.size();i++){
-					if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_pai)){
-                                                m_members[ind].m_aTehai.remove(i);
-						bDeleted = TRUE;
-						break;
-					}
-				}
-				
-				if(!bDeleted){
-                                        for(i=0;i<m_members[ind].m_aTehai.size();i++){
-						if(m_members[ind].m_aTehai[i] == PAI_NIL){
-                                                        m_members[ind].m_aTehai.remove(i);
-							bDeleted = TRUE;
-							break;
-						}
-					}
-					
-					if(!bDeleted){
-						AfxDebugBreak();
-					}
-				}
-				
-				// 手牌を並べ直し
-                                if(m_members[ind].m_aTehai.size() > 0){
-                                        pai = m_members[ind].m_aTehai[m_members[ind].m_aTehai.size()-1];
-                                        m_members[ind].m_aTehai.remove(m_members[ind].m_aTehai.size()-1);
-					bInserted = FALSE;
-					
-                                        for(i=m_members[ind].m_aTehai.size()-1;i>=0;i--){
-						if(pai >= m_members[ind].m_aTehai[i]){
-                                                        m_members[ind].m_aTehai.insert(i+1,pai);
-							bInserted = TRUE;
-							break;
-						}
-					}
-					
-					if(!bInserted){
-                                                m_members[ind].m_aTehai.insert(0,pai);
-					}
-				}
-				
-				break;
-			case TYPE_TII:
-				ind = getMemberIndex(&value.m_event.m_command.m_player);
-                                m_members[ind].m_gamestate.m_aNakiList.append(value.m_event.m_command.m_mentsu);
-                                for(i=0;i<m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai.size();i++){
-					if(m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].match(value.m_event.m_command.m_pai)){
-						m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].m_bNaki = TRUE;
-						break;
-					}
-				}
-				num = 0;
-                                for(i=0;i<m_members[ind].m_aTehai.size();i++){
-                                        for(j=0;j<value.m_event.m_command.m_mentsu.m_aPaiList.size();j++){
-						if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
-                                                        m_members[ind].m_aTehai.remove(i);
-							i--;
-							num++;
-							break;
-						}
-					}
-				}
+    // イベントを処理する
+    if(value.m_event.m_bActive){
+        if(m_event.m_iSeq != value.m_event.m_iSeq){
+            prevSeq = m_event.m_iSeq;
+            m_event = value.m_event;
+            switch(value.m_event.m_command.m_iType){
+            case TYPE_DAHAI:
+            case TYPE_RIICHI:
+            case TYPE_KOUHAI:
+                if(value.m_event.m_command.m_pai != PAI_NIL){
+                    ind = getMemberIndex(&value.m_event.m_command.m_player);
+                    if(m_pListener != NULL) {
+                        m_pListener->dahaiAdded(this,ind,&m_members[ind],m_members[ind].m_aDahai.size(),&value.m_event.m_command.m_pai);
+                    }
+                    m_members[ind].m_aDahai.append(value.m_event.m_command.m_pai);
+                    m_members[ind].m_aDahai[m_members[ind].m_aDahai.size()-1].m_bLast = TRUE;
+                    bDeleted = m_members[ind].m_aTehai.size() == 0 ? TRUE : FALSE;
 
-				if(num < 2){
-                                        for(i=0;i<m_members[ind].m_aTehai.size();i++){
-						if(m_members[ind].m_aTehai[i] == PAI_NIL){
-                                                        m_members[ind].m_aTehai.remove(i);
-							i--;
-							num++;
-							if(num >= 2) break;
-						}
-					}
-				}
+                    for(i=0;i<m_members[ind].m_aTehai.size();i++){
+                        if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_pai)){
+                            if(m_pListener != NULL){
+                                m_pListener->tehaiRemoved(this,ind,&m_members[ind],i,&value.m_event.m_command.m_pai);
+                            }
+                            m_members[ind].m_aTehai.remove(i);
+                            bDeleted = TRUE;
+                            break;
+                        }
+                    }
 
-#if GLASS_DEBUG
-				if(num < 2){
-					AfxDebugBreak();
-				}
-#endif
+                    if(!bDeleted){
+                        for(i=0;i<m_members[ind].m_aTehai.size();i++){
+                            if(m_members[ind].m_aTehai[i] == PAI_NIL){
+                                if(m_pListener != NULL){
+                                    m_pListener->tehaiRemoved(this,ind,&m_members[ind],i,&m_members[ind].m_aTehai[i]);
+                                }
+                                m_members[ind].m_aTehai.remove(i);
+                                bDeleted = TRUE;
+                                break;
+                            }
+                        }
 
-				bTsumo = FALSE;
-				break;
-			case TYPE_PON:
-				ind = getMemberIndex(&value.m_event.m_command.m_player);
-                                m_members[ind].m_gamestate.m_aNakiList.append(value.m_event.m_command.m_mentsu);
-                                for(i=0;i<m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai.size();i++){
-					if(m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].match(value.m_event.m_command.m_pai)){
-						m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].m_bNaki = TRUE;
-						break;
-					}
-				}
+                        if(!bDeleted){
+                            AfxDebugBreak();
+                        }
+                    }
 
-				num = 0;
-                                for(i=0;i<m_members[ind].m_aTehai.size();i++){
-                                        for(j=0;j<value.m_event.m_command.m_mentsu.m_aPaiList.size();j++){
-						if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
-                                                        m_members[ind].m_aTehai.remove(i);
-							i--;
-							num++;
-							break;
-						}
-					}
-				}
+                    // 手牌を並べ直し
+                    if(m_members[ind].m_aTehai.size() > 0){
+                        pai = m_members[ind].m_aTehai[m_members[ind].m_aTehai.size()-1];
+                        if(m_pListener != NULL){
+                            m_pListener->tehaiRemoved(this,ind,&m_members[ind],i,&pai);
+                        }
+                        m_members[ind].m_aTehai.remove(m_members[ind].m_aTehai.size()-1);
 
-				if(num < 2){
-                                        for(i=0;i<m_members[ind].m_aTehai.size();i++){
-						if(m_members[ind].m_aTehai[i] == PAI_NIL){
-                                                        m_members[ind].m_aTehai.remove(i);
-							i--;
-							num++;
-							if(num >= 2) break;
-						}
-					}
-				}
-#if GLASS_DEBUG
-				if(num < 2){
-					AfxDebugBreak();
-				}
-#endif
+                        bInserted = FALSE;
 
-				bTsumo = FALSE;
-				break;
-			case TYPE_DAIMINKAN:
-				ind = getMemberIndex(&value.m_event.m_command.m_player);
-                                m_members[ind].m_gamestate.m_aNakiList.append(value.m_event.m_command.m_mentsu);
-                                for(i=0;i<m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai.size();i++){
-					if(m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].match(value.m_event.m_command.m_pai)){
-						m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].m_bNaki = TRUE;
-						break;
-					}
-				}
-				
-				num = 0;
-                                for(i=0;i<m_members[ind].m_aTehai.size();i++){
-                                        for(j=0;j<value.m_event.m_command.m_mentsu.m_aPaiList.size();j++){
-						if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
-                                                        m_members[ind].m_aTehai.remove(i);
-							i--;
-							num++;
-							break;
-						}
-					}
-				}
-				if(num < 3){
-                                        for(i=0;i<m_members[ind].m_aTehai.size();i++){
-						if(m_members[ind].m_aTehai[i] == PAI_NIL){
-                                                        m_members[ind].m_aTehai.remove(i);
-							i--;
-							num++;
-							if(num >= 3) break;
-						}
-					}
-				}
-#if GLASS_DEBUG
+                        for(i=m_members[ind].m_aTehai.size()-1;i>=0;i--){
+                            if(pai >= m_members[ind].m_aTehai[i]){
+                                if(m_pListener != NULL){
+                                    m_pListener->tehaiAdded(this,ind,&m_members[ind],i+1,&pai);
+                                }
+                                m_members[ind].m_aTehai.insert(i+1,pai);
+                                bInserted = TRUE;
+                                break;
+                            }
+                        }
 
-				if(num < 3){
-					AfxDebugBreak();
-				}
-#endif
+                        if(!bInserted){
+                            if(m_pListener != NULL){
+                                m_pListener->tehaiAdded(this,ind,&m_members[ind],0,&pai);
+                            }
+                            m_members[ind].m_aTehai.insert(0,pai);
+                        }
+                    }
 
-				break;
-			case TYPE_KUWAEKAN:
-				ind = getMemberIndex(&value.m_event.m_command.m_player);
-                                for(i=0;i<m_members[ind].m_gamestate.m_aNakiList.size();i++){
-					if((UINT)m_members[ind].m_gamestate.m_aNakiList[i].m_nakihai == (UINT)value.m_event.m_command.m_pai){
-                                                m_members[ind].m_gamestate.m_aNakiList.remove(i);
-						break;
-					}
-				}
-                                m_members[ind].m_gamestate.m_aNakiList.append(value.m_event.m_command.m_mentsu);
-				num = 0;
-                                for(i=0;i<m_members[ind].m_aTehai.size();i++){
-                                        for(j=0;j<value.m_event.m_command.m_mentsu.m_aPaiList.size();j++){
-						if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
-                                                        m_members[ind].m_aTehai.remove(i);
-							i--;
-							num++;
-							break;
-						}
-					}
-				}
-				if(num < 1){
-                                        for(i=0;i<m_members[ind].m_aTehai.size();i++){
-						if(m_members[ind].m_aTehai[i] == PAI_NIL){
-                                                        m_members[ind].m_aTehai.remove(i);
-							i--;
-							num++;
-							if(num >= 1) break;
-						}
-					}
-				}
+                    if(value.m_event.m_command.m_iType == TYPE_RIICHI) {
+                        m_members[ind].m_gamestate.m_bRiichi = TRUE;
+                    }
+                }
+                break;
+            case TYPE_TII:
+            case TYPE_PON:
+            case TYPE_DAIMINKAN:
+            case TYPE_ANKAN:
+                if(value.m_event.m_command.m_iType == TYPE_TII || value.m_event.m_command.m_iType == TYPE_PON){
+                    pais = 2;
+                    bTsumo = FALSE;
+                }else if(value.m_event.m_command.m_iType == TYPE_DAIMINKAN){
+                    pais = 3;
+                }else if(value.m_event.m_command.m_iType == TYPE_ANKAN){
+                    pais = 4;
+                }
+                ind = getMemberIndex(&value.m_event.m_command.m_player);
+                if(m_pListener != NULL){
+                    m_pListener->nakiAdded(this,ind,&m_members[ind],&value.m_event.m_command.m_mentsu);
+                }
+                m_members[ind].m_gamestate.m_aNakiList.append(value.m_event.m_command.m_mentsu);
+                for(i=0;i<m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai.size();i++){
+                    if(m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].match(value.m_event.m_command.m_pai)){
+                        if(m_pListener != NULL){
+                            m_pListener->dahaiNaki(this,value.m_event.m_command.m_mentsu.m_iAite,&m_members[value.m_event.m_command.m_mentsu.m_iAite],0,&m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i]);
+                        }
+                        m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai[i].m_bNaki = TRUE;
+                        break;
+                    }
+                }
+                num = 0;
+                for(i=0;i<m_members[ind].m_aTehai.size();i++){
+                    for(j=0;j<value.m_event.m_command.m_mentsu.m_aPaiList.size();j++){
+                        if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
+                            if(m_pListener != NULL){
+                                m_pListener->tehaiRemoved(this,ind,&m_members[ind],i,&m_members[ind].m_aTehai[i]);
+                            }
+                            m_members[ind].m_aTehai.remove(i);
+                            i--;
+                            num++;
+                            break;
+                        }
+                    }
+                }
+
+                if(num < pais){
+                    for(i=0;i<m_members[ind].m_aTehai.size();i++){
+                        if(m_members[ind].m_aTehai[i] == PAI_NIL){
+                            m_members[ind].m_aTehai.remove(i);
+                            if(m_pListener != NULL){
+                                m_pListener->tehaiRemoved(this,ind,&m_members[ind],i,&m_members[ind].m_aTehai[i]);
+                            }
+                            i--;
+                            num++;
+                            if(num >= pais) break;
+                        }
+                    }
+                }
 
 #if GLASS_DEBUG
-				if(num < 1){
-					AfxDebugBreak();
-				}
+                if(num < pais){
+                    AfxDebugBreak();
+                }
 #endif
-				break;
-			case TYPE_ANKAN:
-				ind = getMemberIndex(&value.m_event.m_command.m_player);
-                                m_members[ind].m_gamestate.m_aNakiList.append(value.m_event.m_command.m_mentsu);
-				num = 0;
-                                for(i=0;i<m_members[ind].m_aTehai.size();i++){
-                                        for(j=0;j<value.m_event.m_command.m_mentsu.m_aPaiList.size();j++){
-						if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
-                                                        m_members[ind].m_aTehai.remove(i);
-							i--;
-							num++;
-							break;
-						}
-					}
-				}
-				if(num < 4){
-                                        for(i=0;i<m_members[ind].m_aTehai.size();i++){
-						if(m_members[ind].m_aTehai[i] == PAI_NIL){
-                                                        m_members[ind].m_aTehai.remove(i);
-							i--;
-							num++;
-							if(num >= 4) break;
-						}
-					}
-				}
+                if(value.m_event.m_command.m_iType == TYPE_ANKAN){
+                    // 手牌を並べ直し
+                    if(m_members[ind].m_aTehai.size() > 0){
+                        pai = m_members[ind].m_aTehai[m_members[ind].m_aTehai.size() - 1];
+                        if(m_pListener != NULL){
+                            m_pListener->tehaiRemoved(this,ind,&m_members[ind],m_members[ind].m_aTehai.size() - 1,&pai);
+                        }
+                        m_members[ind].m_aTehai.remove(m_members[ind].m_aTehai.size() - 1);
+                        bInserted = FALSE;
+
+                        for(i=m_members[ind].m_aTehai.size() - 1;i>=0;i--){
+                            if(pai >= m_members[ind].m_aTehai[i]){
+                                if(m_pListener != NULL){
+                                    m_pListener->tehaiAdded(this,ind,&m_members[ind],i+1,&pai);
+                                }
+                                m_members[ind].m_aTehai.insert(i+1,pai);
+                                bInserted = TRUE;
+                                break;
+                            }
+                        }
+
+                        if(!bInserted){
+                            if(m_pListener != NULL){
+                                m_pListener->tehaiAdded(this,ind,&m_members[ind],0,&pai);
+                            }
+                            m_members[ind].m_aTehai.insert(0,pai);
+                        }
+                    }
+                }
+
+                break;
+            case TYPE_KUWAEKAN:
+                ind = getMemberIndex(&value.m_event.m_command.m_player);
+                for(i=0;i<m_members[ind].m_gamestate.m_aNakiList.size();i++){
+                    if((UINT)m_members[ind].m_gamestate.m_aNakiList[i].m_nakihai == (UINT)value.m_event.m_command.m_pai){
+                        if(m_pListener != NULL){
+                            m_pListener->nakiRemoved(this,ind,&m_members[ind],&m_members[ind].m_gamestate.m_aNakiList[i]);
+                        }
+                        m_members[ind].m_gamestate.m_aNakiList.remove(i);
+                        break;
+                    }
+                }
+                if(m_pListener != NULL){
+                    m_pListener->nakiAdded(this,ind,&m_members[ind],&value.m_event.m_command.m_mentsu);
+                }
+                m_members[ind].m_gamestate.m_aNakiList.append(value.m_event.m_command.m_mentsu);
+                num = 0;
+                for(i=0;i<m_members[ind].m_aTehai.size();i++){
+                    for(j=0;j<value.m_event.m_command.m_mentsu.m_aPaiList.size();j++){
+                        if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_mentsu.m_aPaiList[j])){
+                            if(m_pListener != NULL){
+                                m_pListener->tehaiRemoved(this,ind,&m_members[ind],i,&m_members[ind].m_aTehai[i]);
+                            }
+                            m_members[ind].m_aTehai.remove(i);
+                            i--;
+                            num++;
+                            break;
+                        }
+                    }
+                }
+                if(num < 1){
+                    for(i=0;i<m_members[ind].m_aTehai.size();i++){
+                        if(m_members[ind].m_aTehai[i] == PAI_NIL){
+                            if(m_pListener != NULL){
+                                m_pListener->tehaiRemoved(this,ind,&m_members[ind],i,&m_members[ind].m_aTehai[i]);
+                            }
+                            m_members[ind].m_aTehai.remove(i);
+                            i--;
+                            num++;
+                            if(num >= 1) break;
+                        }
+                    }
+                }
 
 #if GLASS_DEBUG
-				if(num < 4){
-					AfxDebugBreak();
-				}
+                if(num < 1){
+                    AfxDebugBreak();
+                }
 #endif
-				// 手牌を並べ直し
-                                if(m_members[ind].m_aTehai.size() > 0){
-                                        pai = m_members[ind].m_aTehai[m_members[ind].m_aTehai.size() - 1];
-                                        m_members[ind].m_aTehai.remove(m_members[ind].m_aTehai.size() - 1);
-					bInserted = FALSE;
-					
-                                        for(i=m_members[ind].m_aTehai.size() - 1;i>=0;i--){
-						if(pai >= m_members[ind].m_aTehai[i]){
-                                                        m_members[ind].m_aTehai.insert(i+1,pai);
-							bInserted = TRUE;
-							break;
-						}
-					}
-					
-					if(!bInserted){
-                                                m_members[ind].m_aTehai.insert(0,pai);
-					}
-				}
+                break;
+            default:
+                break;
+            }
 
-				break;
-			case TYPE_RIICHI:
-				ind = getMemberIndex(&value.m_event.m_command.m_player);
-                                m_members[ind].m_aDahai.append(value.m_event.m_command.m_pai);
-                                m_members[ind].m_aDahai[m_members[ind].m_aDahai.size() - 1].m_bLast = TRUE;
-                                bDeleted = m_members[ind].m_aTehai.size() == 0 ? TRUE : FALSE;
-				
-                                for(i=0;i<m_members[ind].m_aTehai.size();i++){
-					if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_pai)){
-                                                m_members[ind].m_aTehai.remove(i);
-						bDeleted = TRUE;
-						break;
-					}
-				}
-				
-				if(!bDeleted){
-                                        for(i=0;i<m_members[ind].m_aTehai.size();i++){
-						if(m_members[ind].m_aTehai[i] == PAI_NIL){
-                                                        m_members[ind].m_aTehai.remove(i);
-							bDeleted = TRUE;
-							break;
-						}
-					}
-					
-					if(!bDeleted){
-						AfxDebugBreak();
-					}
-				}
-				
-				// 手牌を並べ直し
-                                if(m_members[ind].m_aTehai.size() > 0){
-                                        pai = m_members[ind].m_aTehai[m_members[ind].m_aTehai.size() - 1];
-                                        m_members[ind].m_aTehai.remove(m_members[ind].m_aTehai.size() - 1);
-					bInserted = FALSE;
-					
-                                        for(i=m_members[ind].m_aTehai.size() - 1;i>=0;i--){
-						if(pai >= m_members[ind].m_aTehai[i]){
-                                                        m_members[ind].m_aTehai.insert(i+1,pai);
-							bInserted = TRUE;
-							break;
-						}
-					}
-					
-					if(!bInserted){
-                                                m_members[ind].m_aTehai.insert(0,pai);
-					}
-				}
-				m_members[ind].m_gamestate.m_bRiichi = TRUE;
-				break;
-			case TYPE_KOUHAI:
-				if(value.m_event.m_command.m_pai != PAI_NIL){
-					ind = getMemberIndex(&value.m_event.m_command.m_player);
-                                        m_members[ind].m_aDahai.append(value.m_event.m_command.m_pai);
-                                        bDeleted = m_members[ind].m_aTehai.size() == 0 ? TRUE : FALSE;
-					
-                                        for(i=0;i<m_members[ind].m_aTehai.size();i++){
-						if(m_members[ind].m_aTehai[i].match(value.m_event.m_command.m_pai)){
-                                                        m_members[ind].m_aTehai.remove(i);
-							bDeleted = TRUE;
-							break;
-						}
-					}
-					
-					if(!bDeleted){
-                                                for(i=0;i<m_members[ind].m_aTehai.size();i++){
-							if(m_members[ind].m_aTehai[i] == PAI_NIL){
-                                                                m_members[ind].m_aTehai.remove(i);
-								bDeleted = TRUE;
-								break;
-							}
-						}
-						
-						if(!bDeleted){
-							AfxDebugBreak();
-						}
-					}
-					
-					// 手牌を並べ直し
-                                        if(m_members[ind].m_aTehai.size() > 0){
-                                                pai = m_members[ind].m_aTehai[m_members[ind].m_aTehai.size() - 1];
-                                                m_members[ind].m_aTehai.remove(m_members[ind].m_aTehai.size() - 1);
-						bInserted = FALSE;
-						
-                                                for(i=m_members[ind].m_aTehai.size() - 1;i>=0;i--){
-							if(pai >= m_members[ind].m_aTehai[i]){
-                                                                m_members[ind].m_aTehai.insert(i+1,pai);
-								bInserted = TRUE;
-								break;
-							}
-						}
-						
-						if(!bInserted){
-                                                        m_members[ind].m_aTehai.insert(0,pai);
-						}
-					}
-				}
-				
-				break;
-			default:
-				break;
-			}
+            if(m_aDora.size() < value.m_aDora.size()){
+                m_aDora.copy(value.m_aDora);
+            }
 
-                        if(m_aDora.size() < value.m_aDora.size()){
-                                OM_COPYARRAY(m_aDora,value.m_aDora);
-			}
-			
-                        if(m_aUradora.size() < value.m_aUradora.size()){
-                                OM_COPYARRAY(m_aUradora,value.m_aUradora);
-			}
-			// ツモ牌はコマンドリストから取得する
-			for(i=0;i<4;i++){
-                                m_members[i].m_aCommandList.clear();
-				m_members[i].m_gamestate.m_bTsumo = value.m_members[i].m_gamestate.m_bTsumo;
-				
-				if(m_members[i].m_gamestate.m_bTsumo && value.m_members[i].m_tsumohai != PAI_NOTINIT){
-                                        m_members[i].m_aTehai.append(value.m_members[i].m_tsumohai);
-                                        if(m_members[i].m_aTehai.size() > 14){
-						AfxDebugBreak();
-					}
-				}
-				
-                                for(j=0;j<value.m_members[i].m_aCommandList.size();j++){
-                                        //CCommand *pCom = &value.m_members[i].m_aCommandList[j];
-                                        m_members[i].m_aCommandList.append(value.m_members[i].m_aCommandList[j]);
-				}
-				
-                                if(value.m_members[i].m_aTehai.size() > 0){
-                                        m_members[i].m_aTehai.clear();
-                                        OM_COPYARRAY(m_members[i].m_aTehai,value.m_members[i].m_aTehai);
-				}
-				
-                                m_members[i].m_aResultList.clear();
-                                for(j=0;j<value.m_members[i].m_aResultList.size();j++){
-                                        m_members[i].m_aResultList.append(value.m_members[i].m_aResultList[j]);
-				}
-			}
-		}
-	}
+            if(m_aUradora.size() < value.m_aUradora.size()){
+                m_aUradora.copy(value.m_aUradora);
+            }
+            // ツモ牌はコマンドリストから取得する
+            for(i=0;i<4;i++){
+                m_members[i].m_aCommandList.clear();
+                m_members[i].m_gamestate.m_bTsumo = value.m_members[i].m_gamestate.m_bTsumo;
+
+                if(m_members[i].m_gamestate.m_bTsumo && value.m_members[i].m_tsumohai != PAI_NOTINIT){
+                    if(m_pListener != NULL){
+                        m_pListener->tehaiAdded(this,i,&m_members[i],m_members[i].m_aTehai.size(),&value.m_members[i].m_tsumohai);
+                    }
+                    m_members[i].m_aTehai.append(value.m_members[i].m_tsumohai);
+                    if(m_members[i].m_aTehai.size() > 14){
+                        AfxDebugBreak();
+                    }
+                }
+
+                for(j=0;j<value.m_members[i].m_aCommandList.size();j++){
+                    //CCommand *pCom = &value.m_members[i].m_aCommandList[j];
+                    m_members[i].m_aCommandList.append(value.m_members[i].m_aCommandList[j]);
+                }
+
+                if(value.m_members[i].m_aTehai.size() > 0){
+                    m_members[i].m_aTehai.clear();
+                    m_members[i].m_aTehai.copy(value.m_members[i].m_aTehai);
+                }
+
+                m_members[i].m_aResultList.clear();
+                for(j=0;j<value.m_members[i].m_aResultList.size();j++){
+                    m_members[i].m_aResultList.append(value.m_members[i].m_aResultList[j]);
+                }
+            }
+        }
+    }
 }
 
 
@@ -931,4 +799,9 @@ int OMTaku::getKawahaiEx(int index,MJIKawahai *pKawa)
 
         return member.m_aDahai.size();
 
+}
+
+void OMTaku::setTakuListener(OMTakuListener *pListener)
+{
+    m_pListener = pListener;
 }

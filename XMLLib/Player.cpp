@@ -64,48 +64,52 @@ OMPlayer::~OMPlayer()
 
 }
 
-void OMPlayer::parseXML(QDomNode pElem)
+void OMPlayer::parseXML(OMDomNode pElem)
 {
-    QDomNode pNode;
-    BSTR pStr;
+    OMDomNode pNode;
+    OMString pStr;
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_ID));
+    pNode = OMGetElement(pElem,_T(TAG_ID));
 
-    OM_TOLONG(pNode,m_iId);
+    OMToNum(pNode,m_iId);
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_NAME));
+    pNode = OMGetElement(pElem,_T(TAG_NAME));
 
-    if(!OM_ISNULL(pNode)){
-        OM_GETTEXT(pNode,pStr);
-        m_strName = QString(pStr);
+    if(!OMIsNull(pNode)){
+        OMGetText(pNode,pStr);
+        m_strName = OMString(pStr);
     }
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_PRIVATEID));
-    OM_TOLONG(pNode,m_iPrivateId);
+    pNode = OMGetElement(pElem,_T(TAG_PRIVATEID));
+    OMToNum(pNode,m_iPrivateId);
 }
 
-void OMPlayer::toXML(QDomDocument pDoc,QDomElement pParent)
+void OMPlayer::toXML(OMDomDocument pDoc,OMDomElement pParent)
 {
-    QDomElement pElemPlayer,pElemID,pElemName;
-    QString str;
+    OMDomElement pElemPlayer,pElemID,pElemName;
+    OMString str;
+    OMDomNode pTxtNode;
 
-    pElemPlayer = OM_EVAL(pDoc,createElement(_T(TAG_PLAYER)));
+    pElemPlayer = OMCreateElement(pDoc,_T(TAG_PLAYER));
 
-    pElemID = OM_EVAL(pDoc,createElement(_T(TAG_ID)));
+    pElemID = OMCreateElement(pDoc,_T(TAG_ID));
     str.Format(_T("%d"),m_iId);
-    OM_EVAL(pElemID,appendChild(OM_CREATETEXT(pDoc,str)));
-    OM_EVAL(pElemPlayer,appendChild(pElemID));
+    pTxtNode = OMCreateTextNode(pDoc,str);
+    OMAppendChild(pElemID,pTxtNode);
+    OMAppendChild(pElemPlayer,pElemID);
 
-    pElemName = OM_EVAL(pDoc,createElement(_T(TAG_NAME)));
-    OM_EVAL(pElemName,appendChild(OM_CREATETEXT(pDoc,m_strName)));
-    OM_EVAL(pElemPlayer,appendChild(pElemName));
+    pElemName = OMCreateElement(pDoc,_T(TAG_NAME));
+    pTxtNode = OMCreateTextNode(pDoc,m_strName);
+    OMAppendChild(pElemName,pTxtNode);
+    OMAppendChild(pElemPlayer,pElemName);
 
-    pElemID = OM_EVAL(pDoc,createElement(_T(TAG_PRIVATEID)));
+    pElemID = OMCreateElement(pDoc,_T(TAG_PRIVATEID));
     str.Format(_T("%d"),m_iPrivateId);
-    OM_EVAL(pElemID,appendChild(OM_CREATETEXT(pDoc,str)));
-    OM_EVAL(pElemPlayer,appendChild(pElemID));
+    pTxtNode = OMCreateTextNode(pDoc,str);
+    OMAppendChild(pElemID,pTxtNode);
+    OMAppendChild(pElemPlayer,pElemID);
 
-    OM_EVAL(pParent,appendChild(pElemPlayer));
+    OMAppendChild(pParent,pElemPlayer);
 
 }
 

@@ -1,6 +1,6 @@
 #include "ConnectionException.h"
 
-OMConnectionException::OMConnectionException(QString &message)
+OMConnectionException::OMConnectionException(OMString &message)
     :OMException(message)
 {
 }

@@ -6,7 +6,7 @@
 class OMIllegalStateException : public OMException
 {
 public:
-    OMIllegalStateException(QString &);
+    OMIllegalStateException(OMString &);
 };
 
 #endif // ILLEGALSTATEEXCEPTION_H

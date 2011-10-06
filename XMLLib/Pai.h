@@ -47,9 +47,9 @@ public:
         void set(UINT id);
 	BOOL m_bRiichi;
         void getDora(OMPai&);
-        void getName(QString&);
+        void getName(OMString&);
 	operator UINT();
-        void parseXML(QDomNode);
+        void parseXML(OMDomNode);
 	BOOL m_bTsumogiri;
 	int m_iId;
 	int m_iNo;

@@ -38,7 +38,7 @@ class OMTakuEvent
 public:
 	int m_iSeq;
 	BOOL m_bActive;
-        void parseXML(QDomNode);
+        void parseXML(OMDomNode);
         OMResult m_result;
         OMCommand m_command;
         OMTakuEvent();

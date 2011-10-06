@@ -5,11 +5,11 @@
 class OMException
 {
 public:
-    OMException(QString &);
+    OMException(OMString &);
     virtual ~OMException() {}
-    QString& getMessage();
+    OMString& getMessage();
 protected:
-    QString m_message;
+    OMString m_message;
 };
 
 #endif // EXCEPTION_H

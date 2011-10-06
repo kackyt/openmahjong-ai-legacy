@@ -37,9 +37,9 @@ class OMMentsu
 {
 public:
         OMMentsu& operator=(OMMentsu& value);
-        virtual void parseXML(QDomNode);
+        virtual void parseXML(OMDomNode);
 	int m_iCategory;
-        OM_DEFARRAY(OMPai) m_aPaiList;
+        OMArray<OMPai> m_aPaiList;
         OMMentsu();
         virtual ~OMMentsu();
 

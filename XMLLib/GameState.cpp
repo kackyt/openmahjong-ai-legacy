@@ -52,50 +52,50 @@ OMGameState::~OMGameState()
 
 }
 
-void OMGameState::parseXML(QDomNode pElem)
+void OMGameState::parseXML(OMDomNode pElem)
 {
-    QDomNode pNode;
-    QDomNodeList pNodeList;
+    OMDomNode pNode;
+    OMDomNodeList pNodeList;
     int i;
 
     /* ÉXÉJÉâÅ[ÉfÅ[É^ÇÃäiî[ */
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_ZIKAZE));
+    pNode = OMGetElement(pElem,_T(TAG_ZIKAZE));
 
-    OM_TOLONG(pNode,m_iZikaze);
+    OMToNum(pNode,m_iZikaze);
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_COUNT));
+    pNode = OMGetElement(pElem,_T(TAG_COUNT));
 
-    OM_TOLONG(pNode,m_iCount);
+    OMToNum(pNode,m_iCount);
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_OYA));
+    pNode = OMGetElement(pElem,_T(TAG_OYA));
 
-    OM_TOBOOL(pNode,m_bOya);
+    OMToBool(pNode,m_bOya);
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_NAKI));
+    pNode = OMGetElement(pElem,_T(TAG_NAKI));
 
-    OM_TOBOOL(pNode,m_bNaki);
+    OMToBool(pNode,m_bNaki);
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_RIICHI));
+    pNode = OMGetElement(pElem,_T(TAG_RIICHI));
 
-    OM_TOBOOL(pNode,m_bRiichi);
+    OMToBool(pNode,m_bRiichi);
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_IPPATSU));
+    pNode = OMGetElement(pElem,_T(TAG_IPPATSU));
 
-    OM_TOBOOL(pNode,m_bIppatsu);
+    OMToBool(pNode,m_bIppatsu);
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_TSUMO));
+    pNode = OMGetElement(pElem,_T(TAG_TSUMO));
 
-    OM_TOBOOL(pNode,m_bTsumo);
+    OMToBool(pNode,m_bTsumo);
 
     /* ñ¬Ç´ñ éqÇÃäiî[ */
     m_aNakiList.clear();
-    pNodeList = OM_GETELEMENTLIST(pElem,_T(TAG_NAKILIST "/" TAG_NAKIMENTSU));
+    pNodeList = OMGetElementList(pElem,_T(TAG_NAKILIST "/" TAG_NAKIMENTSU));
 
-    if(!OM_ISEMPTY(pNodeList)){
-        for(i=0;i<OM_LISTLENGTH(pNodeList);i++){
+    if(!OMIsEmpty(pNodeList)){
+        for(i=0;i<OMListLength(pNodeList);i++){
             OMNakiMentsu mentsu;
-            pNode = OM_LISTITEM(pNodeList,i);
+            pNode = OMListItem(pNodeList,i);
             mentsu.parseXML(pNode);
             m_aNakiList.append(mentsu);
         }

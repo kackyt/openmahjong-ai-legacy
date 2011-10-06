@@ -39,8 +39,8 @@ public:
 	int m_iAotenjo;
 	int m_iAka;
 	BOOL m_bActive;
-        void toXML(QDomDocument,QDomElement);
-        void parseXML(QDomNode);
+        void toXML(OMDomDocument,OMDomElement);
+        void parseXML(OMDomNode);
 	int m_iKuitan;
 	int m_iGlasshai;
         OMRule();

@@ -39,14 +39,14 @@ class OMCommand
 {
 public:
         OMRule m_rule;
-        void toXML(QDomDocument,QDomElement);
+        void toXML(OMDomDocument,OMDomElement);
 #ifdef _MSC_VER
         OMCommand& operator=(OMCommand&);
 #else
         OMCommand& operator=(const OMCommand&);
 #endif
         OMNakiMentsu m_mentsu;
-        void parseXML(QDomNode);
+        void parseXML(OMDomNode);
         OMPai m_pai;
         OMPlayer m_player;
 	int m_iType;

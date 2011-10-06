@@ -53,65 +53,71 @@ OMRule::~OMRule()
 
 }
 
-void OMRule::parseXML(QDomNode pElem)
+void OMRule::parseXML(OMDomNode pElem)
 {
-        QDomNode pNode;
+        OMDomNode pNode;
 
 	m_bActive = TRUE;
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_GLASSHAI));
+        pNode = OMGetElement(pElem,_T(TAG_GLASSHAI));
 
-        OM_TOLONG(pNode,m_iGlasshai);
+        OMToNum(pNode,m_iGlasshai);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_KUITAN));
+        pNode = OMGetElement(pElem,_T(TAG_KUITAN));
 
-        OM_TOLONG(pNode,m_iKuitan);
+        OMToNum(pNode,m_iKuitan);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_AKA));
+        pNode = OMGetElement(pElem,_T(TAG_AKA));
 
-        OM_TOLONG(pNode,m_iAka);
+        OMToNum(pNode,m_iAka);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_AOTENJO));
+        pNode = OMGetElement(pElem,_T(TAG_AOTENJO));
 
-        OM_TOLONG(pNode,m_iAotenjo);
+        OMToNum(pNode,m_iAotenjo);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_HAIPAI));
+        pNode = OMGetElement(pElem,_T(TAG_HAIPAI));
 
-        OM_TOLONG(pNode,m_iHaipai);
+        OMToNum(pNode,m_iHaipai);
 }
 
-void OMRule::toXML(QDomDocument pDoc,QDomElement pParent)
+void OMRule::toXML(OMDomDocument pDoc,OMDomElement pParent)
 {
-        QDomElement pElemKey,pElemRule;
-        QString str;
+        OMDomElement pElemKey,pElemRule;
+        OMDomNode pTxtNode;
+        OMString str;
 
-        pElemRule = OM_EVAL(pDoc,createElement(_T(TAG_RULE)));
+        pElemRule = OMCreateElement(pDoc,_T(TAG_RULE));
 
-        pElemKey = OM_EVAL(pDoc,createElement(_T(TAG_GLASSHAI)));
+        pElemKey = OMCreateElement(pDoc,_T(TAG_GLASSHAI));
 	str.Format(_T("%d"),m_iGlasshai);
-        OM_EVAL(pElemKey,appendChild(OM_CREATETEXT(pDoc,str)));
-        OM_EVAL(pElemRule,appendChild(pElemKey));
+        pTxtNode = OMCreateTextNode(pDoc,str);
+        OMAppendChild(pElemKey,pTxtNode);
+        OMAppendChild(pElemRule,pElemKey);
 
-        pElemKey = OM_EVAL(pDoc,createElement(_T(TAG_KUITAN)));
+        pElemKey = OMCreateElement(pDoc,_T(TAG_KUITAN));
 	str.Format(_T("%d"),m_iKuitan);
-        OM_EVAL(pElemKey,appendChild(OM_CREATETEXT(pDoc,str)));
-        OM_EVAL(pElemRule,appendChild(pElemKey));
+        pTxtNode = OMCreateTextNode(pDoc,str);
+        OMAppendChild(pElemKey,pTxtNode);
+        OMAppendChild(pElemRule,pElemKey);
 
-        pElemKey = OM_EVAL(pDoc,createElement(_T(TAG_AKA)));
+        pElemKey = OMCreateElement(pDoc,_T(TAG_AKA));
 	str.Format(_T("%d"),m_iAka);
-        OM_EVAL(pElemKey,appendChild(OM_CREATETEXT(pDoc,str)));
-        OM_EVAL(pElemRule,appendChild(pElemKey));
+        pTxtNode = OMCreateTextNode(pDoc,str);
+        OMAppendChild(pElemKey,pTxtNode);
+        OMAppendChild(pElemRule,pElemKey);
 
-        pElemKey = OM_EVAL(pDoc,createElement(_T(TAG_AOTENJO)));
+        pElemKey = OMCreateElement(pDoc,_T(TAG_AOTENJO));
 	str.Format(_T("%d"),m_iAotenjo);
-        OM_EVAL(pElemKey,appendChild(OM_CREATETEXT(pDoc,str)));
-        OM_EVAL(pElemRule,appendChild(pElemKey));
+        pTxtNode = OMCreateTextNode(pDoc,str);
+        OMAppendChild(pElemKey,pTxtNode);
+        OMAppendChild(pElemRule,pElemKey);
 
-        pElemKey = OM_EVAL(pDoc,createElement(_T(TAG_HAIPAI)));
+        pElemKey = OMCreateElement(pDoc,_T(TAG_HAIPAI));
 	str.Format(_T("%d"),m_iHaipai);
-        OM_EVAL(pElemKey,appendChild(OM_CREATETEXT(pDoc,str)));
-        OM_EVAL(pElemRule,appendChild(pElemKey));
+        pTxtNode = OMCreateTextNode(pDoc,str);
+        OMAppendChild(pElemKey,pTxtNode);
+        OMAppendChild(pElemRule,pElemKey);
 
-        OM_EVAL(pParent,appendChild(pElemRule));
+        OMAppendChild(pParent,pElemRule);
 
 }

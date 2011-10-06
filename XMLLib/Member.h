@@ -40,15 +40,16 @@
 class OMMember
 {
 public:
+        static int getChaDistance(int x,int y);
         OMPai m_tsumohai;
         OMMember& operator = (OMMember&);
         BOOL isExecutableCommand(OMCommand&);
         OMGameState m_gamestate;
-        void parseXML(QDomNode);
-        OM_DEFARRAY(OMResult) m_aResultList;
-        OM_DEFARRAY(OMCommand) m_aCommandList;
-        OM_DEFARRAY(OMPai) m_aTehai;
-        OM_DEFARRAY(OMPai) m_aDahai;
+        void parseXML(OMDomNode);
+        OMArray<OMResult> m_aResultList;
+        OMArray<OMCommand> m_aCommandList;
+        OMArray<OMPai> m_aTehai;
+        OMArray<OMPai> m_aDahai;
 	int m_iState;
 	int m_iPoint;
         OMPlayer m_player;

@@ -46,30 +46,30 @@ OMMember::~OMMember()
 
 }
 
-void OMMember::parseXML(QDomNode pElem)
+void OMMember::parseXML(OMDomNode pElem)
 {
-        QDomNode pNode;
-        QDomNodeList pNodeList;
+        OMDomNode pNode;
+        OMDomNodeList pNodeList;
 	int i;
 
 	/* ÉXÉJÉâÅ[ÉfÅ[É^ÇÃäiî[ */
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_MSTATE));
+        pNode = OMGetElement(pElem,_T(TAG_MSTATE));
 
-        OM_TOLONG(pNode,m_iState);
+        OMToNum(pNode,m_iState);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_POINT));
+        pNode = OMGetElement(pElem,_T(TAG_POINT));
 
-        OM_TOLONG(pNode,m_iPoint);
+        OMToNum(pNode,m_iPoint);
 
 	/* ë≈îvÇÃäiî[ */
         m_aDahai.clear();
-        pNodeList = OM_GETELEMENTLIST(pElem,_T(TAG_DAHAI "/"  TAG_PAI));
+        pNodeList = OMGetElementList(pElem,_T(TAG_DAHAI "/"  TAG_PAI));
 
-        if(!OM_ISEMPTY(pNodeList)){
-            for(i=0;i<OM_LISTLENGTH(pNodeList);i++){
+        if(!OMIsEmpty(pNodeList)){
+            for(i=0;i<OMListLength(pNodeList);i++){
                         OMPai pai;
-                        pNode = OM_LISTITEM(pNodeList,i);
+                        pNode = OMListItem(pNodeList,i);
                         pai.parseXML(pNode);
                         m_aDahai.append(pai);
 		}
@@ -77,12 +77,12 @@ void OMMember::parseXML(QDomNode pElem)
 
 	/* éËîvÇÃäiî[ */
         m_aTehai.clear();
-        pNodeList = OM_GETELEMENTLIST(pElem,_T(TAG_TEHAI "/" TAG_PAI));
+        pNodeList = OMGetElementList(pElem,_T(TAG_TEHAI "/" TAG_PAI));
 
-        if(!OM_ISEMPTY(pNodeList)){
-            for(i=0;i<OM_LISTLENGTH(pNodeList);i++){
+        if(!OMIsEmpty(pNodeList)){
+            for(i=0;i<OMListLength(pNodeList);i++){
                         OMPai pai;
-                        pNode = OM_LISTITEM(pNodeList,i);
+                        pNode = OMListItem(pNodeList,i);
                         pai.parseXML(pNode);
                         m_aTehai.append(pai);
 		}
@@ -90,24 +90,24 @@ void OMMember::parseXML(QDomNode pElem)
 
 	/* ÉRÉ}ÉìÉhÉäÉXÉgÇÃäiî[ */
         m_aCommandList.clear();
-        pNodeList = OM_GETELEMENTLIST(pElem,_T(TAG_COMMANDLIST "/" TAG_COMMAND));
+        pNodeList = OMGetElementList(pElem,_T(TAG_COMMANDLIST "/" TAG_COMMAND));
 
-        if(!OM_ISEMPTY(pNodeList)){
-            for(i=0;i<OM_LISTLENGTH(pNodeList);i++){
+        if(!OMIsEmpty(pNodeList)){
+            for(i=0;i<OMListLength(pNodeList);i++){
                         OMCommand com;
-                        pNode = OM_LISTITEM(pNodeList,i);
+                        pNode = OMListItem(pNodeList,i);
                         com.parseXML(pNode);
                         m_aCommandList.append(com);
 		}
 	}
 
 	/* ÉcÉÇîvÇÃäiî[ */
-        pNode = OM_GETELEMENT(pElem,_T(TAG_TSUMOHAI));
+        pNode = OMGetElement(pElem,_T(TAG_TSUMOHAI));
 
-        if(!OM_ISNULL(pNode)){
+        if(!OMIsNull(pNode)){
 		m_gamestate.m_bTsumo = TRUE;
-                pNode = OM_GETELEMENT(pElem,_T(TAG_TSUMOHAI "/" TAG_PAI));
-                if(!OM_ISNULL(pNode)){
+                pNode = OMGetElement(pElem,_T(TAG_TSUMOHAI "/" TAG_PAI));
+                if(!OMIsNull(pNode)){
 			m_tsumohai.parseXML(pNode);
 		}
 	}else{
@@ -117,27 +117,27 @@ void OMMember::parseXML(QDomNode pElem)
 
 	/* ÉvÉåÅ[ÉÑÅ[ÇÃäiî[ */
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_PLAYER));
+        pNode = OMGetElement(pElem,_T(TAG_PLAYER));
 
-        if(!OM_ISNULL(pNode)){
+        if(!OMIsNull(pNode)){
 		m_player.parseXML(pNode);
 	}
 
 	/* ÉQÅ[ÉÄèÛë‘ÇÃäiî[ */
-        pNode = OM_GETELEMENT(pElem,_T(TAG_GAMESTATE));
+        pNode = OMGetElement(pElem,_T(TAG_GAMESTATE));
 
-        if(!OM_ISNULL(pNode)){
+        if(!OMIsNull(pNode)){
 		m_gamestate.parseXML(pNode);
 	}
 
 	/* Ç†Ç™ÇËÇÃäiî[ */
         m_aResultList.clear();
-        pNodeList = OM_GETELEMENTLIST(pElem,_T(TAG_RESULTLIST "/" TAG_RESULT));
+        pNodeList = OMGetElementList(pElem,_T(TAG_RESULTLIST "/" TAG_RESULT));
 
-        if(!OM_ISEMPTY(pNodeList)){
-            for(i=0;i<OM_LISTLENGTH(pNodeList);i++){
+        if(!OMIsEmpty(pNodeList)){
+            for(i=0;i<OMListLength(pNodeList);i++){
                         OMResult res;
-                        pNode = OM_LISTITEM(pNodeList,i);
+                        pNode = OMListItem(pNodeList,i);
                         res.parseXML(pNode);
                         m_aResultList.append(res);
 		}
@@ -165,16 +165,27 @@ OMMember& OMMember::operator =(OMMember& value)
         for(i=0;i<value.m_aCommandList.size();i++){
                 m_aCommandList.append(value.m_aCommandList[i]);
 	}
-        OM_COPYARRAY(m_aDahai,value.m_aDahai);
+        m_aDahai.copy(value.m_aDahai);
         m_aResultList.clear();
         for(i=0;i<value.m_aResultList.size();i++){
                 m_aResultList.append(value.m_aResultList[i]);
 	}
-        OM_COPYARRAY(m_aTehai,value.m_aTehai);
+        m_aTehai.copy(value.m_aTehai);
 	m_gamestate = value.m_gamestate;
 	m_iPoint = value.m_iPoint;
 	m_iState = value.m_iState;
 	m_player = value.m_player;
 
 	return *this;
+}
+
+/* ÇªÇÍÇºÇÍÇÃâ∆ÇÃãóó£Çï‘Ç∑
+  0 - é©êg
+  1 - â∫â∆
+  2 - ëŒñ 
+  3 - è„â∆
+  */
+int OMMember::getChaDistance(int x, int y)
+{
+    return (y - x + 4) % 4;
 }

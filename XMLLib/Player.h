@@ -50,8 +50,8 @@ class OMPlayer
 public:
     static const UINT ieTable[][4];
     int m_iPrivateId;
-    void toXML(QDomDocument,QDomElement);
-    void parseXML(QDomNode);
+    void toXML(OMDomDocument,OMDomElement);
+    void parseXML(OMDomNode);
     UINT onPlayerAction(OMTaku *,OMPlayerActionParam&);
     UINT onSutehai(OMTaku *,OMCommand&);
 
@@ -60,7 +60,7 @@ public:
     MJPIFunc m_pFunc;
     void* m_pInst;
     BOOL m_bIsComp;
-    QString m_strName;
+    OMString m_strName;
     int m_iId;
     OMPlayer();
     virtual ~OMPlayer();

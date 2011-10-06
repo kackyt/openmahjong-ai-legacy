@@ -48,69 +48,71 @@ OMMessage::~OMMessage()
 
 }
 
-void OMMessage::parseXML(QDomNode pElem)
+void OMMessage::parseXML(OMDomNode pElem)
 {
-        QDomNode pNode;
-        QDomNodeList pNodeList;
-	BSTR pStr;
+        OMDomNode pNode;
+        OMDomNodeList pNodeList;
+        OMString pStr;
 	int i;
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_TEXT));
+        pNode = OMGetElement(pElem,_T(TAG_TEXT));
 
-        if(!OM_ISNULL(pNode)){
-                OM_GETTEXT(pNode,pStr);
-                m_strText = QString(pStr);
+        if(!OMIsNull(pNode)){
+                OMGetText(pNode,pStr);
+                m_strText = OMString(pStr);
 	}
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_FROM "/" TAG_PLAYER));
+        pNode = OMGetElement(pElem,_T(TAG_FROM "/" TAG_PLAYER));
 
-        if(!OM_ISNULL(pNode)){
+        if(!OMIsNull(pNode)){
 		m_playerFrom.parseXML(pNode);
 	}
 
-        pNodeList = OM_GETELEMENTLIST(pElem,_T(TAG_TEHAI "/" TAG_PAI));
+        pNodeList = OMGetElementList(pElem,_T(TAG_TEHAI "/" TAG_PAI));
 
-        if(!OM_ISEMPTY(pNodeList)){
-            for(i=0;i<OM_LISTLENGTH(pNodeList);i++){
+        if(!OMIsEmpty(pNodeList)){
+            for(i=0;i<OMListLength(pNodeList);i++){
                         OMPlayer player;
-                        pNode = OM_LISTITEM(pNodeList,i);
+                        pNode = OMListItem(pNodeList,i);
 			player.parseXML(pNode);
                         m_aPlayerTo.append(player);
 		}
 	}
 }
 
-void OMMessage::toXML(QDomDocument pDoc,QDomElement pParent)
+void OMMessage::toXML(OMDomDocument pDoc,OMDomElement pParent)
 {
-        QDomElement pElemMes,pElemTo,pElemFrom,pElemText;
+        OMDomElement pElemMes,pElemTo,pElemFrom,pElemText;
+        OMDomNode pTxtNode;
 	int i;
 
-        pElemMes = OM_EVAL(pDoc,createElement(_T(TAG_MESSAGE)));
+        pElemMes = OMCreateElement(pDoc,_T(TAG_MESSAGE));
 
-        pElemTo = OM_EVAL(pDoc,createElement(_T(TAG_TO)));
+        pElemTo = OMCreateElement(pDoc,_T(TAG_TO));
 
         for(i=0;i<m_aPlayerTo.size();i++){
 		m_aPlayerTo[i].toXML(pDoc,pElemTo);
 	}
 
-        OM_EVAL(pElemMes,appendChild(pElemTo));
+        OMAppendChild(pElemMes,pElemTo);
 
 
-        pElemFrom = OM_EVAL(pDoc,createElement(_T(TAG_FROM)));
+        pElemFrom = OMCreateElement(pDoc,_T(TAG_FROM));
 	m_playerFrom.toXML(pDoc,pElemFrom);
-        OM_EVAL(pElemMes,appendChild(pElemFrom));
+        OMAppendChild(pElemMes,pElemFrom);
 
-        pElemText = OM_EVAL(pDoc,createElement(_T(TAG_TEXT)));
-        OM_EVAL(pElemText,appendChild(OM_CREATETEXT(pDoc,m_strText)));
-        OM_EVAL(pElemMes,appendChild(pElemText));
+        pElemText = OMCreateElement(pDoc,_T(TAG_TEXT));
+        pTxtNode = OMCreateTextNode(pDoc,m_strText);
+        OMAppendChild(pElemText,pTxtNode);
+        OMAppendChild(pElemMes,pElemText);
 
-        OM_EVAL(pParent,appendChild(pElemMes));
+        OMAppendChild(pParent,pElemMes);
 
 }
 
 OMMessage& OMMessage::operator =(OMMessage& value)
 {
-        OM_COPYARRAY(m_aPlayerTo,value.m_aPlayerTo);
+        m_aPlayerTo.copy(value.m_aPlayerTo);
 
 	m_playerFrom = value.m_playerFrom;
 

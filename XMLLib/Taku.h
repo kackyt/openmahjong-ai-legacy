@@ -37,6 +37,9 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+class OMTakuListener;
+
+
 class OMTaku
 {
 public:
@@ -44,24 +47,28 @@ public:
         void getMJITehai(int,MJITehai1 *,OMRule&);
         void update(OMTaku&);
         OMTaku& operator=(OMTaku&);
-        void printState(int,QString&);
+        void printState(int,OMString&);
 	int getVisibleHais(UINT,int);
 	int getKawahai(int,UINT*);
 	void getMJITehai(int,MJITehai*);
         int getMemberIndex(OMPlayer*);
         OMTakuEvent m_event;
         OMMember m_members[4];
-        void parseXML(QDomNode);
+        void parseXML(OMDomNode);
 	int m_iYama;
 	int m_iTsumibou;
 	int m_iRiichibou;
 	int m_iKyokuCount;
 	int m_iBakaze;
-        OM_DEFARRAY(OMPai) m_aUradora;
-        OM_DEFARRAY(OMPai) m_aDora;
+        OMArray<OMPai> m_aUradora;
+        OMArray<OMPai> m_aDora;
 	int m_iTurn;
         OMTaku();
         virtual ~OMTaku();
+        void setTakuListener(OMTakuListener *pListener);
+protected:
+        OMTakuListener *m_pListener;
+
 
 };
 

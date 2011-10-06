@@ -46,69 +46,69 @@ OMResult::~OMResult()
 
 }
 
-void OMResult::parseXML(QDomNode pElem)
+void OMResult::parseXML(OMDomNode pElem)
 {
-        QDomNode pNode;
-        QDomNodeList pNodeList;
-        QString text;
-	BSTR pStr;
+        OMDomNode pNode;
+        OMDomNodeList pNodeList;
+        OMString text;
+        OMString pStr;
 	int i;
 
 	m_bActive = TRUE;
 
 	/* スカラーデータの格納 */
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_DORAKAZU));
+        pNode = OMGetElement(pElem,_T(TAG_DORAKAZU));
 
-        OM_TOLONG(pNode,m_iDorakazu);
+        OMToNum(pNode,m_iDorakazu);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_HAN));
+        pNode = OMGetElement(pElem,_T(TAG_HAN));
 
-        OM_TOLONG(pNode,m_iHan);
+        OMToNum(pNode,m_iHan);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_FU));
+        pNode = OMGetElement(pElem,_T(TAG_FU));
 
-        OM_TOLONG(pNode,m_iFu);
+        OMToNum(pNode,m_iFu);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_MACHI));
+        pNode = OMGetElement(pElem,_T(TAG_MACHI));
 
-        OM_TOLONG(pNode,m_iMachi);
+        OMToNum(pNode,m_iMachi);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_MANGAN));
+        pNode = OMGetElement(pElem,_T(TAG_MANGAN));
 
-        OM_TOLONG(pNode,m_iMangan);
+        OMToNum(pNode,m_iMangan);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_SCORE));
+        pNode = OMGetElement(pElem,_T(TAG_SCORE));
 
-        OM_TOLONG(pNode,m_iScore);
+        OMToNum(pNode,m_iScore);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_OYASCORE));
+        pNode = OMGetElement(pElem,_T(TAG_OYASCORE));
 
-        OM_TOLONG(pNode,m_iOyaScore);
+        OMToNum(pNode,m_iOyaScore);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_KOSCORE));
+        pNode = OMGetElement(pElem,_T(TAG_KOSCORE));
 
-        OM_TOLONG(pNode,m_iKoScore);
+        OMToNum(pNode,m_iKoScore);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_TSUMO));
+        pNode = OMGetElement(pElem,_T(TAG_TSUMO));
 
-        OM_TOBOOL(pNode,m_bTsumo);
+        OMToBool(pNode,m_bTsumo);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_MACHIHAI "/" TAG_PAI));
+        pNode = OMGetElement(pElem,_T(TAG_MACHIHAI "/" TAG_PAI));
 
-        if(!OM_ISNULL(pNode)){
+        if(!OMIsNull(pNode)){
 		m_machihai.parseXML(pNode);
 	}
 
 	/* 役名リストを格納 */
         m_aYaku.clear();
-        pNodeList = OM_GETELEMENTLIST(pElem,_T(TAG_YAKU));
+        pNodeList = OMGetElementList(pElem,_T(TAG_YAKU));
 
-        if(!OM_ISEMPTY(pNodeList)){
-            for(i=0;i<OM_LISTLENGTH(pNodeList);i++){
-                pNode = OM_LISTITEM(pNodeList,i);
-                OM_GETTEXT(pNode,pStr);
-                text = QString(pStr);
+        if(!OMIsEmpty(pNodeList)){
+            for(i=0;i<OMListLength(pNodeList);i++){
+                pNode = OMListItem(pNodeList,i);
+                OMGetText(pNode,pStr);
+                text = OMString(pStr);
                 m_aYaku.append(text);
             }
 	}
@@ -133,7 +133,7 @@ OMResult& OMResult::operator=(const OMResult& value)
 	m_iKoScore = value.m_iKoScore;
 	m_bTsumo = value.m_bTsumo;
 	m_machihai = value.m_machihai;
-        OM_COPYARRAY(m_aYaku,((OMResult&)value).m_aYaku);
+        m_aYaku.copy(((OMResult&)value).m_aYaku);
 
 	return *this;
 }

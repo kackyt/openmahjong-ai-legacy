@@ -6,7 +6,7 @@
 class OMConnectionException : public OMException
 {
 public:
-    OMConnectionException(QString&);
+    OMConnectionException(OMString&);
 };
 
 #endif // CONNECTIONEXCEPTION_H

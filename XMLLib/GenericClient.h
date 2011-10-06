@@ -35,12 +35,14 @@ public:
     void gameStart();
     void gameStop();
     void sendLibrary(OMLibrary&);
-    void sendCommand(OM_DEFARRAY(OMCommand)&,QString&);
-    int sendCommand(OMCommand&,QString&);
+    void sendCommand(OMArray<OMCommand>&,OMString&);
+    int sendCommand(OMCommand&,OMString&);
     void connect(OM_CONNECTION_TYPE contype,int session = 0);
     void setClientListener(OMClientListener *pListener);
-    void setPlayerName(OM_DEFARRAY(QString)&playernames,OM_DEFARRAY(QString)&compnames);
-    void getPlayerName(OM_DEFARRAY(QString)&playernames) const;
+    void setPlayerName(OMArray<OMString>&playernames,OMArray<OMString>&compnames);
+    void getPlayerName(OMArray<OMString>&playernames) const;
+    int getPlayerIndex() const;
+    int getSessionNum() const;
 protected:
     OMRule m_rule;
     BOOL m_bBusy;
@@ -55,10 +57,10 @@ protected:
     int m_iCurState;
     OMPlayer m_players[4];
     OMPlayer *m_pCurPlayer;
-    OMClientListener *m_pListener;
     OM_GAME_STATE m_gamestate;
+    OMClientListener *m_pListener;
     /* HTTPによりサーバーに文字列を送受信するメソッドをサブクラスで実装してください */
-    virtual void sendString(QString& sendMessage,QString& recvMessage) = 0;
+    virtual void sendString(OMString& sendMessage,OMString& recvMessage) = 0;
 
 };
 

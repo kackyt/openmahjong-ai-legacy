@@ -1,6 +1,6 @@
 #include "Exception.h"
 
-OMException::OMException(QString &message)
+OMException::OMException(OMString &message)
     : m_message(message)
 {
 }

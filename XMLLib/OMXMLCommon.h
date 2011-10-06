@@ -68,6 +68,73 @@ static inline void OM_GETATTRIBUTE(QDomNode inst,LPCTSTR name,QString &text){
 
 #else
 #include <QtXml>
+#include <QVector>
+typedef QDomNode OMDomNode;
+typedef QDomElement OMDomElement;
+typedef QDomDocument OMDomDocument;
+typedef QDomNodeList OMDomNodeList;
+#define XMLOBJ_ISPOINTER (0)
+
+class OMString : public QString {
+public:
+    OMString() {}
+    OMString(const char *str) : QString(str) {}
+    OMString(const OMString &inst) : QString(inst) {}
+    OMString(const QString &inst) : QString(inst) {}
+
+    void Format(const char *format,...)
+    {
+        va_list ap;
+        va_start(ap,format);
+        this->vsprintf(format,ap);
+        va_end(ap);
+    }
+
+};
+
+template <typename T> class OMArray{
+private:
+    QVector<T> inst;
+
+public:
+    int size() {
+        return inst.size();
+    }
+    void clear() {
+        inst.clear();
+    }
+    void remove(int index) {
+        inst.remove(index);
+    }
+    T & operator[](int index){
+        return inst[index];
+    }
+    void insert(int index,const T& value){
+        inst.insert(index,value);
+    }
+
+    void append(const T&value){
+        inst.append(value);
+    }
+
+    void copy(OMArray<T> &dst){
+        dst = *this;
+    }
+};
+
+typedef char TCHAR;
+typedef int BOOL;
+typedef uint UINT;
+typedef long LONG;
+typedef ushort USHORT;
+typedef void* LPVOID;
+#define WINAPI __stdcall
+#define _T(str) (str)
+#define AfxDebugBreak()
+
+
+#if 0
+
 #define OM_DEFARRAY(type) QVector<type>
 #define OM_EVAL(inst,func)  (inst).func
 #define OM_CREATEDOCUMENT(inst)
@@ -93,12 +160,24 @@ static inline QDomElement OM_GETELEMENT(QDomNode inst,QString name) {
 
 static inline QDomNodeList OM_GETELEMENTLIST(QDomNode inst,QString name) {
     QStringList list = name.split("/");
-    QDomElement node = inst.toElement();
+    QDomElement node;
     QDomNodeList nodelist;
     QString nm;
-    while(list.size() > 1 && !node.isNull()){
+    bool isFirst = true;
+
+    while(list.size() > 1){
         nm = list.takeFirst();
-        node = node.firstChildElement(nm);
+        if(isFirst){
+            node = inst.firstChildElement(nm);
+            isFirst = false;
+        }else{
+            node = node.firstChildElement(nm);
+        }
+        if(node.isNull()) break;
+    }
+
+    if(isFirst){
+        node = inst.toElement();
     }
 
     if(!node.isNull()){
@@ -118,29 +197,6 @@ static inline QDomNodeList OM_GETELEMENTLIST(QDomNode inst,QString name) {
 #define OM_COPYARRAY(dst,src) ((dst) = (src))
 #define OM_TOXML(inst,str) (str = (inst).toString(-1))
 #define OM_GETATTRIBUTE(inst,name,text) (text = inst.attribute(name))
-
-#define _T(str) (str)
-#define Format sprintf
-typedef QString BSTR;
-typedef char TCHAR;
-typedef int BOOL;
-typedef uint UINT;
-typedef long LONG;
-typedef ushort USHORT;
-typedef void* LPVOID;
-#define WINAPI __stdcall
-//#define TRUE (1)
-//#define FALSE (0)
-#define AfxDebugBreak()
-#define OM_SLEEP(tim) { \
-    QMutex mutex;\
-    QWaitCondition wc;\
-    mutex.lock();\
-    wc.wait(&mutex,(tim));\
-    mutex.unlock();\
-    }
-
-#endif
 
 static inline void OM_TOLONG(QDomNode inst,int &val)
 {
@@ -170,4 +226,61 @@ static inline void OM_TOLONG(QDomNode inst,int &val)
         text = QString(pStr);\
         val = (text == _T("true")) ? TRUE : FALSE;\
     }
+
+
+#define Format sprintf
+//#define TRUE (1)
+//#define FALSE (0)
+#define OM_SLEEP(tim) { \
+    QMutex mutex;\
+    QWaitCondition wc;\
+    mutex.lock();\
+    wc.wait(&mutex,(tim));\
+    mutex.unlock();\
+    }
+
+#endif
+#endif
+
+extern long OMStrtol(OMString val);
+extern void OMNumToStr(OMString &str,int val);
+
+#if XMLOBJ_ISPOINTER == 1
+extern void OMCreateDocument(OMDomDocument inst);
+extern void OMLoadXML(OMDomDocument inst,OMString &str);
+extern OMDomElement OMGetElement(OMDomNode node,OMString name);
+extern OMDomNodeList OMGetElementList(OMDomNode node,OMString name);
+extern void OMToXML(OMDomDocument inst,OMString &str);
+extern int OMListLength(OMDomNodeList list);
+extern OMDomNode OMListItem(OMDomNodeList list,int index);
+extern void OMGetAttribute(OMDomElement inst,OMString name,OMString &str);
+extern bool OMIsNull(OMDomNode inst);
+extern OMDomNode OMCreateTextNode(OMDomDocument doc,OMString str);
+extern void OMGetText(OMDomNode inst,OMString &str);
+extern void OMToNum(OMDomNode inst,int &val);
+extern void OMToBool(OMDomNode inst,BOOL &val);
+extern OMDomElement OMCreateElement(OMDomDocument doc,OMString name);
+extern void OMAppendChild(OMDomNode parent,OMDomNode child);
+extern void OMSetAttribute(OMDomElement inst,OMString name,OMString val);
+extern bool OMIsEmpty(OMDomNodeList list);
+#else
+extern void OMCreateDocument(OMDomDocument &inst);
+extern void OMLoadXML(OMDomDocument &inst,OMString &str);
+extern OMDomElement OMGetElement(OMDomNode &node,OMString name);
+extern OMDomNodeList OMGetElementList(OMDomNode &node,OMString name);
+extern void OMToXML(OMDomDocument &inst,OMString &str);
+extern int OMListLength(OMDomNodeList &list);
+extern OMDomNode OMListItem(OMDomNodeList &list,int index);
+extern void OMGetAttribute(OMDomElement &inst,OMString name,OMString &str);
+extern bool OMIsNull(OMDomNode &inst);
+extern OMDomNode OMCreateTextNode(OMDomDocument &doc,OMString str);
+extern void OMNumToStr(OMString &str,int val);
+extern void OMGetText(OMDomNode &inst,OMString &str);
+extern void OMToNum(OMDomNode &inst,int &val);
+extern void OMToBool(OMDomNode &inst,BOOL &val);
+extern OMDomElement OMCreateElement(OMDomDocument &doc,OMString name);
+extern void OMAppendChild(OMDomNode &parent,OMDomNode &child);
+extern void OMSetAttribute(OMDomElement &inst,OMString name,OMString val);
+extern bool OMIsEmpty(OMDomNodeList &list);
+#endif
 

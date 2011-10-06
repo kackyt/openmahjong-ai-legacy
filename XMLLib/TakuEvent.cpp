@@ -48,29 +48,29 @@ OMTakuEvent::~OMTakuEvent()
 
 }
 
-void OMTakuEvent::parseXML(QDomNode pElem)
+void OMTakuEvent::parseXML(OMDomNode pElem)
 {
-        QDomNode pNode;
+        OMDomNode pNode;
 
 	m_bActive = TRUE;
 
 	/* スカラーデータの格納 */
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_COMMAND));
+        pNode = OMGetElement(pElem,_T(TAG_COMMAND));
 
-        if(!OM_ISNULL(pNode)){
+        if(!OMIsNull(pNode)){
 		m_command.parseXML(pNode);
 	}
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_RESULT));
+        pNode = OMGetElement(pElem,_T(TAG_RESULT));
 
-        if(!OM_ISNULL(pNode)){
+        if(!OMIsNull(pNode)){
 		m_result.parseXML(pNode);
 	}else{
 		m_result.m_bActive = FALSE;
 	}
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_SEQ));
+        pNode = OMGetElement(pElem,_T(TAG_SEQ));
 
-        OM_TOLONG(pElem,m_iSeq);
+        OMToNum(pNode,m_iSeq);
 }

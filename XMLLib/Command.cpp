@@ -50,47 +50,47 @@ OMCommand::~OMCommand()
 
 }
 
-void OMCommand::parseXML(QDomNode pElem)
+void OMCommand::parseXML(OMDomNode pElem)
 {
-    QDomNode pNode;
+    OMDomNode pNode;
 
     /* スカラーデータの格納 */
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_ID));
+    pNode = OMGetElement(pElem,_T(TAG_ID));
 
-    OM_TOLONG(pNode,m_iId);
+    OMToNum(pNode,m_iId);
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_TYPE));
+    pNode = OMGetElement(pElem,_T(TAG_TYPE));
 
-    OM_TOLONG(pNode,m_iType);
+    OMToNum(pNode,m_iType);
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_PAI));
+    pNode = OMGetElement(pElem,_T(TAG_PAI));
 
-    if(!OM_ISNULL(pNode)){
+    if(!OMIsNull(pNode)){
         m_pai.parseXML(pNode);
     }
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_PLAYER));
+    pNode = OMGetElement(pElem,_T(TAG_PLAYER));
 
-    if(!OM_ISNULL(pNode)){
+    if(!OMIsNull(pNode)){
         m_player.parseXML(pNode);
     }
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_NAKIMENTSU));
+    pNode = OMGetElement(pElem,_T(TAG_NAKIMENTSU));
 
-    if(!OM_ISNULL(pNode)){
+    if(!OMIsNull(pNode)){
         m_mentsu.parseXML(pNode);
     }else{
-        pNode = OM_GETELEMENT(pElem,_T(TAG_MENTSU));
+        pNode = OMGetElement(pElem,_T(TAG_MENTSU));
 
-        if(!OM_ISNULL(pNode)){
+        if(!OMIsNull(pNode)){
             m_mentsu.parseXML(pNode);
         }
     }
 
-    pNode = OM_GETELEMENT(pElem,_T(TAG_RULE));
+    pNode = OMGetElement(pElem,_T(TAG_RULE));
 
-    if(!OM_ISNULL(pNode)){
+    if(!OMIsNull(pNode)){
         m_rule.parseXML(pNode);
     }
 
@@ -111,19 +111,21 @@ OMCommand& OMCommand::operator=(const OMCommand& value)
     return *this;
 }
 
-void OMCommand::toXML(QDomDocument pDoc,QDomElement pParent)
+void OMCommand::toXML(OMDomDocument pDoc,OMDomElement pParent)
 {
-    QDomElement pElemCom,pElemID;
-    QString str;
+    OMDomElement pElemCom,pElemID;
+    OMDomNode pTxtNode;
+    OMString str;
 
-    pElemCom = OM_EVAL(pDoc,createElement(_T(TAG_COMMAND)));
-            OM_EVAL(pParent,appendChild(pElemCom));
-    pElemID = OM_EVAL(pDoc,createElement(_T(TAG_ID)));
-    OM_EVAL(pElemCom,appendChild(pElemID));
+    pElemCom = OMCreateElement(pDoc,_T(TAG_COMMAND));
+    OMAppendChild(pParent,pElemCom);
+    pElemID = OMCreateElement(pDoc,_T(TAG_ID));
+    OMAppendChild(pElemCom,pElemID);
 
-    OM_NUMTOSTR(str,m_iId);
+    OMNumToStr(str,m_iId);
 
-    OM_EVAL(pElemID,appendChild(OM_CREATETEXT(pDoc,str)));
+    pTxtNode = OMCreateTextNode(pDoc,str);
+    OMAppendChild(pElemID,pTxtNode);
 
     m_player.toXML(pDoc,pElemCom);
 

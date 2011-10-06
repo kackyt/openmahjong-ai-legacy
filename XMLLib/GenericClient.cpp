@@ -5,11 +5,19 @@
 #include "IllegalParamException.h"
 #include "IllegalStateException.h"
 
+static const UINT ieTable[][4] = {
+    { 0, 1, 2, 3},
+    { 3, 0, 1, 2},
+    { 2, 3, 0, 1},
+    { 1, 2, 3, 0},
+};
+
 static const TCHAR *ieStrTable[] = {_T("東"),_T("南"),_T("西"),_T("北")};
 static const TCHAR *posStrTable[] = {_T("自分"),_T("下家"),_T("対面"),_T("上家")};
 
 OMGenericClient::OMGenericClient()
-    : m_gamestate(OM_GAME_STATE_STOP)
+    : m_gamestate(OM_GAME_STATE_STOP),
+      m_pListener(NULL)
 {
 
 }
@@ -17,10 +25,10 @@ OMGenericClient::OMGenericClient()
 void OMGenericClient::connect(OM_CONNECTION_TYPE contype,int session)
 {
     int i,rescom;
-    QString text,errmessage;
+    OMString text,errmessage;
     OMCommand com;
-    QDomDocument doc;
-    QDomNode node;
+    OMDomDocument doc;
+    OMDomNode node;
 
     switch(contype){
     case OM_CONNECTION_TYPE_DEBUG:
@@ -35,10 +43,10 @@ void OMGenericClient::connect(OM_CONNECTION_TYPE contype,int session)
             }
         }while(rescom < 0);
 
-        OM_CREATEDOCUMENT(doc);
-        OM_LOADXML(doc,text);
-        node = OM_GETELEMENT(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_TAKU));
-        if(!OM_ISNULL(node)){
+        OMCreateDocument(doc);
+        OMLoadXML(doc,text);
+        node = OMGetElement(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_TAKU));
+        if(!OMIsNull(node)){
             m_aTakuAll[0].parseXML(node);
         }
 
@@ -71,24 +79,24 @@ void OMGenericClient::connect(OM_CONNECTION_TYPE contype,int session)
                 }
             }while(rescom < 0);
 
-            OM_CREATEDOCUMENT(doc);
-            OM_LOADXML(doc,text);
+            OMCreateDocument(doc);
+            OMLoadXML(doc,text);
 
             if(i==0 && contype == OM_CONNECTION_TYPE_CREATE){
-                QDomElement elem = OM_GETELEMENT(doc,_T(TAG_OPENMAHJONGSERVER));
-                QString sesStr;
-                OM_GETATTRIBUTE(elem,_T("session"),sesStr);
-                m_iSession = OM_STRTOL(sesStr);
+                OMDomElement elem = OMGetElement(doc,_T(TAG_OPENMAHJONGSERVER));
+                OMString sesStr;
+                OMGetAttribute(elem,_T("session"),sesStr);
+                m_iSession = OMStrtol(sesStr);
 
             }
 
             if(i==0 && contype == OM_CONNECTION_TYPE_CONNECT){
-                QDomElement elem = OM_GETELEMENT(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_COMMAND "/" TAG_RULE));
+                OMDomElement elem = OMGetElement(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_COMMAND "/" TAG_RULE));
                 m_rule.parseXML(elem);
             }
 
-            node = OM_GETELEMENT(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_COMMAND "/" TAG_PLAYER "/" TAG_ID));
-            OM_TOLONG(node,m_players[i].m_iId);
+            node = OMGetElement(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_COMMAND "/" TAG_PLAYER "/" TAG_ID));
+            OMToNum(node,m_players[i].m_iId);
 
             if(m_players[i].m_bIsComp){
                 m_players[i].m_pFunc(m_players[i].m_pInst,MJPI_STARTGAME,0,0);
@@ -104,15 +112,15 @@ void OMGenericClient::connect(OM_CONNECTION_TYPE contype,int session)
 
 OM_SYNC_STATE OMGenericClient::gameSync()
 {
-    QDomDocument doc;
-    QDomNode node,nodeTaku;
-    QDomNodeList nodeList;
-    QDomNodeList nodeListTaku;
-    QDomNodeList nodeListCode;
-    QString recvMessage;
+    OMDomDocument doc;
+    OMDomNode node,nodeTaku;
+    OMDomNodeList nodeList;
+    OMDomNodeList nodeListTaku;
+    OMDomNodeList nodeListCode;
+    OMString recvMessage;
     OMCommand command;
-    OM_DEFARRAY(OMCommand) aCommand;
-    QString text;
+    OMArray<OMCommand> aCommand;
+    OMString text;
     UINT ret;
     int i,j,code,kaze3,rescom;
     int aCode[4];
@@ -123,7 +131,8 @@ OM_SYNC_STATE OMGenericClient::gameSync()
 
     m_bBusy = TRUE;
 
-    while(!bPlayerCommand && m_gamestate == OM_GAME_STATE_START) {
+    if(!bPlayerCommand && m_gamestate == OM_GAME_STATE_START) {
+        aCommand.clear();
         for(i=0;i<m_iPlayerNum+m_iCompNum;i++) {
             command.m_iId = m_bFirst ? ID_STATUS : ID_UPDATE;
             command.m_player = m_players[i];
@@ -132,21 +141,21 @@ OM_SYNC_STATE OMGenericClient::gameSync()
 
         sendCommand(aCommand,recvMessage);
 
-        OM_CREATEDOCUMENT(doc);
-        OM_LOADXML(doc,recvMessage);
+        OMCreateDocument(doc);
+        OMLoadXML(doc,recvMessage);
 
-        node = OM_GETELEMENT(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_ERROR));
+        node = OMGetElement(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_ERROR));
 
         /* エラーを確認したら出力する */
-        if(!OM_ISNULL(node)){
+        if(!OMIsNull(node)){
 
         }
 
-        node = OM_GETELEMENT(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_CODE));
+        node = OMGetElement(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_CODE));
 
         code = 0;
 
-        OM_TOLONG(node,code);
+        OMToNum(node,code);
 
         if(code == RESPONCE_SESSION) {
             return OM_SYNC_STATE_ERROR;
@@ -156,47 +165,43 @@ OM_SYNC_STATE OMGenericClient::gameSync()
             return OM_SYNC_STATE_ERROR;
         }
 
-        node = OM_GETELEMENT(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_STATE "/" TAG_CODE));
+        node = OMGetElement(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_STATE "/" TAG_CODE));
         code = 0;
 
-        OM_TOLONG(node,code);
+        OMToNum(node,code);
 
         if(code == CODE_BUSY) {
-            OM_SLEEP(m_iSyncTick);
-            continue;
+            return OM_SYNC_STATE_ERROR;
         }
 
-        nodeListTaku = OM_GETELEMENTLIST(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_TAKU));
+        nodeListTaku = OMGetElementList(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_TAKU));
 
-        if(OM_ISEMPTY(nodeListTaku) || OM_LISTLENGTH(nodeListTaku) < m_iPlayerNum + m_iCompNum) {
+        if(OMIsEmpty(nodeListTaku) || OMListLength(nodeListTaku) < m_iPlayerNum + m_iCompNum) {
             /* もし見つからなかったらタイムアウトもしくはサーバーエラーの可能性があるので、ステータスの取得をやり直す */
             m_bFirst = TRUE;
-            continue;
+            return OM_SYNC_STATE_ERROR;
         }
 
-        nodeListCode = OM_GETELEMENTLIST(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_STATE "/" TAG_CODE));
+        nodeListCode = OMGetElementList(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_STATE "/" TAG_CODE));
 
-        for(i=0;i<OM_LISTLENGTH(nodeListCode);i++){
-            node = OM_LISTITEM(nodeListCode,i);
-            OM_TOLONG(node,aCode[i]);
+        for(i=0;i<OMListLength(nodeListCode);i++){
+            node = OMListItem(nodeListCode,i);
+            OMToNum(node,aCode[i]);
         }
 
-        for(i=0;i<OM_LISTLENGTH(nodeListTaku);i++){
-            nodeTaku = OM_LISTITEM(nodeListTaku,i);
+        for(i=0;i<OMListLength(nodeListTaku);i++){
+            nodeTaku = OMListItem(nodeListTaku,i);
 
-            if(!OM_ISNULL(nodeTaku)){
+            if(!OMIsNull(nodeTaku)){
                 if(m_bFirst){
                     m_aTakuAll[i].parseXML(nodeTaku);
                 }else{
                     OMTaku value;
                     value.parseXML(nodeTaku);
+
                     m_aTakuAll[i].update(value);
                 }
             }
-        }
-
-        if(aCode[0] != CODE_WAITSYNC && aCode[0] != CODE_BUSY){
-            m_bFirst = FALSE;
         }
 
 
@@ -206,9 +211,14 @@ OM_SYNC_STATE OMGenericClient::gameSync()
 
             m_pCurPlayer = &m_players[i];
             m_pCurTaku = &m_aTakuAll[i];
+            m_iPlayerIndex = m_pCurTaku->getMemberIndex(&m_players[i]);
 
-            node = OM_LISTITEM(nodeListCode,i);
-            if(!OM_ISNULL(node)){
+            if(m_bFirst && m_pListener != NULL){
+                m_pListener->onStarted(i,m_pCurTaku);
+            }
+
+            node = OMListItem(nodeListCode,i);
+            if(!OMIsNull(node)){
                 code = aCode[i];
                 if(m_pListener != NULL){
                     m_pListener->onStatusCode(code);
@@ -253,13 +263,13 @@ OM_SYNC_STATE OMGenericClient::gameSync()
                 }else{
                     /* プレーヤーのターン(終わり) */
                     // 自分宛のメッセージを引っ張り出してくる
-                    nodeTaku = OM_LISTITEM(nodeListTaku,i);
-                    nodeList = OM_GETELEMENTLIST(nodeTaku,_T(TAG_MESSAGE));
-                    for(j=0;j<OM_LISTLENGTH(nodeList);j++){
+                    nodeTaku = OMListItem(nodeListTaku,i);
+                    nodeList = OMGetElementList(nodeTaku,_T(TAG_MESSAGE));
+                    for(j=0;j<OMListLength(nodeList);j++){
                         OMMessage mes;
                         int index;
-                        QString mestext;
-                        node = OM_LISTITEM(nodeList,j);
+                        OMString mestext;
+                        node = OMListItem(nodeList,j);
                         mes.parseXML(node);
 
                         index = m_pCurTaku->getMemberIndex(&mes.m_playerFrom);
@@ -268,16 +278,15 @@ OM_SYNC_STATE OMGenericClient::gameSync()
                                        ieStrTable[m_pCurTaku->m_members[index].m_gamestate.m_iZikaze - 1],mes.m_strText);
 
                         if(m_pListener != NULL){
-                            m_pListener->appendMessageText(mestext);
+                            m_pListener->appendMessageText(&mestext);
                         }
                     }
 
-                    m_iPlayerIndex = m_pCurTaku->getMemberIndex(&m_players[i]);
+#if 0
                     for(j=0;j<4;j++){
-                        kaze3 = OMPlayer::ieTable[m_pCurTaku->m_members[m_iPlayerIndex].m_gamestate.m_iZikaze - 1][m_pCurTaku->m_members[j].m_gamestate.m_iZikaze - 1];
+                        kaze3 = ieTable[m_pCurTaku->m_members[m_iPlayerIndex].m_gamestate.m_iZikaze - 1][m_pCurTaku->m_members[j].m_gamestate.m_iZikaze - 1];
 
                         text.Format(_T("%s(%s)"),m_pCurTaku->m_members[j].m_player.m_strName,posStrTable[kaze3]);
-#if 0
                         if(kaze3 == 1){
                             m_btnSndTo1.SetWindowText((LPCTSTR)text);
                         }else if(kaze3 == 2){
@@ -285,8 +294,8 @@ OM_SYNC_STATE OMGenericClient::gameSync()
                         }else if(kaze3 == 3){
                             m_btnSndTo3.SetWindowText((LPCTSTR)text);
                         }
-#endif
                     }
+#endif
 
                     if(m_pListener != NULL){
                         if(code != CODE_WAITSYNC && code != CODE_BUSY && m_pCurTaku->m_event.m_command.m_iType == TYPE_RIICHI
@@ -323,7 +332,7 @@ OM_SYNC_STATE OMGenericClient::gameSync()
 
                     if(code == CODE_PROGRESSED){
                         if(m_pListener != NULL){
-                            m_pListener->onProgressed(m_iPlayerIndex,*m_pCurTaku);
+                            m_pListener->onProgressed(m_iPlayerIndex,m_pCurTaku);
                         }
                     }else if(code == CODE_WAITCOMMAND){
                         iPlayerDlgIndex = i;
@@ -333,7 +342,7 @@ OM_SYNC_STATE OMGenericClient::gameSync()
                         /* 実行可能なコマンドをサーチする */
                         for(j=0;j<m_pCurTaku->m_members[m_iPlayerIndex].m_aCommandList.size();j++){
                             if(m_pListener != NULL){
-                                m_pListener->enableCommand(m_pCurTaku->m_members[m_iPlayerIndex].m_aCommandList[j]);
+                                m_pListener->enableCommand(&m_pCurTaku->m_members[m_iPlayerIndex].m_aCommandList[j]);
                             }
                         }
 
@@ -487,7 +496,9 @@ OM_SYNC_STATE OMGenericClient::gameSync()
             i++;
         }
 
-        OM_SLEEP(m_iSyncTick);
+        if(aCode[0] != CODE_WAITSYNC && aCode[0] != CODE_BUSY){
+            m_bFirst = FALSE;
+        }
 
     }
 
@@ -500,28 +511,28 @@ OM_SYNC_STATE OMGenericClient::gameSync()
 
 }
 
-void OMGenericClient::sendCommand(OM_DEFARRAY(OMCommand)& aCommand, QString& recvMessage)
+void OMGenericClient::sendCommand(OMArray<OMCommand>& aCommand, OMString& recvMessage)
 {
-    QDomDocument doc;
-    QDomElement elemRoot,elemCom,elemID,elemPlayer;
-    QDomNode node;
-    QString str;
-    QString sendMessage;
+    OMDomDocument doc;
+    OMDomElement elemRoot,elemCom,elemID,elemPlayer;
+    OMDomNode node;
+    OMString str;
+    OMString sendMessage;
     int i;
 
     recvMessage = _T("");
 
-    OM_CREATEDOCUMENT(doc);
+    OMCreateDocument(doc);
 
-    elemRoot = OM_EVAL(doc,createElement(_T(TAG_OPENMAHJONGCLIENT)));
+    elemRoot = OMCreateElement(doc,_T(TAG_OPENMAHJONGCLIENT));
 
-    OM_EVAL(doc,appendChild(elemRoot));
+    OMAppendChild(doc,elemRoot);
 
 
     str.Format(_T("%d"),m_iSession);
 
-    OM_EVAL(elemRoot,setAttribute(_T("session"),str));
-    OM_EVAL(elemRoot,setAttribute(_T("version"),_T("0.1")));
+    OMSetAttribute(elemRoot,_T("session"),str);
+    OMSetAttribute(elemRoot,_T("version"),_T("0.1"));
 
     for(i=0;i<aCommand.size();i++)
     {
@@ -530,34 +541,34 @@ void OMGenericClient::sendCommand(OM_DEFARRAY(OMCommand)& aCommand, QString& rec
 
     /* キューに入ったメッセージを送信 */
 
-    OM_TOXML(doc,str);
+    OMToXML(doc,sendMessage);
 
     sendString(sendMessage,recvMessage);
 
 }
 
-int OMGenericClient::sendCommand(OMCommand &command, QString &recvMessage)
+int OMGenericClient::sendCommand(OMCommand &command, OMString &recvMessage)
 {
-    QDomDocument doc;
-    QDomElement elemRoot;
-    QDomNode node;
-    QString str;
-    QString sendMessage;
+    OMDomDocument doc;
+    OMDomElement elemRoot;
+    OMDomNode node;
+    OMString str;
+    OMString sendMessage;
     int code;
 
     recvMessage = _T("");
 
-    OM_CREATEDOCUMENT(doc);
+    OMCreateDocument(doc);
 
-    elemRoot = OM_EVAL(doc,createElement(_T(TAG_OPENMAHJONGCLIENT)));
+    elemRoot = OMCreateElement(doc,_T(TAG_OPENMAHJONGCLIENT));
 
-    OM_EVAL(doc,appendChild(elemRoot));
+    OMAppendChild(doc,elemRoot);
 
 
     str.Format(_T("%d"),m_iSession);
 
-    OM_EVAL(elemRoot,setAttribute(_T("session"),str));
-    OM_EVAL(elemRoot,setAttribute(_T("version"),_T("0.1")));
+    OMSetAttribute(elemRoot,_T("session"),str);
+    OMSetAttribute(elemRoot,_T("version"),_T("0.1"));
 
     if(command.m_iId != 0){
         command.toXML(doc,elemRoot);
@@ -567,7 +578,7 @@ int OMGenericClient::sendCommand(OMCommand &command, QString &recvMessage)
 
 
 
-    OM_TOXML(doc,sendMessage);
+    OMToXML(doc,sendMessage);
 
     try{
         sendString(sendMessage,recvMessage);
@@ -576,21 +587,21 @@ int OMGenericClient::sendCommand(OMCommand &command, QString &recvMessage)
     }
 
     /* 受信メッセージをパース */
-    OM_LOADXML(doc,recvMessage);
+    OMLoadXML(doc,recvMessage);
 
-    node = OM_GETELEMENT(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_CODE));
+    node = OMGetElement(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_CODE));
 
-    OM_TOLONG(node,code);
+    OMToNum(node,code);
 
     return code;
 }
 
-void OMGenericClient::setPlayerName(OM_DEFARRAY(QString) &playernames, OM_DEFARRAY(QString)&compnames)
+void OMGenericClient::setPlayerName(OMArray<OMString> &playernames, OMArray<OMString>&compnames)
 {
     int i;
 
     if(m_gamestate != OM_GAME_STATE_STOP){
-        QString mes = QString("setPlayerName called when state is not stopped.");
+        OMString mes = OMString("setPlayerName called when state is not stopped.");
         throw OMIllegalStateException(mes);
     }
     m_iPlayerNum = playernames.size();
@@ -598,7 +609,7 @@ void OMGenericClient::setPlayerName(OM_DEFARRAY(QString) &playernames, OM_DEFARR
 
     if(m_iPlayerNum + m_iCompNum > 4){
         /* パラメータが不正 */
-        QString mes("playernum + compnum > 4");
+        OMString mes("playernum + compnum > 4");
         throw OMIllegalParamException(mes);
     }
 
@@ -617,4 +628,29 @@ void OMGenericClient::setPlayerName(OM_DEFARRAY(QString) &playernames, OM_DEFARR
     }
 
     m_gamestate = OM_GAME_STATE_PLAYERSETNAME;
+}
+
+int OMGenericClient::getPlayerIndex() const
+{
+    return m_iPlayerIndex;
+}
+
+void OMGenericClient::gameStart()
+{
+    m_gamestate = OM_GAME_STATE_START;
+}
+
+void OMGenericClient::gameStop()
+{
+    m_gamestate = OM_GAME_STATE_STOP;
+}
+
+int OMGenericClient::getSessionNum() const
+{
+    return m_iSession;
+}
+
+void OMGenericClient::setClientListener(OMClientListener *pListener)
+{
+    m_pListener = pListener;
 }

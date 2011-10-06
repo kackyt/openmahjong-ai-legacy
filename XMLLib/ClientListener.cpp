@@ -19,7 +19,12 @@ void OMClientListener::onPon()
 
 }
 
-void OMClientListener::onProgressed(int index, OMTaku &)
+void OMClientListener::onStarted(int index, OMTaku *)
+{
+
+}
+
+void OMClientListener::onProgressed(int index, OMTaku *)
 {
 
 }

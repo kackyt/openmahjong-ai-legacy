@@ -36,10 +36,10 @@ class OMMessage
 {
 public:
         OMMessage& operator=(OMMessage&);
-        void toXML(QDomDocument,QDomElement);
-        void parseXML(QDomNode);
-        OM_DEFARRAY(OMPlayer) m_aPlayerTo;
-        QString m_strText;
+        void toXML(OMDomDocument,OMDomElement);
+        void parseXML(OMDomNode);
+        OMArray<OMPlayer> m_aPlayerTo;
+        OMString m_strText;
         OMPlayer m_playerFrom;
         OMMessage();
         virtual ~OMMessage();

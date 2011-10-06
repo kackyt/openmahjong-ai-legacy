@@ -53,29 +53,29 @@ OMPai::~OMPai()
 
 }
 
-void OMPai::parseXML(QDomNode pElem)
+void OMPai::parseXML(OMDomNode pElem)
 {
-        QDomNode pNode;
+        OMDomNode pNode;
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_CATEGORY));
+        pNode = OMGetElement(pElem,_T(TAG_CATEGORY));
 
-        OM_TOLONG(pNode,m_iCategory);
+        OMToNum(pNode,m_iCategory);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_NO));
+        pNode = OMGetElement(pElem,_T(TAG_NO));
 
-        OM_TOLONG(pNode,m_iNo);
+        OMToNum(pNode,m_iNo);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_ID));
+        pNode = OMGetElement(pElem,_T(TAG_ID));
 
-        OM_TOLONG(pNode,m_iId);
+        OMToNum(pNode,m_iId);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_TSUMOGIRI));
+        pNode = OMGetElement(pElem,_T(TAG_TSUMOGIRI));
 
-        OM_TOBOOL(pNode,m_bTsumogiri);
+        OMToBool(pNode,m_bTsumogiri);
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_RIICHI));
+        pNode = OMGetElement(pElem,_T(TAG_RIICHI));
 
-        OM_TOBOOL(pNode,m_bRiichi);
+        OMToBool(pNode,m_bRiichi);
 
 }
 
@@ -86,7 +86,7 @@ OMPai::operator UINT()
 	else return (m_iCategory - 1) * 9 + (m_iNo - 1);
 }
 
-void OMPai::getName(QString& text)
+void OMPai::getName(OMString& text)
 {
 	const TCHAR *table[] = {_T("àÍ"),_T("ìÒ"),_T("éO"),_T("él"),_T("å‹"),_T("òZ"),_T("éµ"),_T("î™"),_T("ã„")};
 	const TCHAR *table2[] = {_T("ìå"),_T("ìÏ"),_T("êº"),_T("ñk"),_T("îí"),_T("î≠"),_T("íÜ")};

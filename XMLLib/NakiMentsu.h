@@ -39,7 +39,7 @@ class OMNakiMentsu : public OMMentsu
 public:
         UINT getNakiPos();
         OMNakiMentsu& operator=(const OMNakiMentsu& value);
-        virtual void parseXML(QDomNode);
+        virtual void parseXML(OMDomNode);
         OMPai m_nakihai;
 	int m_iAite;
         OMNakiMentsu();

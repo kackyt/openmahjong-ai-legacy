@@ -47,27 +47,27 @@ OMNakiMentsu::~OMNakiMentsu()
 
 }
 
-void OMNakiMentsu::parseXML(QDomNode pElem)
+void OMNakiMentsu::parseXML(OMDomNode pElem)
 {
-        QDomNode pNode;
+        OMDomNode pNode;
 
 	/* スーパークラスの呼び出し */
-        pNode = OM_GETELEMENT(pElem,_T(TAG_MENTSU));
+        pNode = OMGetElement(pElem,_T(TAG_MENTSU));
 
-        if(!OM_ISNULL(pNode)){
+        if(!OMIsNull(pNode)){
                 OMMentsu::parseXML(pNode);
 	}
 
 	/* スカラーデータの格納 */
 
-        pNode = OM_GETELEMENT(pElem,_T(TAG_AITE));
+        pNode = OMGetElement(pElem,_T(TAG_AITE));
 
-        OM_TOLONG(pNode,m_iAite);
+        OMToNum(pNode,m_iAite);
 
 	/* 牌の格納 */
-        pNode = OM_GETELEMENT(pElem,_T(TAG_NAKIHAI "/" TAG_PAI));
+        pNode = OMGetElement(pElem,_T(TAG_NAKIHAI "/" TAG_PAI));
 
-        if(!OM_ISNULL(pNode)){
+        if(!OMIsNull(pNode)){
 		m_nakihai.parseXML(pNode);
 	}
 
@@ -78,7 +78,7 @@ OMNakiMentsu& OMNakiMentsu::operator=(const OMNakiMentsu& value)
 	m_iAite = value.m_iAite;
 	m_nakihai = value.m_nakihai;
 	m_iCategory = value.m_iCategory;
-        OM_COPYARRAY(m_aPaiList,((OMNakiMentsu&)value).m_aPaiList);
+        m_aPaiList.copy(((OMNakiMentsu&)value).m_aPaiList);
 
 	return *this;
 }

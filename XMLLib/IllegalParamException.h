@@ -6,7 +6,7 @@
 class OMIllegalParamException : public OMException
 {
 public:
-    OMIllegalParamException(QString&);
+    OMIllegalParamException(OMString&);
 };
 
 #endif // ILLEGALPARAMEXCEPTION_H

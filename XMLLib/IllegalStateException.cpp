@@ -1,6 +1,6 @@
 #include "IllegalStateException.h"
 
-OMIllegalStateException::OMIllegalStateException(QString &message)
+OMIllegalStateException::OMIllegalStateException(OMString &message)
     : OMException(message)
 {
 }

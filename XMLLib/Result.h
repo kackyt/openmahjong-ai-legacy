@@ -38,11 +38,11 @@ public:
 	int m_iFu;
 	BOOL m_bActive;
 #ifdef _MSC_VER
-        CResult& operator=(CResult& value);
+        OMResult& operator=(OMResult& value);
 #else
         OMResult& operator=(const OMResult& value);
 #endif
-        void parseXML(QDomNode);
+        void parseXML(OMDomNode);
         OMPai m_machihai;
 	int m_iDorakazu;
 	BOOL m_bTsumo;
@@ -52,7 +52,7 @@ public:
 	int m_iScore;
 	int m_iMangan;
 	int m_iHan;
-        OM_DEFARRAY(QString) m_aYaku;
+        OMArray<OMString> m_aYaku;
         OMResult();
         virtual ~OMResult();
 

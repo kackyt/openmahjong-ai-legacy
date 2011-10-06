@@ -9,8 +9,8 @@ class OMClientListener
 public:
     OMClientListener();
     virtual ~OMClientListener(){}
-    virtual void appendMessageText(QString &) = 0;
-    virtual void enableCommand(OMCommand&) = 0;
+    virtual void appendMessageText(OMString *) = 0;
+    virtual void enableCommand(OMCommand *) = 0;
     virtual void onTii();
     virtual void onPon();
     virtual void onKan();
@@ -19,7 +19,8 @@ public:
     virtual void onRiichi();
     virtual void onRivalRiichi();
     virtual void onDahai();
-    virtual void onProgressed(int index,OMTaku &);
+    virtual void onProgressed(int index,OMTaku *);
+    virtual void onStarted(int index,OMTaku *);
     virtual void onStatusCode(int code);
 };
 

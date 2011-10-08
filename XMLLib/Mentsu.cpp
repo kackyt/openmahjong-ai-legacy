@@ -60,7 +60,7 @@ void OMMentsu::parseXML(OMDomNode pElem)
 
 	/* ”v‚ÌŠi”[ */
         m_aPaiList.clear();
-        pNodeList = OMGetElementList(pElem,_T(TAG_TEHAI "/" TAG_PAI));
+        pNodeList = OMGetElementList(pElem,_T(TAG_PAI));
 
         if(!OMIsEmpty(pNodeList)){
             for(i=0;i<OMListLength(pNodeList);i++){
@@ -81,3 +81,16 @@ OMMentsu& OMMentsu::operator=(OMMentsu& value)
 	return *this;
 }
 
+int OMMentsu::indexOf(OMPai &pai)
+{
+    int i,ret = -1;
+
+    for(i=0;i<m_aPaiList.size();i++){
+        if(pai == m_aPaiList[i]){
+            ret = i;
+            break;
+        }
+    }
+
+    return ret;
+}

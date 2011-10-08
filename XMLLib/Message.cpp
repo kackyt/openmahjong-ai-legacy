@@ -68,7 +68,7 @@ void OMMessage::parseXML(OMDomNode pElem)
 		m_playerFrom.parseXML(pNode);
 	}
 
-        pNodeList = OMGetElementList(pElem,_T(TAG_TEHAI "/" TAG_PAI));
+        pNodeList = OMGetElementList(pElem,_T(TAG_TO "/" TAG_PLAYER));
 
         if(!OMIsEmpty(pNodeList)){
             for(i=0;i<OMListLength(pNodeList);i++){

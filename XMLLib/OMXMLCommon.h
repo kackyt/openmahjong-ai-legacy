@@ -117,8 +117,8 @@ public:
         inst.append(value);
     }
 
-    void copy(OMArray<T> &dst){
-        dst = *this;
+    void copy(OMArray<T> &src){
+        *this = src;
     }
 };
 

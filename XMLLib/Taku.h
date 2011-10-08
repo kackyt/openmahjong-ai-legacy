@@ -68,7 +68,8 @@ public:
         void setTakuListener(OMTakuListener *pListener);
 protected:
         OMTakuListener *m_pListener;
-
+private:
+        void resortTehai(int memberIndex);
 
 };
 

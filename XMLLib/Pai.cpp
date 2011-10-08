@@ -196,3 +196,13 @@ int OMPai::operator >=(OMPai& pai)
 
 	return FALSE;
 }
+
+bool OMPai::operator ==(OMPai& pai)
+{
+        if(m_iCategory == pai.m_iCategory && m_iNo == pai.m_iNo && m_iId == pai.m_iId){
+            return true;
+        }else{
+            return false;
+        }
+}
+

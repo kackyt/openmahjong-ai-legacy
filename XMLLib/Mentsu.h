@@ -42,6 +42,7 @@ public:
         OMArray<OMPai> m_aPaiList;
         OMMentsu();
         virtual ~OMMentsu();
+        int indexOf(OMPai &pai);
 
 };
 

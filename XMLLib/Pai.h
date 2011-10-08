@@ -40,6 +40,7 @@ class OMPai
 {
 public:
         int operator >=(OMPai&);
+        bool operator ==(OMPai &);
 	BOOL m_bLast;
         BOOL isAka(OMRule&);
 	BOOL m_bNaki;

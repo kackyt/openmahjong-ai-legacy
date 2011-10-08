@@ -15,15 +15,18 @@ typedef enum {
 
 typedef enum {
     OM_SYNC_STATE_USERCOMMAND,
+    OM_SYNC_STATE_OK,
     OM_SYNC_STATE_STOP,
     OM_SYNC_STATE_ERROR
 } OM_SYNC_STATE;
 
 typedef enum {
-    OM_GAME_STATE_CREATED,
     OM_GAME_STATE_PLAYERSETNAME,
-    OM_GAME_STATE_STOP,
-    OM_GAME_STATE_START
+    OM_GAME_STATE_CONNECTED,
+    OM_GAME_STATE_STOPED,
+    OM_GAME_STATE_STARTED,
+    OM_GAME_STATE_PROGRESSING,
+    OM_GAME_STATE_WAITCOMMAND
 } OM_GAME_STATE;
 
 class OMGenericClient
@@ -43,6 +46,8 @@ public:
     void getPlayerName(OMArray<OMString>&playernames) const;
     int getPlayerIndex() const;
     int getSessionNum() const;
+private:
+    void debugPrint();
 protected:
     OMRule m_rule;
     BOOL m_bBusy;
@@ -53,7 +58,6 @@ protected:
     int m_iSyncTick;
     OMTaku *m_pCurTaku;
     OMTaku m_aTakuAll[4];
-    BOOL m_bFirst;
     int m_iCurState;
     OMPlayer m_players[4];
     OMPlayer *m_pCurPlayer;

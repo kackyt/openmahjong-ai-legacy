@@ -10,7 +10,6 @@ public:
     OMClientListener();
     virtual ~OMClientListener(){}
     virtual void appendMessageText(OMString *) = 0;
-    virtual void enableCommand(OMCommand *) = 0;
     virtual void onTii();
     virtual void onPon();
     virtual void onKan();

@@ -36,7 +36,8 @@ SOURCES += main.cpp\
     common/IllegalStateException.cpp \
     ClientThread.cpp \
     common/TakuListener.cpp \
-    common/OMXMLCommonQt.cpp
+    common/OMXMLCommonQt.cpp \
+    common/UICommander.cpp
 
 HEADERS  += openmahjongclient.h \
     common/OMXMLCommon.h \
@@ -65,7 +66,8 @@ HEADERS  += openmahjongclient.h \
     common/IllegalParamException.h \
     common/IllegalStateException.h \
     ClientThread.h \
-    common/TakuListener.h
+    common/TakuListener.h \
+    common/UICommander.h
 
 FORMS    += openmahjongclient.ui \
     ConnectDialog.ui

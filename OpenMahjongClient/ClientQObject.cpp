@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include "ClientQObject.h"
@@ -28,12 +29,6 @@ void OMClientQObject::sendString(OMString &sendMessage, OMString &recvMessage)
     clThread->sendString(m_dstUrl,sendMessage,recvMessage);
 }
 
-void OMClientQObject::selectPai(OMPai &pai)
-{
-
-}
-
-
 void OMClientQObject::clientStart()
 {
     QMetaObject::invokeMethod(this,"clientStartImpl");
@@ -46,7 +41,23 @@ void OMClientQObject::clientStop()
 
 void OMClientQObject::confirmCommand()
 {
+    OMCommand com;
+    OMString recvMessage;
+    int res;
 
+    qDebug() << "confirmCommand";
+
+    m_commander.getCommand(com);
+
+    com.m_player = *m_pCurPlayer;
+
+    while((res = sendCommand(com,recvMessage)) < 0);
+
+    qDebug() << "res = " << res;
+
+    if(res != RESPONCE_OK){
+        emit sigResponceCode(res);
+    }
 }
 
 void OMClientQObject::setDestination(QUrl &url)
@@ -56,43 +67,46 @@ void OMClientQObject::setDestination(QUrl &url)
 
 void OMClientQObject::takuUpdate()
 {
-    gameSync();
+    if(gameSync() == OM_SYNC_STATE_USERCOMMAND){
+        m_commander.initialize(m_pCurTaku->m_members[getPlayerIndex()]);
+        emit sigUserTurn();
+    }
 }
 
-void OMClientQObject::tehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai)
+void OMClientQObject::tehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai)
 {
     emit sigTehaiAdded(taku,memberIndex,member,paiIndex,pai);
 }
 
-void OMClientQObject::tehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai)
+void OMClientQObject::tehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai)
 {
     emit sigTehaiRemoved(taku,memberIndex,member,paiIndex,pai);
 }
 
-void OMClientQObject::dahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai)
+void OMClientQObject::dahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai)
 {
     emit sigDahaiAdded(taku,memberIndex,member,paiIndex,pai);
 
 }
 
-void OMClientQObject::dahaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai)
+void OMClientQObject::dahaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai)
 {
     emit sigDahaiRemoved(taku,memberIndex,member,paiIndex,pai);
 
 }
 
-void OMClientQObject::dahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai)
+void OMClientQObject::dahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai)
 {
     emit sigDahaiNaki(taku,memberIndex,member,paiIndex,pai);
 
 }
 
-void OMClientQObject::nakiAdded(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu *mentsu)
+void OMClientQObject::nakiAdded(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu)
 {
     emit sigNakiAdded(taku,memberIndex,member,mentsu);
 }
 
-void OMClientQObject::nakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu *mentsu)
+void OMClientQObject::nakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu)
 {
     emit sigNakiRemoved(taku,memberIndex,member,mentsu);
 }
@@ -153,11 +167,6 @@ void OMClientQObject::onTsumo()
 }
 
 void OMClientQObject::appendMessageText(OMString *)
-{
-
-}
-
-void OMClientQObject::enableCommand(OMCommand *)
 {
 
 }

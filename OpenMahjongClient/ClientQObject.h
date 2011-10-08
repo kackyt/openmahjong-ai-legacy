@@ -9,6 +9,7 @@
 #include "common/ClientListener.h"
 #include "common/TakuListener.h"
 #include "common/Pai.h"
+#include "common/UICommander.h"
 
 class OMClientQObject : public QObject,public OMGenericClient,public OMTakuListener,public OMClientListener
 {
@@ -21,18 +22,18 @@ class OMClientQObject : public QObject,public OMGenericClient,public OMTakuListe
         SELECT_STATE_RIICHI
     } SELECT_STATE;
 public:
+    OMUICommander m_commander;
     explicit OMClientQObject(QObject *parent = 0);
     virtual ~OMClientQObject();
     void setDestination(QUrl &url);
-    virtual void tehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai);
-    void tehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai);
-    void dahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai);
-    void dahaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai);
-    void dahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai);
-    void nakiAdded(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu *mentsu);
-    void nakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu *mentsu);
+    virtual void tehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void tehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void dahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void dahaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void dahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void nakiAdded(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu);
+    void nakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu);
     void appendMessageText(OMString *);
-    void enableCommand(OMCommand*);
     void onTii();
     void onPon();
     void onKan();
@@ -56,15 +57,14 @@ private:
 
 signals:
     void waitingUserCommand();
-    void sigTehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai);
-    void sigTehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai);
-    void sigDahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai);
-    void sigDahaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai);
-    void sigDahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai *pai);
-    void sigNakiAdded(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu *mentsu);
-    void sigNakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu *mentsu);
+    void sigTehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void sigTehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void sigDahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void sigDahaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void sigDahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void sigNakiAdded(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu);
+    void sigNakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu);
     void sigAppendMessageText(OMString *);
-    void sigEnableCommand(OMCommand*);
     void sigTii();
     void sigPon();
     void sigKan();
@@ -76,11 +76,12 @@ signals:
     void sigProgressed(int index,OMTaku *);
     void sigStarted(int index,OMTaku *);
     void sigStatusCode(int code);
+    void sigResponceCode(int code);
+    void sigUserTurn();
 
 public slots:
     void clientStart();
     void clientStop();
-    void selectPai(OMPai &pai);
     void confirmCommand();
     void takuUpdate();
 private slots:

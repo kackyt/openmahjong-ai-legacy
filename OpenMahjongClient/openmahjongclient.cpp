@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QMessageBox>
 #include "openmahjongclient.h"
 #include "PaiButton.h"
 #include "ui_openmahjongclient.h"
@@ -10,13 +11,26 @@ OpenMahjongClient::OpenMahjongClient(QWidget *parent) :
 {
     qRegisterMetaType<OMTaku*>();
     qRegisterMetaType<OMMember*>();
-    qRegisterMetaType<OMNakiMentsu*>();
+    qRegisterMetaType<OMNakiMentsu>();
     qRegisterMetaType<OMPai*>();
+    qRegisterMetaType<OMPai>();
     ui->setupUi(this);
+
+    /* レイアウト方向の変更 */
+    ui->m_layout_dahai10->setDirection(QBoxLayout::BottomToTop);
+    ui->m_layout_dahai11->setDirection(QBoxLayout::BottomToTop);
+    ui->m_layout_dahai12->setDirection(QBoxLayout::BottomToTop);
+    ui->m_layout_dahai20->setDirection(QBoxLayout::RightToLeft);
+    ui->m_layout_dahai21->setDirection(QBoxLayout::RightToLeft);
+    ui->m_layout_dahai22->setDirection(QBoxLayout::RightToLeft);
+    ui->m_layout_tehai1->setDirection(QBoxLayout::BottomToTop);
+    ui->m_layout_tehai2->setDirection(QBoxLayout::RightToLeft);
+
     QObject::connect(&m_client,SIGNAL(sigStarted(int,OMTaku*)),SLOT(onStarted(int,OMTaku*)));
-    QObject::connect(&m_client,SIGNAL(sigDahaiAdded(OMTaku*,int,OMMember*,int,OMPai*)),SLOT(onDahaiAdded(OMTaku*,int,OMMember*,int,OMPai*)));
-    QObject::connect(&m_client,SIGNAL(sigTehaiAdded(OMTaku*,int,OMMember*,int,OMPai*)),SLOT(onTehaiAdded(OMTaku*,int,OMMember*,int,OMPai*)));
-    QObject::connect(&m_client,SIGNAL(sigTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai*)),SLOT(onTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai*)));
+    QObject::connect(&m_client,SIGNAL(sigDahaiAdded(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onDahaiAdded(OMTaku*,int,OMMember*,int,OMPai)));
+    QObject::connect(&m_client,SIGNAL(sigTehaiAdded(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onTehaiAdded(OMTaku*,int,OMMember*,int,OMPai)));
+    QObject::connect(&m_client,SIGNAL(sigTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai)));
+    QObject::connect(&m_client,SIGNAL(sigUserTurn()),SLOT(onMyTurn()));
 }
 
 OpenMahjongClient::~OpenMahjongClient()
@@ -58,11 +72,6 @@ void OpenMahjongClient::appendMessageText(OMString *)
 
 }
 
-void OpenMahjongClient::enableCommand(OMCommand *)
-{
-
-}
-
 void OpenMahjongClient::layoutDahai(OMPai &pai, int index,int num)
 {
     OMPaiButton *btn = new OMPaiButton();
@@ -70,7 +79,6 @@ void OpenMahjongClient::layoutDahai(OMPai &pai, int index,int num)
     btn->setPai(pai,pai.m_bRiichi ? ((index + 1) & 3) : index);
     switch(index){
     case 0:
-        btn->setEnabled(true);
         if(num < 6){
             ui->m_layout_dahai00->addWidget(btn,Qt::AlignLeft | Qt::AlignBottom);
         }else if(num < 12){
@@ -112,24 +120,23 @@ void OpenMahjongClient::layoutDahai(OMPai &pai, int index,int num)
 
 }
 
-void OpenMahjongClient::layoutTehai(OMPai &pai, int index)
+void OpenMahjongClient::layoutTehai(OMPai &pai, int index,int num)
 {
     OMPaiButton *btn = new OMPaiButton();
     btn->setEnabled(false);
     btn->setPai(pai,index);
     switch(index){
     case 0:
-        ui->m_layout_tehai0->addWidget(btn,0,Qt::AlignLeft | Qt::AlignBottom);
-        btn->setEnabled(true);
+        ui->m_layout_tehai0->insertWidget(num,btn,0,Qt::AlignLeft | Qt::AlignBottom);
         break;
     case 1:
-        ui->m_layout_tehai1->addWidget(btn,0,Qt::AlignRight | Qt::AlignBottom);
+        ui->m_layout_tehai1->insertWidget(num,btn,0,Qt::AlignRight | Qt::AlignBottom);
         break;
     case 2:
-        ui->m_layout_tehai2->addWidget(btn,0,Qt::AlignRight | Qt::AlignTop);
+        ui->m_layout_tehai2->insertWidget(num,btn,0,Qt::AlignRight | Qt::AlignTop);
         break;
     case 3:
-        ui->m_layout_tehai3->addWidget(btn,0,Qt::AlignLeft | Qt::AlignTop);
+        ui->m_layout_tehai3->insertWidget(num,btn,0,Qt::AlignLeft | Qt::AlignTop);
         break;
     default:
         break;
@@ -153,14 +160,14 @@ void OpenMahjongClient::onStarted(int index, OMTaku *taku)
 
             if(member->m_aTehai.size() > 0){
                 for(j=0;j<member->m_aTehai.size();j++){
-                    layoutTehai(member->m_aTehai[j],i);
+                    layoutTehai(member->m_aTehai[j],i,j);
                 }
             }else{
                 OMPai nilPai;
                 nilPai.m_iCategory = 0;
                 nilPai.m_iNo = 0;
                 for(j=0;j<13-member->m_gamestate.m_aNakiList.size()*3;j++){
-                    layoutTehai(nilPai,i);
+                    layoutTehai(nilPai,i,j);
                 }
             }
 
@@ -204,23 +211,23 @@ void OpenMahjongClient::onStatusCode(int code)
 
 }
 
-void OpenMahjongClient::onDahaiAdded(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai *pai)
+void OpenMahjongClient::onDahaiAdded(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai pai)
 {
     int ind = m_client.getPlayerIndex();
     int cha = OMMember::getChaDistance(ind,memberIndex);
 
-    layoutDahai(*pai,cha,paiIndex);
+    layoutDahai(pai,cha,paiIndex);
 }
 
-void OpenMahjongClient::onTehaiAdded(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai *pai)
+void OpenMahjongClient::onTehaiAdded(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai pai)
 {
     int ind = m_client.getPlayerIndex();
     int cha = OMMember::getChaDistance(ind,memberIndex);
 
-    layoutTehai(*pai,cha);
+    layoutTehai(pai,cha,paiIndex);
 }
 
-void OpenMahjongClient::onTehaiRemoved(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai *pai)
+void OpenMahjongClient::onTehaiRemoved(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai pai)
 {
     int ind = m_client.getPlayerIndex();
     int cha = OMMember::getChaDistance(ind,memberIndex);
@@ -248,4 +255,124 @@ void OpenMahjongClient::onTehaiRemoved(OMTaku *taku, int memberIndex, OMMember *
         pItem->widget()->deleteLater(); // 必要かどうかわからないけど。
         layout->removeItem(pItem);
     }
+}
+
+void OpenMahjongClient::onMyTurn()
+{
+    /* 自分のターンが回ってきた */
+    int i;
+    for(i=0;i<ui->m_layout_tehai0->count();i++){
+        OMPaiButton *widget = (OMPaiButton *)ui->m_layout_tehai0->itemAt(i)->widget();
+        widget->setEnabled(true);
+        QObject::connect(widget,SIGNAL(selectPai(OMPai*,bool)),SLOT(onSelectPai(OMPai*,bool)));
+    }
+    ui->m_btnTii->setEnabled(m_client.m_commander.isTiiAvailable());
+    ui->m_btnPon->setEnabled(m_client.m_commander.isPonAvailable());
+    ui->m_btnKan->setEnabled(m_client.m_commander.isKanAvailable());
+    ui->m_btnRon->setEnabled(m_client.m_commander.isRonAvailable());
+    ui->m_btnTsumo->setEnabled(m_client.m_commander.isTsumoAvailable());
+    ui->m_btnRiichi->setEnabled(m_client.m_commander.isRiichiAvailable());
+    ui->m_btnPass->setEnabled(m_client.m_commander.isPassAvailable());
+    ui->m_btnTouhai->setEnabled(m_client.m_commander.isTouhaiAvailable());
+    ui->m_btnDecide->setEnabled(true);
+}
+
+void OpenMahjongClient::endTurn()
+{
+    int i;
+    bool enable;
+
+    for(i=0;i<ui->m_layout_tehai0->count();i++){
+        OMPaiButton *widget = (OMPaiButton *)ui->m_layout_tehai0->itemAt(i)->widget();
+        widget->setEnabled(false);
+        widget->setChecked(false);
+        QObject::disconnect(widget,SIGNAL(selectPai(OMPai*,bool)),this,SLOT(onSelectPai(OMPai*,bool)));
+    }
+    ui->m_btnTii->setEnabled(false);
+    ui->m_btnPon->setEnabled(false);
+    ui->m_btnKan->setEnabled(false);
+    ui->m_btnRon->setEnabled(false);
+    ui->m_btnTsumo->setEnabled(false);
+    ui->m_btnRiichi->setEnabled(false);
+    ui->m_btnPass->setEnabled(false);
+    ui->m_btnTouhai->setEnabled(false);
+    ui->m_btnDecide->setEnabled(false);
+
+    ui->m_btnTii->setChecked(false);
+    ui->m_btnPon->setChecked(false);
+    ui->m_btnKan->setChecked(false);
+    ui->m_btnRiichi->setChecked(false);
+
+    enable = QMetaObject::invokeMethod(&m_client,"confirmCommand");
+
+    qDebug() << "endTurn " << enable;
+}
+
+void OpenMahjongClient::onSelectPai(OMPai *pai, bool enable)
+{
+    if(enable){
+        if(m_client.m_commander.addPai(*pai)){
+            endTurn();
+        }
+    }else{
+        m_client.m_commander.removePai(*pai);
+    }
+}
+
+void OpenMahjongClient::on_m_btnTii_toggled(bool checked)
+{
+    m_client.m_commander.setTii(checked);
+}
+
+void OpenMahjongClient::on_m_btnPon_toggled(bool checked)
+{
+    m_client.m_commander.setPon(checked);
+}
+
+void OpenMahjongClient::on_m_btnKan_toggled(bool checked)
+{
+    m_client.m_commander.setKan(checked);
+}
+
+void OpenMahjongClient::on_m_btnRon_clicked()
+{
+    if(m_client.m_commander.setRon()){
+        endTurn();
+    }
+}
+
+void OpenMahjongClient::on_m_btnTsumo_clicked()
+{
+    if(m_client.m_commander.setTsumo()){
+        endTurn();
+    }
+}
+
+void OpenMahjongClient::on_m_btnRiichi_toggled(bool checked)
+{
+    m_client.m_commander.setRiichi(checked);
+}
+
+void OpenMahjongClient::on_m_btnPass_clicked()
+{
+    if(m_client.m_commander.setPass()){
+        endTurn();
+    }
+}
+
+void OpenMahjongClient::on_m_btnTouhai_clicked()
+{
+    if(m_client.m_commander.setTouhai()){
+        endTurn();
+    }
+}
+
+void OpenMahjongClient::on_m_btnDecide_clicked()
+{
+    if(m_client.m_commander.setConfirm()){
+        endTurn();
+    }else{
+        QMessageBox::warning(this,"コマンド失敗","その牌では実行できません。");
+    }
+
 }

@@ -15,10 +15,10 @@ public:
     void setRule(OMRule&);
 
 signals:
-    void selectPai(OMPai &);
+    void selectPai(OMPai *,bool);
 
 private slots:
-    void clickPai();
+    void togglePai(bool enable);
 
 public slots:
 

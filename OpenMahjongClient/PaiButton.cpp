@@ -5,8 +5,9 @@ OMPaiButton::OMPaiButton(QWidget *parent) :
     QPushButton(parent)
 {
     setPai(m_pai,1);
+    setCheckable(true);
     setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    QObject::connect(this,SIGNAL(clicked()),this,SLOT(clickPai()));
+    QObject::connect(this,SIGNAL(clicked(bool)),this,SLOT(togglePai(bool)));
 }
 
 void OMPaiButton::toPaiString(OMPai &pai, QString &str)
@@ -133,7 +134,7 @@ void OMPaiButton::paintEvent(QPaintEvent *)
 
 }
 
-void OMPaiButton::clickPai()
+void OMPaiButton::togglePai(bool enable)
 {
-    emit selectPai(m_pai);
+    emit selectPai(&m_pai,enable);
 }

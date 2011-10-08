@@ -514,7 +514,7 @@ background-color: rgb(0, 170, 0);
        <string>ロン</string>
       </property>
       <property name="checkable">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
     </item>
@@ -533,7 +533,7 @@ background-color: rgb(0, 170, 0);
        <string>ツモ</string>
       </property>
       <property name="checkable">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
     </item>

@@ -26,7 +26,11 @@ void OMClientQObject::sendString(OMString &sendMessage, OMString &recvMessage)
 {
     OMClientThread *clThread = new OMClientThread();
 
-    clThread->sendString(m_dstUrl,sendMessage,recvMessage);
+    try {
+        clThread->sendString(m_dstUrl,sendMessage,recvMessage);
+    }catch(...){
+
+    }
 }
 
 void OMClientQObject::clientStart()
@@ -177,7 +181,7 @@ void OMClientQObject::clientStartImpl()
     gameStart();
     m_pTimer = new QTimer(this);
     QObject::connect(m_pTimer,SIGNAL(timeout()),SLOT(takuUpdate()));
-    m_pTimer->setInterval(100);
+    m_pTimer->setInterval(3000);
     m_pTimer->setSingleShot(false);
     m_pTimer->start();
 }

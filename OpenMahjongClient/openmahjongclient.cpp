@@ -55,15 +55,19 @@ void OpenMahjongClient::on_m_btnConnect_clicked()
         dialog.getUrl(url);
         m_client.setDestination(url);
         conType = dialog.getConnectionType();
-        ((OMGenericClient*)&m_client)->connect(conType,dialog.getSessionNum());
+        try{
+            ((OMGenericClient*)&m_client)->connect(conType,dialog.getSessionNum());
 
-        session = m_client.getSessionNum();
+            session = m_client.getSessionNum();
 
-        strNum.setNum(session);
-        ui->m_labelSession->setText(strNum);
+            strNum.setNum(session);
+            ui->m_labelSession->setText(strNum);
 
-        /* クライアントスレッドをスタートさせる */
-        m_client.clientStart();
+            /* クライアントスレッドをスタートさせる */
+            m_client.clientStart();
+        }catch(...){
+            QMessageBox::warning(this,"接続失敗","接続に失敗しました。");
+        }
     }
 }
 
@@ -77,41 +81,42 @@ void OpenMahjongClient::layoutDahai(OMPai &pai, int index,int num)
     OMPaiButton *btn = new OMPaiButton();
     btn->setEnabled(false);
     btn->setPai(pai,pai.m_bRiichi ? ((index + 1) & 3) : index);
+
     switch(index){
     case 0:
         if(num < 6){
-            ui->m_layout_dahai00->addWidget(btn,Qt::AlignLeft | Qt::AlignBottom);
+            ui->m_layout_dahai00->insertWidget(ui->m_layout_dahai00->count()-1,btn,Qt::AlignLeft | Qt::AlignBottom);
         }else if(num < 12){
-            ui->m_layout_dahai01->addWidget(btn,0,Qt::AlignLeft | Qt::AlignBottom);
+            ui->m_layout_dahai01->insertWidget(ui->m_layout_dahai01->count()-1,btn,0,Qt::AlignLeft | Qt::AlignBottom);
         }else{
-            ui->m_layout_dahai02->addWidget(btn,0,Qt::AlignLeft | Qt::AlignBottom);
+            ui->m_layout_dahai02->insertWidget(ui->m_layout_dahai02->count()-1,btn,0,Qt::AlignLeft | Qt::AlignBottom);
         }
         break;
     case 1:
         if(num < 6){
-            ui->m_layout_dahai10->addWidget(btn,0,Qt::AlignRight | Qt::AlignBottom);
+            ui->m_layout_dahai10->insertWidget(ui->m_layout_dahai10->count()-1,btn,0,Qt::AlignRight | Qt::AlignBottom);
         }else if(num < 12){
-            ui->m_layout_dahai11->addWidget(btn,0,Qt::AlignRight | Qt::AlignBottom);
+            ui->m_layout_dahai11->insertWidget(ui->m_layout_dahai11->count()-1,btn,0,Qt::AlignRight | Qt::AlignBottom);
         }else{
-            ui->m_layout_dahai12->addWidget(btn,0,Qt::AlignRight | Qt::AlignBottom);
+            ui->m_layout_dahai12->insertWidget(ui->m_layout_dahai12->count()-1,btn,0,Qt::AlignRight | Qt::AlignBottom);
         }
         break;
     case 2:
         if(num < 6){
-            ui->m_layout_dahai20->addWidget(btn,0,Qt::AlignRight | Qt::AlignTop);
+            ui->m_layout_dahai20->insertWidget(ui->m_layout_dahai20->count()-1,btn,0,Qt::AlignRight | Qt::AlignTop);
         }else if(num < 12){
-            ui->m_layout_dahai21->addWidget(btn,0,Qt::AlignRight | Qt::AlignTop);
+            ui->m_layout_dahai21->insertWidget(ui->m_layout_dahai21->count()-1,btn,0,Qt::AlignRight | Qt::AlignTop);
         }else{
-            ui->m_layout_dahai22->addWidget(btn,0,Qt::AlignRight | Qt::AlignTop);
+            ui->m_layout_dahai22->insertWidget(ui->m_layout_dahai22->count()-1,btn,0,Qt::AlignRight | Qt::AlignTop);
         }
         break;
     case 3:
         if(num < 6){
-            ui->m_layout_dahai30->addWidget(btn,0,Qt::AlignLeft | Qt::AlignTop);
+            ui->m_layout_dahai30->insertWidget(ui->m_layout_dahai30->count()-1,btn,0,Qt::AlignLeft | Qt::AlignTop);
         }else if(num < 12){
-            ui->m_layout_dahai31->addWidget(btn,0,Qt::AlignLeft | Qt::AlignTop);
+            ui->m_layout_dahai31->insertWidget(ui->m_layout_dahai31->count()-1,btn,0,Qt::AlignLeft | Qt::AlignTop);
         }else{
-            ui->m_layout_dahai32->addWidget(btn,0,Qt::AlignLeft | Qt::AlignTop);
+            ui->m_layout_dahai32->insertWidget(ui->m_layout_dahai32->count()-1,btn,0,Qt::AlignLeft | Qt::AlignTop);
         }
         break;
     default:
@@ -263,8 +268,10 @@ void OpenMahjongClient::onMyTurn()
     int i;
     for(i=0;i<ui->m_layout_tehai0->count();i++){
         OMPaiButton *widget = (OMPaiButton *)ui->m_layout_tehai0->itemAt(i)->widget();
-        widget->setEnabled(true);
-        QObject::connect(widget,SIGNAL(selectPai(OMPai*,bool)),SLOT(onSelectPai(OMPai*,bool)));
+        if(widget != NULL){
+            widget->setEnabled(true);
+            QObject::connect(widget,SIGNAL(selectPai(OMPai*,bool)),SLOT(onSelectPai(OMPai*,bool)));
+        }
     }
     ui->m_btnTii->setEnabled(m_client.m_commander.isTiiAvailable());
     ui->m_btnPon->setEnabled(m_client.m_commander.isPonAvailable());
@@ -284,9 +291,11 @@ void OpenMahjongClient::endTurn()
 
     for(i=0;i<ui->m_layout_tehai0->count();i++){
         OMPaiButton *widget = (OMPaiButton *)ui->m_layout_tehai0->itemAt(i)->widget();
-        widget->setEnabled(false);
-        widget->setChecked(false);
-        QObject::disconnect(widget,SIGNAL(selectPai(OMPai*,bool)),this,SLOT(onSelectPai(OMPai*,bool)));
+        if(widget != NULL){
+            widget->setEnabled(false);
+            widget->setChecked(false);
+            QObject::disconnect(widget,SIGNAL(selectPai(OMPai*,bool)),this,SLOT(onSelectPai(OMPai*,bool)));
+        }
     }
     ui->m_btnTii->setEnabled(false);
     ui->m_btnPon->setEnabled(false);

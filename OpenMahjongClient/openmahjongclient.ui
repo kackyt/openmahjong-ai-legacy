@@ -53,7 +53,24 @@ background-color: rgb(0, 170, 0);
       <height>41</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="m_layout_dahai00"/>
+    <layout class="QHBoxLayout" name="m_layout_dahai00">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_2">
     <property name="geometry">
@@ -64,7 +81,24 @@ background-color: rgb(0, 170, 0);
       <height>41</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="m_layout_dahai01"/>
+    <layout class="QHBoxLayout" name="m_layout_dahai01">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_3">
     <property name="geometry">
@@ -75,7 +109,24 @@ background-color: rgb(0, 170, 0);
       <height>41</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="m_layout_dahai02"/>
+    <layout class="QHBoxLayout" name="m_layout_dahai02">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer_7">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </widget>
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
@@ -86,7 +137,24 @@ background-color: rgb(0, 170, 0);
       <height>171</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="m_layout_dahai10"/>
+    <layout class="QVBoxLayout" name="m_layout_dahai10">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <spacer name="verticalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </widget>
    <widget class="QWidget" name="verticalLayoutWidget_2">
     <property name="geometry">
@@ -97,7 +165,24 @@ background-color: rgb(0, 170, 0);
       <height>171</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="m_layout_dahai11"/>
+    <layout class="QVBoxLayout" name="m_layout_dahai11">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <spacer name="verticalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </widget>
    <widget class="QWidget" name="verticalLayoutWidget_3">
     <property name="geometry">
@@ -108,7 +193,24 @@ background-color: rgb(0, 170, 0);
       <height>171</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="m_layout_dahai12"/>
+    <layout class="QVBoxLayout" name="m_layout_dahai12">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <spacer name="verticalSpacer_7">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_4">
     <property name="geometry">
@@ -119,7 +221,24 @@ background-color: rgb(0, 170, 0);
       <height>41</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="m_layout_dahai20"/>
+    <layout class="QHBoxLayout" name="m_layout_dahai20">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_5">
     <property name="geometry">
@@ -130,7 +249,24 @@ background-color: rgb(0, 170, 0);
       <height>41</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="m_layout_dahai21"/>
+    <layout class="QHBoxLayout" name="m_layout_dahai21">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_6">
     <property name="geometry">
@@ -141,7 +277,24 @@ background-color: rgb(0, 170, 0);
       <height>41</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="m_layout_dahai22"/>
+    <layout class="QHBoxLayout" name="m_layout_dahai22">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </widget>
    <widget class="QWidget" name="verticalLayoutWidget_4">
     <property name="geometry">
@@ -152,7 +305,24 @@ background-color: rgb(0, 170, 0);
       <height>171</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="m_layout_dahai30"/>
+    <layout class="QVBoxLayout" name="m_layout_dahai30">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </widget>
    <widget class="QWidget" name="verticalLayoutWidget_5">
     <property name="geometry">
@@ -163,7 +333,24 @@ background-color: rgb(0, 170, 0);
       <height>171</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="m_layout_dahai31"/>
+    <layout class="QVBoxLayout" name="m_layout_dahai31">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </widget>
    <widget class="QWidget" name="verticalLayoutWidget_6">
     <property name="geometry">
@@ -174,7 +361,24 @@ background-color: rgb(0, 170, 0);
       <height>171</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="m_layout_dahai32"/>
+    <layout class="QVBoxLayout" name="m_layout_dahai32">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <spacer name="verticalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_7">
     <property name="geometry">
@@ -189,6 +393,19 @@ background-color: rgb(0, 170, 0);
      <property name="spacing">
       <number>0</number>
      </property>
+     <item>
+      <spacer name="horizontalSpacer_8">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_8">
@@ -204,6 +421,19 @@ background-color: rgb(0, 170, 0);
      <property name="spacing">
       <number>0</number>
      </property>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="verticalLayoutWidget_7">
@@ -219,6 +449,19 @@ background-color: rgb(0, 170, 0);
      <property name="spacing">
       <number>0</number>
      </property>
+     <item>
+      <spacer name="verticalSpacer_8">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="verticalLayoutWidget_8">
@@ -234,6 +477,19 @@ background-color: rgb(0, 170, 0);
      <property name="spacing">
       <number>0</number>
      </property>
+     <item>
+      <spacer name="verticalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_9">

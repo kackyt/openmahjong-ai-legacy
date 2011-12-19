@@ -295,7 +295,7 @@ OM_SYNC_STATE OMGenericClient::gameSync()
 
         /* エラーを確認したら出力する [TODO] */
         if(!OMIsNull(node)){
-
+            return OM_SYNC_STATE_ERROR;
         }
 
         node = OMGetElement(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_CODE));

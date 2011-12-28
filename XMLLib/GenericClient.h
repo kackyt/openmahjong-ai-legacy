@@ -15,6 +15,7 @@ typedef enum {
 
 typedef enum {
     OM_SYNC_STATE_USERCOMMAND,
+    OM_SYNC_STATE_NEXTKYOKU,
     OM_SYNC_STATE_OK,
     OM_SYNC_STATE_STOP,
     OM_SYNC_STATE_ERROR

@@ -44,6 +44,7 @@ public:
     bool isTouhaiAvailable();
     bool isPassAvailable();
     bool setConfirm();
+    bool setStart();
     bool getCommand(OMCommand &com);
 };
 

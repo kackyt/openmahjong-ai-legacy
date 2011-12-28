@@ -211,6 +211,17 @@ bool OMUICommander::setConfirm()
     return matched;
 }
 
+bool OMUICommander::setStart()
+{
+    bool ret = false;
+    if(searchCommand(TYPE_START,-1,&m_selectedCommand)){
+        m_state = OM_COM_STATE_CONFIRM;
+        ret = true;
+    }
+
+    return ret;
+}
+
 bool OMUICommander::getCommand(OMCommand &com)
 {
     bool ret = false;

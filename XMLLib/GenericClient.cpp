@@ -479,10 +479,21 @@ OM_SYNC_STATE OMGenericClient::gameSync()
                             m_pListener->onProgressed(m_iPlayerIndex,m_pCurTaku);
                         }
                     }else if(code == CODE_WAITCOMMAND && m_gamestate != OM_GAME_STATE_WAITCOMMAND){
+                        int index = m_pCurTaku->getMemberIndex(&m_players[i]);
                         iPlayerDlgIndex = i;
                         debugPrint();
                         retVal = OM_SYNC_STATE_USERCOMMAND;
                         m_gamestate = OM_GAME_STATE_WAITCOMMAND;
+                        for(j=0;j<m_pCurTaku->m_members[index].m_aCommandList.size();j++){
+                            switch(m_pCurTaku->m_members[index].m_aCommandList[j].m_iType){
+                            case TYPE_START:
+                            case TYPE_KOUHAI:
+                                retVal = OM_SYNC_STATE_NEXTKYOKU;
+                                break;
+                            default:
+                                break;
+                            }
+                        }
                     }
 
                 }

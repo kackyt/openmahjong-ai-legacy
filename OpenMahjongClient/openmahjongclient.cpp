@@ -154,6 +154,63 @@ void OpenMahjongClient::onStarted(int index, OMTaku *taku)
         int i,j,ind;
         OMPai pai;
         OMPaiButton *btn;
+
+        /* レイアウトのクリーニング */
+        while(ui->m_layout_dahai00->count() > 1){
+            ui->m_layout_dahai00->removeItem(ui->m_layout_dahai00->itemAt(0));
+        }
+        while(ui->m_layout_dahai01->count() > 1){
+            ui->m_layout_dahai01->removeItem(ui->m_layout_dahai01->itemAt(0));
+        }
+        while(ui->m_layout_dahai02->count() > 1){
+            ui->m_layout_dahai02->removeItem(ui->m_layout_dahai02->itemAt(0));
+        }
+        while(ui->m_layout_dahai10->count() > 1){
+            ui->m_layout_dahai10->removeItem(ui->m_layout_dahai10->itemAt(0));
+        }
+        while(ui->m_layout_dahai11->count() > 1){
+            ui->m_layout_dahai11->removeItem(ui->m_layout_dahai11->itemAt(0));
+        }
+        while(ui->m_layout_dahai02->count() > 1){
+            ui->m_layout_dahai12->removeItem(ui->m_layout_dahai12->itemAt(0));
+        }
+        while(ui->m_layout_dahai20->count() > 1){
+            ui->m_layout_dahai20->removeItem(ui->m_layout_dahai20->itemAt(0));
+        }
+        while(ui->m_layout_dahai21->count() > 1){
+            ui->m_layout_dahai21->removeItem(ui->m_layout_dahai21->itemAt(0));
+        }
+        while(ui->m_layout_dahai22->count() > 1){
+            ui->m_layout_dahai22->removeItem(ui->m_layout_dahai22->itemAt(0));
+        }
+        while(ui->m_layout_dahai30->count() > 1){
+            ui->m_layout_dahai30->removeItem(ui->m_layout_dahai30->itemAt(0));
+        }
+        while(ui->m_layout_dahai31->count() > 1){
+            ui->m_layout_dahai31->removeItem(ui->m_layout_dahai31->itemAt(0));
+        }
+        while(ui->m_layout_dahai32->count() > 1){
+            ui->m_layout_dahai32->removeItem(ui->m_layout_dahai32->itemAt(0));
+        }
+        while(ui->m_layout_tehai0->count() > 1){
+            ui->m_layout_tehai0->removeItem(ui->m_layout_tehai0->itemAt(0));
+        }
+        while(ui->m_layout_tehai1->count() > 1){
+            ui->m_layout_tehai1->removeItem(ui->m_layout_tehai1->itemAt(0));
+        }
+        while(ui->m_layout_tehai2->count() > 1){
+            ui->m_layout_tehai2->removeItem(ui->m_layout_tehai2->itemAt(0));
+        }
+        while(ui->m_layout_tehai3->count() > 1){
+            ui->m_layout_tehai3->removeItem(ui->m_layout_tehai3->itemAt(0));
+        }
+        while(ui->m_layout_dora->count() > 1){
+            ui->m_layout_dora->removeItem(ui->m_layout_dora->itemAt(0));
+        }
+        while(ui->m_layout_uradora->count() > 1){
+            ui->m_layout_uradora->removeItem(ui->m_layout_uradora->itemAt(0));
+        }
+
         ind = m_client.getPlayerIndex();
         for(i=0;i<4;i++){
             OMMember *member = &taku->m_members[ind];

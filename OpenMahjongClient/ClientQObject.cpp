@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QMessageBox>
 #include "ClientQObject.h"
 #include "ClientThread.h"
 
@@ -71,9 +72,41 @@ void OMClientQObject::setDestination(QUrl &url)
 
 void OMClientQObject::takuUpdate()
 {
-    if(gameSync() == OM_SYNC_STATE_USERCOMMAND){
+    OM_SYNC_STATE state;
+    int i;
+
+    state = gameSync();
+    if(state == OM_SYNC_STATE_USERCOMMAND){
         m_commander.initialize(m_pCurTaku->m_members[getPlayerIndex()]);
         emit sigUserTurn();
+    }else if(state == OM_SYNC_STATE_NEXTKYOKU){
+        OMString text,recvMessage;
+        OMCommand com;
+        m_commander.initialize(m_pCurTaku->m_members[getPlayerIndex()]);
+
+
+        if(m_pCurTaku->m_event.m_command.m_iType == TYPE_KOUHAI){
+            text = "çrîvïΩã«";
+        }else{
+            for(i=0;i<m_pCurTaku->m_event.m_result.m_aYaku.size();i++){
+                text += m_pCurTaku->m_event.m_result.m_aYaku[i];
+            }
+
+        }
+
+        m_commander.setStart();
+        m_commander.getCommand(com);
+
+
+        QMessageBox::information(NULL,"èIã«",text);
+
+        /* éüÇÃã«Ç÷ */
+
+        sendCommand(com,recvMessage);
+
+        gameStart();
+
+
     }
 }
 

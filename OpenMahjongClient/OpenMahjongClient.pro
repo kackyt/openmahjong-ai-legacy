@@ -37,7 +37,8 @@ SOURCES += main.cpp\
     ClientThread.cpp \
     common/TakuListener.cpp \
     common/OMXMLCommonQt.cpp \
-    common/UICommander.cpp
+    common/UICommander.cpp \
+    AgariDialog.cpp
 
 HEADERS  += openmahjongclient.h \
     common/OMXMLCommon.h \
@@ -67,10 +68,12 @@ HEADERS  += openmahjongclient.h \
     common/IllegalStateException.h \
     ClientThread.h \
     common/TakuListener.h \
-    common/UICommander.h
+    common/UICommander.h \
+    AgariDialog.h
 
 FORMS    += openmahjongclient.ui \
-    ConnectDialog.ui
+    ConnectDialog.ui \
+    AgariDialog.ui
 
 RESOURCES += \
     OMResource.qrc

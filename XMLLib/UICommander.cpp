@@ -56,6 +56,27 @@ bool OMUICommander::searchCommand(int type,int count,OMCommand *pCom)
     return matched;
 }
 
+bool OMUICommander::searchCommandById(int id,OMCommand *pCom)
+{
+    int i;
+    bool matched = false;
+
+    for(i=0;i<m_member.m_aCommandList.size();i++){
+        OMCommand com = m_member.m_aCommandList[i];
+
+        if(com.m_iId == id){
+            matched = true;
+            if(pCom != NULL){
+                *pCom = com;
+            }
+            break;
+        }
+
+    }
+
+    return matched;
+}
+
 
 bool OMUICommander::addPai(OMPai &pai)
 {
@@ -103,82 +124,93 @@ void OMUICommander::removePai(OMPai &pai)
 
 void OMUICommander::setTii(bool enable)
 {
-    if(enable){
-        m_state = OM_COM_STATE_TII;
-    }else{
-        m_state = OM_COM_STATE_DAHAI;
+    if(m_state != OM_COM_STATE_CONFIRM){
+        if(enable){
+            m_state = OM_COM_STATE_TII;
+        }else{
+            m_state = OM_COM_STATE_DAHAI;
+        }
     }
-
 }
 
 void OMUICommander::setPon(bool enable)
 {
-    if(enable){
-        m_state = OM_COM_STATE_PON;
-    }else{
-        m_state = OM_COM_STATE_DAHAI;
+    if(m_state != OM_COM_STATE_CONFIRM){
+        if(enable){
+            m_state = OM_COM_STATE_PON;
+        }else{
+            m_state = OM_COM_STATE_DAHAI;
+        }
     }
 }
 
 void OMUICommander::setKan(bool enable)
 {
-    if(enable){
-        m_state = OM_COM_STATE_KAN;
-    }else{
-        m_state = OM_COM_STATE_DAHAI;
+    if(m_state != OM_COM_STATE_CONFIRM){
+        if(enable){
+            m_state = OM_COM_STATE_KAN;
+        }else{
+            m_state = OM_COM_STATE_DAHAI;
+        }
     }
 }
 
 void OMUICommander::setRiichi(bool enable)
 {
-    if(enable){
-        m_state = OM_COM_STATE_RIICHI;
-    }else{
-        m_state = OM_COM_STATE_DAHAI;
+    if(m_state != OM_COM_STATE_CONFIRM){
+        if(enable){
+            m_state = OM_COM_STATE_RIICHI;
+        }else{
+            m_state = OM_COM_STATE_DAHAI;
+        }
     }
 }
 
 bool OMUICommander::setRon()
 {
     bool ret = false;
-    if(searchCommand(TYPE_RON,-1,&m_selectedCommand)){
-        m_state = OM_COM_STATE_CONFIRM;
-        ret = true;
+    if(m_state != OM_COM_STATE_CONFIRM){
+        if(searchCommand(TYPE_RON,-1,&m_selectedCommand)){
+            m_state = OM_COM_STATE_CONFIRM;
+            ret = true;
+        }
     }
-
     return ret;
 }
 
 bool OMUICommander::setTsumo()
 {
     bool ret = false;
-    if(searchCommand(TYPE_TSUMO,-1,&m_selectedCommand)){
-        m_state = OM_COM_STATE_CONFIRM;
-        ret = true;
+    if(m_state != OM_COM_STATE_CONFIRM){
+        if(searchCommand(TYPE_TSUMO,-1,&m_selectedCommand)){
+            m_state = OM_COM_STATE_CONFIRM;
+            ret = true;
+        }
     }
-
     return ret;
 }
 
 bool OMUICommander::setTouhai()
 {
     bool ret = false;
-    if(searchCommand(TYPE_TOUHAI,-1,&m_selectedCommand)){
-        m_state = OM_COM_STATE_CONFIRM;
-        ret = true;
+    if(m_state != OM_COM_STATE_CONFIRM){
+        if(searchCommand(TYPE_TOUHAI,-1,&m_selectedCommand)){
+            m_state = OM_COM_STATE_CONFIRM;
+            ret = true;
+        }
     }
-
     return ret;
 }
 
 bool OMUICommander::setPass()
 {
     bool ret = false;
-    if(searchCommand(TYPE_PASS,-1,&m_selectedCommand)){
-        m_state = OM_COM_STATE_CONFIRM;
-        ret = true;
+    if(m_state != OM_COM_STATE_CONFIRM){
+        if(searchCommand(TYPE_PASS,-1,&m_selectedCommand)){
+            m_state = OM_COM_STATE_CONFIRM;
+            ret = true;
+        }
     }
-
     return ret;
 }
 
@@ -214,7 +246,7 @@ bool OMUICommander::setConfirm()
 bool OMUICommander::setStart()
 {
     bool ret = false;
-    if(searchCommand(TYPE_START,-1,&m_selectedCommand)){
+    if(searchCommandById(ID_START,&m_selectedCommand)){
         m_state = OM_COM_STATE_CONFIRM;
         ret = true;
     }

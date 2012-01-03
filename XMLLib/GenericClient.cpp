@@ -566,7 +566,7 @@ int OMGenericClient::sendCommand(OMCommand &command, OMString &recvMessage)
     OMDomNode node;
     OMString str;
     OMString sendMessage;
-    int code;
+    int code = -1;
 
     recvMessage = _T("");
 
@@ -594,20 +594,21 @@ int OMGenericClient::sendCommand(OMCommand &command, OMString &recvMessage)
 
     try{
         sendString(sendMessage,recvMessage);
+        /* 受信メッセージをパース */
+        OMLoadXML(doc,recvMessage);
+
+        node = OMGetElement(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_CODE));
+
+        OMToNum(node,code);
+
+        if(code == RESPONCE_OK && m_gamestate == OM_GAME_STATE_WAITCOMMAND){
+            m_gamestate = OM_GAME_STATE_PROGRESSING;
+        }
+
     }catch(...){
 
     }
 
-    /* 受信メッセージをパース */
-    OMLoadXML(doc,recvMessage);
-
-    node = OMGetElement(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_CODE));
-
-    OMToNum(node,code);
-
-    if(code == RESPONCE_OK && m_gamestate == OM_GAME_STATE_WAITCOMMAND){
-        m_gamestate = OM_GAME_STATE_PROGRESSING;
-    }
 
     return code;
 }

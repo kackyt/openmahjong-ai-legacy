@@ -12,6 +12,7 @@ private:
     OMMember m_member;
     OMCommand m_selectedCommand;
     bool searchCommand(int type,int count = -1,OMCommand *pCom = NULL);
+    bool searchCommandById(int id,OMCommand *pCom = NULL);
     virtual void __unused_function();
     enum {
         OM_COM_STATE_DAHAI,

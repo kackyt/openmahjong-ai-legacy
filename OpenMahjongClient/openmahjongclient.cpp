@@ -1,9 +1,15 @@
+#include <QString>
 #include <QDebug>
 #include <QMessageBox>
 #include "openmahjongclient.h"
 #include "PaiButton.h"
 #include "ui_openmahjongclient.h"
 #include "ConnectDialog.h"
+
+//static const QString ieStrTable[] = {QString("東家"),QString("南家"),QString("西家"),QString("北家")};
+
+static const TCHAR *ieStrTable[] = {_T("東家"),_T("南家"),_T("西家"),_T("北家")};
+
 
 OpenMahjongClient::OpenMahjongClient(QWidget *parent) :
     QWidget(parent),
@@ -14,6 +20,7 @@ OpenMahjongClient::OpenMahjongClient(QWidget *parent) :
     qRegisterMetaType<OMNakiMentsu>();
     qRegisterMetaType<OMPai*>();
     qRegisterMetaType<OMPai>();
+    qRegisterMetaType<OMString>();
     ui->setupUi(this);
 
     /* レイアウト方向の変更 */
@@ -31,6 +38,8 @@ OpenMahjongClient::OpenMahjongClient(QWidget *parent) :
     QObject::connect(&m_client,SIGNAL(sigTehaiAdded(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onTehaiAdded(OMTaku*,int,OMMember*,int,OMPai)));
     QObject::connect(&m_client,SIGNAL(sigTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai)));
     QObject::connect(&m_client,SIGNAL(sigUserTurn()),SLOT(onMyTurn()));
+    QObject::connect(&m_client,SIGNAL(sigResponceCode(int)),SLOT(onResponce(int)));
+    QObject::connect(&m_client,SIGNAL(sigKyokuEnd(OMString)),SLOT(onKyokuEnd(OMString)));
 }
 
 OpenMahjongClient::~OpenMahjongClient()
@@ -154,66 +163,131 @@ void OpenMahjongClient::onStarted(int index, OMTaku *taku)
         int i,j,ind;
         OMPai pai;
         OMPaiButton *btn;
+        QLayoutItem *item;
 
         /* レイアウトのクリーニング */
         while(ui->m_layout_dahai00->count() > 1){
-            ui->m_layout_dahai00->removeItem(ui->m_layout_dahai00->itemAt(0));
+            item = ui->m_layout_dahai00->itemAt(0);
+            ui->m_layout_dahai00->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_dahai01->count() > 1){
-            ui->m_layout_dahai01->removeItem(ui->m_layout_dahai01->itemAt(0));
+            item = ui->m_layout_dahai01->itemAt(0);
+            ui->m_layout_dahai01->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_dahai02->count() > 1){
-            ui->m_layout_dahai02->removeItem(ui->m_layout_dahai02->itemAt(0));
+            item = ui->m_layout_dahai02->itemAt(0);
+            ui->m_layout_dahai02->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_dahai10->count() > 1){
-            ui->m_layout_dahai10->removeItem(ui->m_layout_dahai10->itemAt(0));
+            item = ui->m_layout_dahai10->itemAt(0);
+            ui->m_layout_dahai10->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_dahai11->count() > 1){
-            ui->m_layout_dahai11->removeItem(ui->m_layout_dahai11->itemAt(0));
+            item = ui->m_layout_dahai11->itemAt(0);
+            ui->m_layout_dahai11->removeItem(item);
+            item->widget()->deleteLater();
         }
-        while(ui->m_layout_dahai02->count() > 1){
-            ui->m_layout_dahai12->removeItem(ui->m_layout_dahai12->itemAt(0));
+        while(ui->m_layout_dahai12->count() > 1){
+            item = ui->m_layout_dahai12->itemAt(0);
+            ui->m_layout_dahai12->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_dahai20->count() > 1){
-            ui->m_layout_dahai20->removeItem(ui->m_layout_dahai20->itemAt(0));
+            item = ui->m_layout_dahai20->itemAt(0);
+            ui->m_layout_dahai20->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_dahai21->count() > 1){
-            ui->m_layout_dahai21->removeItem(ui->m_layout_dahai21->itemAt(0));
+            item = ui->m_layout_dahai21->itemAt(0);
+            ui->m_layout_dahai21->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_dahai22->count() > 1){
-            ui->m_layout_dahai22->removeItem(ui->m_layout_dahai22->itemAt(0));
+            item = ui->m_layout_dahai22->itemAt(0);
+            ui->m_layout_dahai22->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_dahai30->count() > 1){
-            ui->m_layout_dahai30->removeItem(ui->m_layout_dahai30->itemAt(0));
+            item = ui->m_layout_dahai30->itemAt(0);
+            ui->m_layout_dahai30->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_dahai31->count() > 1){
-            ui->m_layout_dahai31->removeItem(ui->m_layout_dahai31->itemAt(0));
+            item = ui->m_layout_dahai31->itemAt(0);
+            ui->m_layout_dahai31->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_dahai32->count() > 1){
-            ui->m_layout_dahai32->removeItem(ui->m_layout_dahai32->itemAt(0));
+            item = ui->m_layout_dahai32->itemAt(0);
+            ui->m_layout_dahai32->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_tehai0->count() > 1){
-            ui->m_layout_tehai0->removeItem(ui->m_layout_tehai0->itemAt(0));
+            item = ui->m_layout_tehai0->itemAt(0);
+            ui->m_layout_tehai0->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_tehai1->count() > 1){
-            ui->m_layout_tehai1->removeItem(ui->m_layout_tehai1->itemAt(0));
+            item = ui->m_layout_tehai1->itemAt(0);
+            ui->m_layout_tehai1->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_tehai2->count() > 1){
-            ui->m_layout_tehai2->removeItem(ui->m_layout_tehai2->itemAt(0));
+            item = ui->m_layout_tehai2->itemAt(0);
+            ui->m_layout_tehai2->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_tehai3->count() > 1){
-            ui->m_layout_tehai3->removeItem(ui->m_layout_tehai3->itemAt(0));
+            item = ui->m_layout_tehai3->itemAt(0);
+            ui->m_layout_tehai3->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_dora->count() > 1){
-            ui->m_layout_dora->removeItem(ui->m_layout_dora->itemAt(0));
+            item = ui->m_layout_dora->itemAt(0);
+            ui->m_layout_dora->removeItem(item);
+            item->widget()->deleteLater();
         }
         while(ui->m_layout_uradora->count() > 1){
-            ui->m_layout_uradora->removeItem(ui->m_layout_uradora->itemAt(0));
+            item = ui->m_layout_uradora->itemAt(0);
+            ui->m_layout_uradora->removeItem(item);
+            item->widget()->deleteLater();
         }
 
         ind = m_client.getPlayerIndex();
         for(i=0;i<4;i++){
             OMMember *member = &taku->m_members[ind];
+            QLabel *pLabelName,*pLabelPoint;
+            QString label;
+
+            /* プレーヤー名と自風、得点 */
+            switch(i){
+            case 0:
+                pLabelName = ui->label_name0;
+                pLabelPoint = ui->label_point0;
+                break;
+            case 1:
+                pLabelName = ui->label_name1;
+                pLabelPoint = ui->label_point1;
+                break;
+            case 2:
+                pLabelName = ui->label_name2;
+                pLabelPoint = ui->label_point2;
+                break;
+            case 3:
+            default:
+                pLabelName = ui->label_name3;
+                pLabelPoint = ui->label_point3;
+                break;
+            }
+
+            label = QString("%1 %2").arg(member->m_player.m_strName).arg(ieStrTable[member->m_gamestate.m_iZikaze-1]);
+            pLabelName->setText(label);
+            label = QString("%1点").arg(member->m_iPoint);
+            pLabelPoint->setText(label);
 
             /* 牌を置いていく */
             for(j=0;j<member->m_aDahai.size();j++){
@@ -248,7 +322,7 @@ void OpenMahjongClient::onStarted(int index, OMTaku *taku)
             }
 
             btn->setPai(pai,0);
-            ui->m_layout_dora->addWidget(btn,0,Qt::AlignLeft | Qt::AlignBottom);
+            ui->m_layout_dora->insertWidget(i,btn,0,Qt::AlignLeft | Qt::AlignBottom);
 
             /* 裏ドラ */
             btn = new OMPaiButton();
@@ -261,7 +335,7 @@ void OpenMahjongClient::onStarted(int index, OMTaku *taku)
             }
 
             btn->setPai(pai,0);
-            ui->m_layout_uradora->addWidget(btn,0,Qt::AlignLeft | Qt::AlignBottom);
+            ui->m_layout_uradora->insertWidget(i,btn,0,Qt::AlignLeft | Qt::AlignBottom);
         }
 
     }
@@ -314,8 +388,8 @@ void OpenMahjongClient::onTehaiRemoved(OMTaku *taku, int memberIndex, OMMember *
 
     if(layout != NULL){
         QLayoutItem *pItem = layout->itemAt(paiIndex);
-        pItem->widget()->deleteLater(); // 必要かどうかわからないけど。
         layout->removeItem(pItem);
+        pItem->widget()->deleteLater();
     }
 }
 
@@ -441,4 +515,15 @@ void OpenMahjongClient::on_m_btnDecide_clicked()
         QMessageBox::warning(this,"コマンド失敗","その牌では実行できません。");
     }
 
+}
+
+void OpenMahjongClient::onResponce(int code)
+{
+}
+
+void OpenMahjongClient::onKyokuEnd(OMString message)
+{
+    QMessageBox::information(this,"終局",message);
+
+    m_client.clientStart();
 }

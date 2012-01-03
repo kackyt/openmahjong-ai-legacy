@@ -49,19 +49,23 @@ void OMClientQObject::confirmCommand()
     OMCommand com;
     OMString recvMessage;
     int res;
+    bool bCommand;
 
-    qDebug() << "confirmCommand";
+    bCommand = m_commander.getCommand(com);
 
-    m_commander.getCommand(com);
+    qDebug() << "confirmCommand" << bCommand;
 
-    com.m_player = *m_pCurPlayer;
+    if(bCommand){
+        com.m_player = *m_pCurPlayer;
 
-    while((res = sendCommand(com,recvMessage)) < 0);
+        do{
+            res = sendCommand(com,recvMessage);
+            qDebug() << "res = " << res;
+        }while(res < 0);
 
-    qDebug() << "res = " << res;
-
-    if(res != RESPONCE_OK){
-        emit sigResponceCode(res);
+        if(res != RESPONCE_OK){
+            emit sigResponceCode(res);
+        }
     }
 }
 
@@ -80,8 +84,7 @@ void OMClientQObject::takuUpdate()
         m_commander.initialize(m_pCurTaku->m_members[getPlayerIndex()]);
         emit sigUserTurn();
     }else if(state == OM_SYNC_STATE_NEXTKYOKU){
-        OMString text,recvMessage;
-        OMCommand com;
+        OMString text;
         m_commander.initialize(m_pCurTaku->m_members[getPlayerIndex()]);
 
 
@@ -90,23 +93,13 @@ void OMClientQObject::takuUpdate()
         }else{
             for(i=0;i<m_pCurTaku->m_event.m_result.m_aYaku.size();i++){
                 text += m_pCurTaku->m_event.m_result.m_aYaku[i];
+                text += "\n";
             }
 
         }
 
-        m_commander.setStart();
-        m_commander.getCommand(com);
-
-
-        QMessageBox::information(NULL,"終局",text);
-
-        /* 次の局へ */
-
-        sendCommand(com,recvMessage);
-
-        gameStart();
-
-
+        clientStop();
+        emit sigKyokuEnd(text);
     }
 }
 
@@ -210,6 +203,21 @@ void OMClientQObject::appendMessageText(OMString *)
 
 void OMClientQObject::clientStartImpl()
 {
+
+    if(m_commander.setStart()){
+        OMCommand com;
+        int res;
+        OMString recvMessage;
+
+        m_commander.getCommand(com);
+        com.m_player = *m_pCurPlayer;
+
+        do{
+            res = sendCommand(com,recvMessage);
+            qDebug() << "res = " << res;
+        }while(res < 0);
+    }
+
     /* タイマーのスタート */
     gameStart();
     m_pTimer = new QTimer(this);

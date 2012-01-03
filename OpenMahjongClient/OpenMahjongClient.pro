@@ -38,7 +38,8 @@ SOURCES += main.cpp\
     common/TakuListener.cpp \
     common/OMXMLCommonQt.cpp \
     common/UICommander.cpp \
-    AgariDialog.cpp
+    AgariDialog.cpp \
+    MentsuWidget.cpp
 
 HEADERS  += openmahjongclient.h \
     common/OMXMLCommon.h \
@@ -69,7 +70,8 @@ HEADERS  += openmahjongclient.h \
     ClientThread.h \
     common/TakuListener.h \
     common/UICommander.h \
-    AgariDialog.h
+    AgariDialog.h \
+    MentsuWidget.h
 
 FORMS    += openmahjongclient.ui \
     ConnectDialog.ui \

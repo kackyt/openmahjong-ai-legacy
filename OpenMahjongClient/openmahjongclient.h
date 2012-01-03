@@ -25,10 +25,16 @@ public slots:
     void onDahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void onTehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void onTehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    /*void onDahaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void onDahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void onNakiAdded(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu);
+    void onNakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu); */
 
 private slots:
     void onMyTurn();
     void onSelectPai(OMPai *pai,bool enable);
+    void onResponce(int code);
+    void onKyokuEnd(OMString message);
     void on_m_btnConnect_clicked();
 
     void on_m_btnTii_toggled(bool checked);
@@ -62,6 +68,7 @@ Q_DECLARE_METATYPE(OMMember*)
 Q_DECLARE_METATYPE(OMPai*)
 Q_DECLARE_METATYPE(OMPai)
 Q_DECLARE_METATYPE(OMNakiMentsu)
+Q_DECLARE_METATYPE(OMString)
 
 
 #endif // OPENMAHJONGCLIENT_H

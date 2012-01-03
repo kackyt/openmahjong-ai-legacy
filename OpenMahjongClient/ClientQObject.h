@@ -78,6 +78,7 @@ signals:
     void sigStatusCode(int code);
     void sigResponceCode(int code);
     void sigUserTurn();
+    void sigKyokuEnd(OMString message);
 
 public slots:
     void clientStart();

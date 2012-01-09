@@ -27,7 +27,6 @@ private:
     OMPai m_pai;
     int m_rotate;
     QImage m_image;
-    void toPaiString(OMPai &,QString &);
 protected:
     virtual void paintEvent(QPaintEvent *);
 

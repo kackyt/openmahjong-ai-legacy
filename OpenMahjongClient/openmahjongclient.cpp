@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include "openmahjongclient.h"
 #include "PaiButton.h"
+#include "MentsuWidget.h"
 #include "ui_openmahjongclient.h"
 #include "ConnectDialog.h"
 
@@ -35,8 +36,10 @@ OpenMahjongClient::OpenMahjongClient(QWidget *parent) :
 
     QObject::connect(&m_client,SIGNAL(sigStarted(int,OMTaku*)),SLOT(onStarted(int,OMTaku*)));
     QObject::connect(&m_client,SIGNAL(sigDahaiAdded(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onDahaiAdded(OMTaku*,int,OMMember*,int,OMPai)));
+    QObject::connect(&m_client,SIGNAL(sigDahaiNaki(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onDahaiNaki(OMTaku*,int,OMMember*,int,OMPai)));
     QObject::connect(&m_client,SIGNAL(sigTehaiAdded(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onTehaiAdded(OMTaku*,int,OMMember*,int,OMPai)));
     QObject::connect(&m_client,SIGNAL(sigTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai)));
+    QObject::connect(&m_client,SIGNAL(sigNakiAdded(OMTaku*,int,OMMember*,int,OMNakiMentsu,bool)),SLOT(onNakiAdded(OMTaku*,int,OMMember*,int,OMNakiMentsu,bool)));
     QObject::connect(&m_client,SIGNAL(sigUserTurn()),SLOT(onMyTurn()));
     QObject::connect(&m_client,SIGNAL(sigResponceCode(int)),SLOT(onResponce(int)));
     QObject::connect(&m_client,SIGNAL(sigKyokuEnd(OMString)),SLOT(onKyokuEnd(OMString)));
@@ -134,6 +137,77 @@ void OpenMahjongClient::layoutDahai(OMPai &pai, int index,int num)
 
 }
 
+void OpenMahjongClient::removeDahai(int index,int num)
+{
+    QLayoutItem *item;
+
+    switch(index){
+    case 0:
+        if(num < 6){
+            item = ui->m_layout_dahai00->itemAt(ui->m_layout_dahai00->count()-2);
+            ui->m_layout_dahai00->removeItem(item);
+            item->widget()->deleteLater();
+        }else if(num < 12){
+            item = ui->m_layout_dahai01->itemAt(ui->m_layout_dahai01->count()-2);
+            ui->m_layout_dahai01->removeItem(item);
+            item->widget()->deleteLater();
+        }else{
+            item = ui->m_layout_dahai02->itemAt(ui->m_layout_dahai02->count()-2);
+            ui->m_layout_dahai02->removeItem(item);
+            item->widget()->deleteLater();
+        }
+        break;
+    case 1:
+        if(num < 6){
+            item = ui->m_layout_dahai10->itemAt(ui->m_layout_dahai10->count()-2);
+            ui->m_layout_dahai10->removeItem(item);
+            item->widget()->deleteLater();
+        }else if(num < 12){
+            item = ui->m_layout_dahai11->itemAt(ui->m_layout_dahai11->count()-2);
+            ui->m_layout_dahai11->removeItem(item);
+            item->widget()->deleteLater();
+        }else{
+            item = ui->m_layout_dahai12->itemAt(ui->m_layout_dahai12->count()-2);
+            ui->m_layout_dahai12->removeItem(item);
+            item->widget()->deleteLater();
+        }
+        break;
+    case 2:
+        if(num < 6){
+            item = ui->m_layout_dahai20->itemAt(ui->m_layout_dahai20->count()-2);
+            ui->m_layout_dahai20->removeItem(item);
+            item->widget()->deleteLater();
+        }else if(num < 12){
+            item = ui->m_layout_dahai21->itemAt(ui->m_layout_dahai21->count()-2);
+            ui->m_layout_dahai21->removeItem(item);
+            item->widget()->deleteLater();
+        }else{
+            item = ui->m_layout_dahai22->itemAt(ui->m_layout_dahai22->count()-2);
+            ui->m_layout_dahai22->removeItem(item);
+            item->widget()->deleteLater();
+        }
+        break;
+    case 3:
+        if(num < 6){
+            item = ui->m_layout_dahai30->itemAt(ui->m_layout_dahai30->count()-2);
+            ui->m_layout_dahai30->removeItem(item);
+            item->widget()->deleteLater();
+        }else if(num < 12){
+            item = ui->m_layout_dahai31->itemAt(ui->m_layout_dahai31->count()-2);
+            ui->m_layout_dahai31->removeItem(item);
+            item->widget()->deleteLater();
+        }else{
+            item = ui->m_layout_dahai32->itemAt(ui->m_layout_dahai32->count()-2);
+            ui->m_layout_dahai32->removeItem(item);
+            item->widget()->deleteLater();
+        }
+        break;
+    default:
+        break;
+    }
+
+}
+
 void OpenMahjongClient::layoutTehai(OMPai &pai, int index,int num)
 {
     OMPaiButton *btn = new OMPaiButton();
@@ -142,6 +216,7 @@ void OpenMahjongClient::layoutTehai(OMPai &pai, int index,int num)
     switch(index){
     case 0:
         ui->m_layout_tehai0->insertWidget(num,btn,0,Qt::AlignLeft | Qt::AlignBottom);
+        m_aButton.append(btn);
         break;
     case 1:
         ui->m_layout_tehai1->insertWidget(num,btn,0,Qt::AlignRight | Qt::AlignBottom);
@@ -166,96 +241,116 @@ void OpenMahjongClient::onStarted(int index, OMTaku *taku)
         QLayoutItem *item;
 
         /* レイアウトのクリーニング */
-        while(ui->m_layout_dahai00->count() > 1){
+        while(ui->m_layout_dahai00->count() > 0){
             item = ui->m_layout_dahai00->itemAt(0);
             ui->m_layout_dahai00->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_dahai01->count() > 1){
+        while(ui->m_layout_dahai01->count() > 0){
             item = ui->m_layout_dahai01->itemAt(0);
             ui->m_layout_dahai01->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_dahai02->count() > 1){
+        while(ui->m_layout_dahai02->count() > 0){
             item = ui->m_layout_dahai02->itemAt(0);
             ui->m_layout_dahai02->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_dahai10->count() > 1){
+        while(ui->m_layout_dahai10->count() > 0){
             item = ui->m_layout_dahai10->itemAt(0);
             ui->m_layout_dahai10->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_dahai11->count() > 1){
+        while(ui->m_layout_dahai11->count() > 0){
             item = ui->m_layout_dahai11->itemAt(0);
             ui->m_layout_dahai11->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_dahai12->count() > 1){
+        while(ui->m_layout_dahai12->count() > 0){
             item = ui->m_layout_dahai12->itemAt(0);
             ui->m_layout_dahai12->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_dahai20->count() > 1){
+        while(ui->m_layout_dahai20->count() > 0){
             item = ui->m_layout_dahai20->itemAt(0);
             ui->m_layout_dahai20->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_dahai21->count() > 1){
+        while(ui->m_layout_dahai21->count() > 0){
             item = ui->m_layout_dahai21->itemAt(0);
             ui->m_layout_dahai21->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_dahai22->count() > 1){
+        while(ui->m_layout_dahai22->count() > 0){
             item = ui->m_layout_dahai22->itemAt(0);
             ui->m_layout_dahai22->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_dahai30->count() > 1){
+        while(ui->m_layout_dahai30->count() > 0){
             item = ui->m_layout_dahai30->itemAt(0);
             ui->m_layout_dahai30->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_dahai31->count() > 1){
+        while(ui->m_layout_dahai31->count() > 0){
             item = ui->m_layout_dahai31->itemAt(0);
             ui->m_layout_dahai31->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_dahai32->count() > 1){
+        while(ui->m_layout_dahai32->count() > 0){
             item = ui->m_layout_dahai32->itemAt(0);
             ui->m_layout_dahai32->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_tehai0->count() > 1){
+        while(ui->m_layout_tehai0->count() > 0){
             item = ui->m_layout_tehai0->itemAt(0);
             ui->m_layout_tehai0->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_tehai1->count() > 1){
+        while(ui->m_layout_tehai1->count() > 0){
             item = ui->m_layout_tehai1->itemAt(0);
             ui->m_layout_tehai1->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_tehai2->count() > 1){
+        while(ui->m_layout_tehai2->count() > 0){
             item = ui->m_layout_tehai2->itemAt(0);
             ui->m_layout_tehai2->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_tehai3->count() > 1){
+        while(ui->m_layout_tehai3->count() > 0){
             item = ui->m_layout_tehai3->itemAt(0);
             ui->m_layout_tehai3->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_dora->count() > 1){
+        while(ui->m_layout_dora->count() > 0){
             item = ui->m_layout_dora->itemAt(0);
             ui->m_layout_dora->removeItem(item);
             item->widget()->deleteLater();
         }
-        while(ui->m_layout_uradora->count() > 1){
+        while(ui->m_layout_uradora->count() > 0){
             item = ui->m_layout_uradora->itemAt(0);
             ui->m_layout_uradora->removeItem(item);
             item->widget()->deleteLater();
         }
+
+        ui->m_layout_dahai00->addItem(ui->m_spacer_d00);
+        ui->m_layout_dahai01->addItem(ui->m_spacer_d01);
+        ui->m_layout_dahai02->addItem(ui->m_spacer_d02);
+        ui->m_layout_dahai10->addItem(ui->m_spacer_d10);
+        ui->m_layout_dahai11->addItem(ui->m_spacer_d11);
+        ui->m_layout_dahai12->addItem(ui->m_spacer_d12);
+        ui->m_layout_dahai20->addItem(ui->m_spacer_d20);
+        ui->m_layout_dahai21->addItem(ui->m_spacer_d21);
+        ui->m_layout_dahai22->addItem(ui->m_spacer_d22);
+        ui->m_layout_dahai30->addItem(ui->m_spacer_d30);
+        ui->m_layout_dahai31->addItem(ui->m_spacer_d31);
+        ui->m_layout_dahai32->addItem(ui->m_spacer_d32);
+
+        ui->m_layout_tehai0->addItem(ui->m_spacer_t0);
+        ui->m_layout_tehai1->addItem(ui->m_spacer_t1);
+        ui->m_layout_tehai2->addItem(ui->m_spacer_t2);
+        ui->m_layout_tehai3->addItem(ui->m_spacer_t3);
+
+        m_aButton.clear();
 
         ind = m_client.getPlayerIndex();
         for(i=0;i<4;i++){
@@ -352,7 +447,7 @@ void OpenMahjongClient::onDahaiAdded(OMTaku *taku, int memberIndex, OMMember *me
     int ind = m_client.getPlayerIndex();
     int cha = OMMember::getChaDistance(ind,memberIndex);
 
-    layoutDahai(pai,cha,paiIndex);
+    layoutDahai(pai,cha,member->getDahaiRealPos(pai));
 }
 
 void OpenMahjongClient::onTehaiAdded(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai pai)
@@ -389,6 +484,9 @@ void OpenMahjongClient::onTehaiRemoved(OMTaku *taku, int memberIndex, OMMember *
     if(layout != NULL){
         QLayoutItem *pItem = layout->itemAt(paiIndex);
         layout->removeItem(pItem);
+        if(cha == 0){
+            m_aButton.remove(m_aButton.indexOf((OMPaiButton*)pItem->widget()),1);
+        }
         pItem->widget()->deleteLater();
     }
 }
@@ -397,10 +495,11 @@ void OpenMahjongClient::onMyTurn()
 {
     /* 自分のターンが回ってきた */
     int i;
-    for(i=0;i<ui->m_layout_tehai0->count();i++){
-        OMPaiButton *widget = (OMPaiButton *)ui->m_layout_tehai0->itemAt(i)->widget();
+    for(i=0;i<m_aButton.size();i++){
+        OMPaiButton *widget = m_aButton[i];
         if(widget != NULL){
             widget->setEnabled(true);
+            widget->setCheckable(true);
             QObject::connect(widget,SIGNAL(selectPai(OMPai*,bool)),SLOT(onSelectPai(OMPai*,bool)));
         }
     }
@@ -420,8 +519,8 @@ void OpenMahjongClient::endTurn()
     int i;
     bool enable;
 
-    for(i=0;i<ui->m_layout_tehai0->count();i++){
-        OMPaiButton *widget = (OMPaiButton *)ui->m_layout_tehai0->itemAt(i)->widget();
+    for(i=0;i<m_aButton.size();i++){
+        OMPaiButton *widget = m_aButton[i];
         if(widget != NULL){
             widget->setEnabled(false);
             widget->setChecked(false);
@@ -526,4 +625,78 @@ void OpenMahjongClient::onKyokuEnd(OMString message)
     QMessageBox::information(this,"終局",message);
 
     m_client.clientStart();
+}
+
+void OpenMahjongClient::onDahaiNaki(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai pai)
+{
+    int ind = m_client.getPlayerIndex();
+    int cha = OMMember::getChaDistance(ind,memberIndex);
+
+    removeDahai(cha,member->getDahaiRealPos(pai));
+
+}
+
+void OpenMahjongClient::onNakiAdded(OMTaku *taku, int memberIndex, OMMember *member,int mentsuIndex, OMNakiMentsu mentsu,bool kuwae)
+{
+    OMMentsuWidget *widget = new OMMentsuWidget();
+    QLayoutItem *item;
+    int ind = m_client.getPlayerIndex();
+    int cha = OMMember::getChaDistance(ind,memberIndex);
+    int dist = OMMember::getChaDistance(memberIndex,mentsu.m_iAite);
+    int i;
+
+    widget->setMentsu(mentsu,cha,dist);
+
+
+    switch(cha){
+    case 0:
+        ui->m_layout_tehai0->insertWidget(ui->m_layout_tehai0->count() - mentsuIndex,widget,0,Qt::AlignRight | Qt::AlignBottom);
+        if(!kuwae && member->m_aTehai.size() == 0){
+            for(i=0;i<3;i++){
+                item = ui->m_layout_tehai0->itemAt(0);
+                ui->m_layout_tehai0->removeItem(item);
+                item->widget()->deleteLater();
+            }
+        }
+        break;
+    case 1:
+        ui->m_layout_tehai1->insertWidget(ui->m_layout_tehai1->count() - mentsuIndex,widget,0,Qt::AlignRight | Qt::AlignTop);
+        if(!kuwae && member->m_aTehai.size() == 0){
+            for(i=0;i<3;i++){
+                item = ui->m_layout_tehai1->itemAt(0);
+                ui->m_layout_tehai1->removeItem(item);
+                item->widget()->deleteLater();
+            }
+        }
+        break;
+    case 2:
+        ui->m_layout_tehai2->insertWidget(ui->m_layout_tehai2->count() - mentsuIndex,widget,0,Qt::AlignLeft | Qt::AlignTop);
+        if(!kuwae && member->m_aTehai.size() == 0){
+            for(i=0;i<3;i++){
+                item = ui->m_layout_tehai2->itemAt(0);
+                ui->m_layout_tehai2->removeItem(item);
+                item->widget()->deleteLater();
+            }
+        }
+        break;
+    case 3:
+        ui->m_layout_tehai3->insertWidget(ui->m_layout_tehai3->count() - mentsuIndex,widget,0,Qt::AlignLeft | Qt::AlignBottom);
+        if(!kuwae && member->m_aTehai.size() == 0){
+            for(i=0;i<3;i++){
+                item = ui->m_layout_tehai3->itemAt(0);
+                ui->m_layout_tehai3->removeItem(item);
+                item->widget()->deleteLater();
+            }
+        }
+        break;
+    default:
+        break;
+    }
+
+
+}
+
+void OpenMahjongClient::onNakiRemoved(OMTaku *taku, int memberIndex, OMMember *member,int mentsuIndex, OMNakiMentsu mentsu)
+{
+
 }

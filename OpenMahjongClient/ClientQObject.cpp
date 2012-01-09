@@ -91,11 +91,15 @@ void OMClientQObject::takuUpdate()
         if(m_pCurTaku->m_event.m_command.m_iType == TYPE_KOUHAI){
             text = "çrîvïΩã«";
         }else{
+            OMString pt;
             for(i=0;i<m_pCurTaku->m_event.m_result.m_aYaku.size();i++){
                 text += m_pCurTaku->m_event.m_result.m_aYaku[i];
                 text += "\n";
             }
 
+            pt = QString("%1„  %2ïÑ %3ì_\n").arg(m_pCurTaku->m_event.m_result.m_iHan).arg(m_pCurTaku->m_event.m_result.m_iFu).arg(m_pCurTaku->m_event.m_result.m_iScore);
+
+            text += pt;
         }
 
         clientStop();
@@ -119,26 +123,20 @@ void OMClientQObject::dahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,i
 
 }
 
-void OMClientQObject::dahaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai)
-{
-    emit sigDahaiRemoved(taku,memberIndex,member,paiIndex,pai);
-
-}
-
 void OMClientQObject::dahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai)
 {
     emit sigDahaiNaki(taku,memberIndex,member,paiIndex,pai);
 
 }
 
-void OMClientQObject::nakiAdded(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu)
+void OMClientQObject::nakiAdded(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu,bool kuwae)
 {
-    emit sigNakiAdded(taku,memberIndex,member,mentsu);
+    emit sigNakiAdded(taku,memberIndex,member,mentsuIndex,mentsu,kuwae);
 }
 
-void OMClientQObject::nakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu)
+void OMClientQObject::nakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu)
 {
-    emit sigNakiRemoved(taku,memberIndex,member,mentsu);
+    emit sigNakiRemoved(taku,memberIndex,member,mentsuIndex,mentsu);
 }
 
 void OMClientQObject::onDahai()

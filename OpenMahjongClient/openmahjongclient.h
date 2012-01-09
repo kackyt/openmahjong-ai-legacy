@@ -5,6 +5,7 @@
 #include <QMetaType>
 #include "ClientQObject.h"
 #include "common/ClientListener.h"
+#include "PaiButton.h"
 
 
 namespace Ui {
@@ -25,10 +26,9 @@ public slots:
     void onDahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void onTehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void onTehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
-    /*void onDahaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void onDahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
-    void onNakiAdded(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu);
-    void onNakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu); */
+    void onNakiAdded(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu,bool kuwae);
+    void onNakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu);
 
 private slots:
     void onMyTurn();
@@ -59,8 +59,10 @@ private:
     Ui::OpenMahjongClient *ui;
     OMClientQObject m_client;
     void layoutDahai(OMPai &pai,int index,int num);
+    void removeDahai(int index,int num);
     void layoutTehai(OMPai &pai,int index,int num);
     void endTurn();
+    QVector<OMPaiButton *> m_aButton;
 };
 
 Q_DECLARE_METATYPE(OMTaku*)

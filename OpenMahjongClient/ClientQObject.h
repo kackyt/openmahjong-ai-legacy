@@ -29,10 +29,9 @@ public:
     virtual void tehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void tehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void dahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
-    void dahaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void dahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
-    void nakiAdded(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu);
-    void nakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu);
+    void nakiAdded(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu,bool kuwae);
+    void nakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu);
     void appendMessageText(OMString *);
     void onTii();
     void onPon();
@@ -60,10 +59,9 @@ signals:
     void sigTehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void sigTehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void sigDahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
-    void sigDahaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void sigDahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
-    void sigNakiAdded(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu);
-    void sigNakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,OMNakiMentsu mentsu);
+    void sigNakiAdded(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu,bool kuwae);
+    void sigNakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu);
     void sigAppendMessageText(OMString *);
     void sigTii();
     void sigPon();

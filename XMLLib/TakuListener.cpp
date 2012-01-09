@@ -19,22 +19,17 @@ void OMTakuListener::dahaiAdded(OMTaku *taku, int memberIndex, OMMember *member,
 
 }
 
-void OMTakuListener::dahaiRemoved(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai pai)
-{
-
-}
-
 void OMTakuListener::dahaiNaki(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai pai)
 {
 
 }
 
-void OMTakuListener::nakiAdded(OMTaku *taku, int memberIndex, OMMember *member, OMNakiMentsu mentsu)
+void OMTakuListener::nakiAdded(OMTaku *taku, int memberIndex, OMMember *member,int mentsuIndex, OMNakiMentsu mentsu,bool kuwae)
 {
 
 }
 
-void OMTakuListener::nakiRemoved(OMTaku *taku, int memberIndex, OMMember *member, OMNakiMentsu mentsu)
+void OMTakuListener::nakiRemoved(OMTaku *taku, int memberIndex, OMMember *member,int mentsuIndex, OMNakiMentsu mentsu)
 {
 
 }

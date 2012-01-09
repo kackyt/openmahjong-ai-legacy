@@ -55,6 +55,7 @@ public:
         OMPlayer m_player;
         OMMember();
         virtual ~OMMember();
+        int getDahaiRealPos(OMPai &);
 
 };
 

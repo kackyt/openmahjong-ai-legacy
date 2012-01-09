@@ -189,3 +189,21 @@ int OMMember::getChaDistance(int x, int y)
 {
     return (y - x + 4) % 4;
 }
+
+int OMMember::getDahaiRealPos(OMPai &pai)
+{
+    int pos = 0;
+    int i;
+    bool matched = false;
+
+    for(i=0;i<m_aDahai.size();i++){
+        if(m_aDahai[i].match(pai)){
+            matched = true;
+            break;
+        }else if(!m_aDahai[i].m_bNaki){
+            pos++;
+        }
+    }
+
+    return matched ? pos : -1;
+}

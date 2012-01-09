@@ -55,7 +55,8 @@ public:
 	int m_iId;
 	int m_iNo;
 	int m_iCategory;
-        OMPai();
+    void toPaiString(OMString &str,OMRule &rule);
+    OMPai();
         virtual ~OMPai();
 
 };

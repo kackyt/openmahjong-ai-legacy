@@ -172,7 +172,11 @@ BOOL OMPai::isAka(OMRule& rule)
 		if(m_iCategory == PAI_PINZU && m_iNo == 5 && m_iId == 3){
 			return TRUE;
 		}
-	}
+    }else if(rule.m_iAka == 3) {
+        if(m_iId == 4){
+            return TRUE;
+        }
+    }
 
 	return FALSE;
 
@@ -206,3 +210,38 @@ bool OMPai::operator ==(OMPai& pai)
         }
 }
 
+void OMPai::toPaiString(OMString &str,OMRule &rule)
+{
+    UINT num;
+    static const char *haigaNameTbl[] = {
+        "ton","nan","sha","pei","haku","hatu","tyun","ura"
+    };
+
+    num = (UINT)*this;
+
+    if(isAka(rule)){
+        num += 35;
+    }
+
+    if(num < 9) {
+        str.sprintf("man%d",num + 1);
+    }else if(num < 18) {
+        str.sprintf("pin%d",(num % 9) + 1);
+    }else if(num < 27) {
+        str.sprintf("sou%d",(num % 9) + 1);
+    }else if(num < 35) {
+        str.sprintf("%s",haigaNameTbl[(num % 9)]);
+    }else if(num < 44) {
+        str.sprintf("manred%d",((num - 35) % 9) + 1);
+    }else if(num < 53) {
+        str.sprintf("pinred%d",((num - 35) % 9) + 1);
+    }else if(num < 62) {
+        str.sprintf("soured%d",((num - 35) % 9) + 1);
+    }else if(num < 68) {
+        str.sprintf("%sred",haigaNameTbl[(num - 35) % 9]);
+    }else{
+        str = "tyun";
+    }
+
+
+}

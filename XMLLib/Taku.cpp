@@ -619,7 +619,7 @@ void OMTaku::update(OMTaku& value)
                 }
                 ind = getMemberIndex(&value.m_event.m_command.m_player);
                 if(m_pListener != NULL){
-                    m_pListener->nakiAdded(this,ind,&m_members[ind],value.m_event.m_command.m_mentsu);
+                    m_pListener->nakiAdded(this,ind,&m_members[ind],m_members[ind].m_gamestate.m_aNakiList.size(),value.m_event.m_command.m_mentsu,false);
                 }
                 m_members[ind].m_gamestate.m_aNakiList.append(value.m_event.m_command.m_mentsu);
                 for(i=0;i<m_members[value.m_event.m_command.m_mentsu.m_iAite].m_aDahai.size();i++){
@@ -675,16 +675,16 @@ void OMTaku::update(OMTaku& value)
                 for(i=0;i<m_members[ind].m_gamestate.m_aNakiList.size();i++){
                     if((UINT)m_members[ind].m_gamestate.m_aNakiList[i].m_nakihai == (UINT)value.m_event.m_command.m_pai){
                         if(m_pListener != NULL){
-                            m_pListener->nakiRemoved(this,ind,&m_members[ind],m_members[ind].m_gamestate.m_aNakiList[i]);
+                            m_pListener->nakiRemoved(this,ind,&m_members[ind],i,m_members[ind].m_gamestate.m_aNakiList[i]);
                         }
                         m_members[ind].m_gamestate.m_aNakiList.remove(i);
                         break;
                     }
                 }
                 if(m_pListener != NULL){
-                    m_pListener->nakiAdded(this,ind,&m_members[ind],value.m_event.m_command.m_mentsu);
+                    m_pListener->nakiAdded(this,ind,&m_members[ind],i,value.m_event.m_command.m_mentsu,true);
                 }
-                m_members[ind].m_gamestate.m_aNakiList.append(value.m_event.m_command.m_mentsu);
+                m_members[ind].m_gamestate.m_aNakiList.insert(i,value.m_event.m_command.m_mentsu);
                 num = 0;
                 for(i=0;i<m_members[ind].m_aTehai.size();i++){
                     for(j=0;j<value.m_event.m_command.m_mentsu.m_aPaiList.size();j++){

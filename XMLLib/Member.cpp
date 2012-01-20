@@ -205,5 +205,9 @@ int OMMember::getDahaiRealPos(OMPai &pai)
         }
     }
 
-    return matched ? pos : -1;
+    if(matched){
+        return pos;
+    }else{
+        return -1;
+    }
 }

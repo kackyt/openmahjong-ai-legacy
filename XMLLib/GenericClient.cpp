@@ -65,6 +65,8 @@ void OMGenericClient::connect(OM_CONNECTION_TYPE contype,int session)
                 com.m_iId = ID_CREATE;
                 m_iSession = -1;
                 com.m_rule = m_rule;
+            }else{
+                com.m_iId = ID_CONNECT;
             }
 
             m_players[i].m_iPrivateId = (rand() << 16) | (rand() & 0xFFFF);
@@ -408,6 +410,7 @@ OM_SYNC_STATE OMGenericClient::gameSync()
                     /* プレーヤーのターン(終わり) */
                     // 自分宛のメッセージを引っ張り出してくる
                     nodeTaku = OMListItem(nodeListTaku,i);
+#if 0
                     nodeList = OMGetElementList(nodeTaku,_T(TAG_MESSAGE));
                     for(j=0;j<OMListLength(nodeList);j++){
                         OMMessage mes;
@@ -425,6 +428,7 @@ OM_SYNC_STATE OMGenericClient::gameSync()
                             m_pListener->appendMessageText(&mestext);
                         }
                     }
+#endif
 
 #if 0
                     for(j=0;j<4;j++){
@@ -587,8 +591,6 @@ int OMGenericClient::sendCommand(OMCommand &command, OMString &recvMessage)
     }
 
     /* キューに入ったメッセージを送信(TODO) */
-
-
 
     OMToXML(doc,sendMessage);
 

@@ -140,64 +140,77 @@ void OpenMahjongClient::layoutDahai(OMPai &pai, int index,int num)
 void OpenMahjongClient::removeDahai(int index,int num)
 {
     QLayoutItem *item;
+    int idx;
 
     switch(index){
     case 0:
         if(num < 6){
-            item = ui->m_layout_dahai00->itemAt(ui->m_layout_dahai00->count()-2);
+            idx = ui->m_layout_dahai00->count()-2;
+            item = ui->m_layout_dahai00->itemAt(idx);
             ui->m_layout_dahai00->removeItem(item);
             item->widget()->deleteLater();
         }else if(num < 12){
-            item = ui->m_layout_dahai01->itemAt(ui->m_layout_dahai01->count()-2);
+            idx = ui->m_layout_dahai01->count()-2;
+            item = ui->m_layout_dahai01->itemAt(idx);
             ui->m_layout_dahai01->removeItem(item);
             item->widget()->deleteLater();
         }else{
-            item = ui->m_layout_dahai02->itemAt(ui->m_layout_dahai02->count()-2);
+            idx = ui->m_layout_dahai02->count()-2;
+            item = ui->m_layout_dahai02->itemAt(idx);
             ui->m_layout_dahai02->removeItem(item);
             item->widget()->deleteLater();
         }
         break;
     case 1:
         if(num < 6){
-            item = ui->m_layout_dahai10->itemAt(ui->m_layout_dahai10->count()-2);
+            idx = ui->m_layout_dahai10->count()-2;
+            item = ui->m_layout_dahai10->itemAt(idx);
             ui->m_layout_dahai10->removeItem(item);
             item->widget()->deleteLater();
         }else if(num < 12){
-            item = ui->m_layout_dahai11->itemAt(ui->m_layout_dahai11->count()-2);
+            idx = ui->m_layout_dahai11->count()-2;
+            item = ui->m_layout_dahai11->itemAt(idx);
             ui->m_layout_dahai11->removeItem(item);
             item->widget()->deleteLater();
         }else{
-            item = ui->m_layout_dahai12->itemAt(ui->m_layout_dahai12->count()-2);
+            idx = ui->m_layout_dahai12->count()-2;
+            item = ui->m_layout_dahai12->itemAt(idx);
             ui->m_layout_dahai12->removeItem(item);
             item->widget()->deleteLater();
         }
         break;
     case 2:
         if(num < 6){
-            item = ui->m_layout_dahai20->itemAt(ui->m_layout_dahai20->count()-2);
+            idx = ui->m_layout_dahai20->count()-2;
+            item = ui->m_layout_dahai20->itemAt(idx);
             ui->m_layout_dahai20->removeItem(item);
             item->widget()->deleteLater();
         }else if(num < 12){
-            item = ui->m_layout_dahai21->itemAt(ui->m_layout_dahai21->count()-2);
+            idx = ui->m_layout_dahai21->count()-2;
+            item = ui->m_layout_dahai21->itemAt(idx);
             ui->m_layout_dahai21->removeItem(item);
             item->widget()->deleteLater();
         }else{
-            item = ui->m_layout_dahai22->itemAt(ui->m_layout_dahai22->count()-2);
+            idx = ui->m_layout_dahai22->count()-2;
+            item = ui->m_layout_dahai22->itemAt(idx);
             ui->m_layout_dahai22->removeItem(item);
             item->widget()->deleteLater();
         }
         break;
     case 3:
         if(num < 6){
-            item = ui->m_layout_dahai30->itemAt(ui->m_layout_dahai30->count()-2);
+            idx = ui->m_layout_dahai30->count()-2;
+            item = ui->m_layout_dahai30->itemAt(idx);
             ui->m_layout_dahai30->removeItem(item);
             item->widget()->deleteLater();
         }else if(num < 12){
-            item = ui->m_layout_dahai31->itemAt(ui->m_layout_dahai31->count()-2);
+            idx = ui->m_layout_dahai31->count()-2;
+            item = ui->m_layout_dahai31->itemAt(idx);
             ui->m_layout_dahai31->removeItem(item);
             item->widget()->deleteLater();
         }else{
-            item = ui->m_layout_dahai32->itemAt(ui->m_layout_dahai32->count()-2);
+            idx = ui->m_layout_dahai32->count()-2;
+            item = ui->m_layout_dahai32->itemAt(idx);
             ui->m_layout_dahai32->removeItem(item);
             item->widget()->deleteLater();
         }
@@ -244,92 +257,128 @@ void OpenMahjongClient::onStarted(int index, OMTaku *taku)
         while(ui->m_layout_dahai00->count() > 0){
             item = ui->m_layout_dahai00->itemAt(0);
             ui->m_layout_dahai00->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_d00){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_dahai01->count() > 0){
             item = ui->m_layout_dahai01->itemAt(0);
             ui->m_layout_dahai01->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_d01){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_dahai02->count() > 0){
             item = ui->m_layout_dahai02->itemAt(0);
             ui->m_layout_dahai02->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_d02){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_dahai10->count() > 0){
             item = ui->m_layout_dahai10->itemAt(0);
             ui->m_layout_dahai10->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_d10){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_dahai11->count() > 0){
             item = ui->m_layout_dahai11->itemAt(0);
             ui->m_layout_dahai11->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_d11){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_dahai12->count() > 0){
             item = ui->m_layout_dahai12->itemAt(0);
             ui->m_layout_dahai12->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_d12){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_dahai20->count() > 0){
             item = ui->m_layout_dahai20->itemAt(0);
             ui->m_layout_dahai20->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_d20){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_dahai21->count() > 0){
             item = ui->m_layout_dahai21->itemAt(0);
             ui->m_layout_dahai21->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_d21){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_dahai22->count() > 0){
             item = ui->m_layout_dahai22->itemAt(0);
             ui->m_layout_dahai22->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_d22){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_dahai30->count() > 0){
             item = ui->m_layout_dahai30->itemAt(0);
             ui->m_layout_dahai30->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_d30){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_dahai31->count() > 0){
             item = ui->m_layout_dahai31->itemAt(0);
             ui->m_layout_dahai31->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_d31){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_dahai32->count() > 0){
             item = ui->m_layout_dahai32->itemAt(0);
             ui->m_layout_dahai32->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_d32){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_tehai0->count() > 0){
             item = ui->m_layout_tehai0->itemAt(0);
             ui->m_layout_tehai0->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_t0){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_tehai1->count() > 0){
             item = ui->m_layout_tehai1->itemAt(0);
             ui->m_layout_tehai1->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_t1){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_tehai2->count() > 0){
             item = ui->m_layout_tehai2->itemAt(0);
             ui->m_layout_tehai2->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_t2){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_tehai3->count() > 0){
             item = ui->m_layout_tehai3->itemAt(0);
             ui->m_layout_tehai3->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_t3){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_dora->count() > 0){
             item = ui->m_layout_dora->itemAt(0);
             ui->m_layout_dora->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_dora){
+                item->widget()->deleteLater();
+            }
         }
         while(ui->m_layout_uradora->count() > 0){
             item = ui->m_layout_uradora->itemAt(0);
             ui->m_layout_uradora->removeItem(item);
-            item->widget()->deleteLater();
+            if(item != ui->m_spacer_ura){
+                item->widget()->deleteLater();
+            }
         }
 
         ui->m_layout_dahai00->addItem(ui->m_spacer_d00);
@@ -349,6 +398,9 @@ void OpenMahjongClient::onStarted(int index, OMTaku *taku)
         ui->m_layout_tehai1->addItem(ui->m_spacer_t1);
         ui->m_layout_tehai2->addItem(ui->m_spacer_t2);
         ui->m_layout_tehai3->addItem(ui->m_spacer_t3);
+
+        ui->m_layout_dora->addItem(ui->m_spacer_dora);
+        ui->m_layout_uradora->addItem(ui->m_spacer_ura);
 
         m_aButton.clear();
 

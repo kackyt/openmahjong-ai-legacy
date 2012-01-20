@@ -21,6 +21,11 @@ public:
     void getCompName(OMArray<OMString> &compnames) const;
     int getSessionNum() const;
     void getUrl(QUrl& url) const;
+private slots:
+    void on_rdConnect_clicked();
+
+    void on_rdCreate_clicked();
+
 private:
     Ui::ConnectDialog *ui;
 };

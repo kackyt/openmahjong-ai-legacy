@@ -82,7 +82,7 @@ void OMClientQObject::takuUpdate()
     state = gameSync();
     if(state == OM_SYNC_STATE_USERCOMMAND){
         m_commander.initialize(m_pCurTaku->m_members[getPlayerIndex()]);
-        emit sigUserTurn();
+        emit sigUserTurn(m_pCurTaku);
     }else if(state == OM_SYNC_STATE_NEXTKYOKU){
         OMString text;
         m_commander.initialize(m_pCurTaku->m_members[getPlayerIndex()]);
@@ -103,7 +103,7 @@ void OMClientQObject::takuUpdate()
         }
 
         clientStop();
-        emit sigKyokuEnd(text);
+        emit sigKyokuEnd(text,m_pCurTaku);
     }
 }
 

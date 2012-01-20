@@ -72,3 +72,13 @@ void ConnectDialog::getUrl(QUrl &url) const
 {
     url = QUrl(ui->cmbUrl->currentText());
 }
+
+void ConnectDialog::on_rdConnect_clicked()
+{
+    ui->edTakuNum->setEnabled(true);
+}
+
+void ConnectDialog::on_rdCreate_clicked()
+{
+    ui->edTakuNum->setEnabled(false);
+}

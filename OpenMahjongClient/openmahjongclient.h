@@ -12,7 +12,7 @@ namespace Ui {
     class OpenMahjongClient;
 }
 
-class OpenMahjongClient : public QWidget,public OMClientListener
+class OpenMahjongClient : public QWidget
 {
     Q_OBJECT
 
@@ -29,12 +29,13 @@ public slots:
     void onDahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void onNakiAdded(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu,bool kuwae);
     void onNakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu);
+    void onProgressed(int index, OMTaku *);
 
 private slots:
-    void onMyTurn();
+    void onMyTurn(OMTaku *);
     void onSelectPai(OMPai *pai,bool enable);
     void onResponce(int code);
-    void onKyokuEnd(OMString message);
+    void onKyokuEnd(OMString message,OMTaku *taku);
     void on_m_btnConnect_clicked();
 
     void on_m_btnTii_toggled(bool checked);
@@ -62,6 +63,7 @@ private:
     void removeDahai(int index,int num);
     void layoutTehai(OMPai &pai,int index,int num);
     void endTurn();
+    void takuUpdate(OMTaku *taku);
     QVector<OMPaiButton *> m_aButton;
 };
 

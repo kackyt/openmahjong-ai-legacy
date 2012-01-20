@@ -64,6 +64,9 @@
     </item>
     <item>
      <widget class="QRadioButton" name="rdReconnect">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="text">
        <string>再接続</string>
       </property>
@@ -97,7 +100,7 @@
     <string>ルール</string>
    </property>
   </widget>
-  <widget class="QWidget" name="layoutWidget">
+  <widget class="QWidget" name="layoutWidget2">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -196,7 +199,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="layoutWidget">
+  <widget class="QWidget" name="layoutWidget1">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -214,7 +217,11 @@
      </widget>
     </item>
     <item row="0" column="1">
-     <widget class="QLineEdit" name="edTakuNum"/>
+     <widget class="QLineEdit" name="edTakuNum">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+     </widget>
     </item>
     <item row="1" column="0">
      <widget class="QLabel" name="label_3">
@@ -228,8 +235,8 @@
     </item>
    </layout>
   </widget>
-  <zorder>layoutWidget</zorder>
-  <zorder>layoutWidget</zorder>
+  <zorder>layoutWidget2</zorder>
+  <zorder>layoutWidget1</zorder>
   <zorder>layoutWidget</zorder>
   <zorder>buttonBox</zorder>
   <zorder>groupBox</zorder>

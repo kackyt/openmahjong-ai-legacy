@@ -40,9 +40,10 @@ OpenMahjongClient::OpenMahjongClient(QWidget *parent) :
     QObject::connect(&m_client,SIGNAL(sigTehaiAdded(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onTehaiAdded(OMTaku*,int,OMMember*,int,OMPai)));
     QObject::connect(&m_client,SIGNAL(sigTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai)));
     QObject::connect(&m_client,SIGNAL(sigNakiAdded(OMTaku*,int,OMMember*,int,OMNakiMentsu,bool)),SLOT(onNakiAdded(OMTaku*,int,OMMember*,int,OMNakiMentsu,bool)));
-    QObject::connect(&m_client,SIGNAL(sigUserTurn()),SLOT(onMyTurn()));
+    QObject::connect(&m_client,SIGNAL(sigUserTurn(OMTaku*)),SLOT(onMyTurn(OMTaku*)));
     QObject::connect(&m_client,SIGNAL(sigResponceCode(int)),SLOT(onResponce(int)));
-    QObject::connect(&m_client,SIGNAL(sigKyokuEnd(OMString)),SLOT(onKyokuEnd(OMString)));
+    QObject::connect(&m_client,SIGNAL(sigKyokuEnd(OMString,OMTaku *)),SLOT(onKyokuEnd(OMString,OMTaku*)));
+    QObject::connect(&m_client,SIGNAL(sigProgressed(int,OMTaku*)),SLOT(onProgressed(int,OMTaku*)));
 }
 
 OpenMahjongClient::~OpenMahjongClient()
@@ -543,10 +544,12 @@ void OpenMahjongClient::onTehaiRemoved(OMTaku *taku, int memberIndex, OMMember *
     }
 }
 
-void OpenMahjongClient::onMyTurn()
+void OpenMahjongClient::onMyTurn(OMTaku *taku)
 {
     /* 自分のターンが回ってきた */
     int i;
+
+    takuUpdate(taku);
     for(i=0;i<m_aButton.size();i++){
         OMPaiButton *widget = m_aButton[i];
         if(widget != NULL){
@@ -672,8 +675,84 @@ void OpenMahjongClient::onResponce(int code)
 {
 }
 
-void OpenMahjongClient::onKyokuEnd(OMString message)
+void OpenMahjongClient::onKyokuEnd(OMString message,OMTaku *taku)
 {
+    int ind = m_client.getPlayerIndex();
+    int i;
+    OMArray<OMPai> *pTehai;
+    QLayoutItem *item;
+
+    /* 手牌をレイアウト */
+    pTehai = &taku->m_members[(ind + 1) % 4].m_aTehai;
+    if(pTehai->size() != 0){
+        while(ui->m_layout_tehai1->count() > 0){
+            item = ui->m_layout_tehai1->itemAt(0);
+            ui->m_layout_tehai1->removeItem(item);
+            if(item != ui->m_spacer_t1){
+                delete item->widget();
+            }
+        }
+        ui->m_layout_tehai1->addItem(ui->m_spacer_t1);
+        for(i=0;i<pTehai->size();i++){
+            layoutTehai((*pTehai)[i],1,i);
+        }
+    }
+    pTehai = &taku->m_members[(ind + 2) % 4].m_aTehai;
+    if(pTehai->size() != 0){
+        while(ui->m_layout_tehai2->count() > 0){
+            item = ui->m_layout_tehai2->itemAt(0);
+            ui->m_layout_tehai2->removeItem(item);
+            if(item != ui->m_spacer_t2){
+                delete item->widget();
+            }
+        }
+        ui->m_layout_tehai2->addItem(ui->m_spacer_t2);
+        for(i=0;i<pTehai->size();i++){
+            layoutTehai((*pTehai)[i],2,i);
+        }
+    }
+    pTehai = &taku->m_members[(ind + 3) % 4].m_aTehai;
+    if(pTehai->size() != 0){
+        while(ui->m_layout_tehai3->count() > 0){
+            item = ui->m_layout_tehai3->itemAt(0);
+            ui->m_layout_tehai3->removeItem(item);
+            if(item != ui->m_spacer_t3){
+                delete item->widget();
+            }
+        }
+        ui->m_layout_tehai3->addItem(ui->m_spacer_t3);
+        for(i=0;i<pTehai->size();i++){
+            layoutTehai((*pTehai)[i],3,i);
+        }
+    }
+
+    /* 裏ドラ */
+    if(taku->m_aUradora.size() != 0){
+        OMPaiButton *btn;
+        OMPai pai;
+        while(ui->m_layout_uradora->count() > 0){
+            item = ui->m_layout_uradora->itemAt(0);
+            ui->m_layout_uradora->removeItem(item);
+            if(item != ui->m_spacer_ura){
+                delete item->widget();
+            }
+        }
+        ui->m_layout_uradora->addItem(ui->m_spacer_ura);
+        for(i=0;i<4;i++){
+            btn = new OMPaiButton();
+
+            if(i<taku->m_aUradora.size()){
+                pai = taku->m_aUradora[i];
+            }else{
+                pai.m_iCategory = 0;
+                pai.m_iNo = 0;
+            }
+
+            btn->setPai(pai,0);
+            ui->m_layout_uradora->insertWidget(i,btn,0,Qt::AlignLeft | Qt::AlignBottom);
+        }
+    }
+
     QMessageBox::information(this,"終局",message);
 
     m_client.clientStart();
@@ -751,4 +830,20 @@ void OpenMahjongClient::onNakiAdded(OMTaku *taku, int memberIndex, OMMember *mem
 void OpenMahjongClient::onNakiRemoved(OMTaku *taku, int memberIndex, OMMember *member,int mentsuIndex, OMNakiMentsu mentsu)
 {
 
+}
+
+void OpenMahjongClient::onProgressed(int index, OMTaku *taku)
+{
+    takuUpdate(taku);
+}
+
+void OpenMahjongClient::takuUpdate(OMTaku *taku)
+{
+    QString mes;
+    mes = QString("%1%2局  残り：%3").arg(taku->m_iKyokuCount < 4 ? "東" : "南").arg((taku->m_iKyokuCount % 4)  + 1).arg(taku->m_iYama);
+    ui->m_labelState1->setText(mes);
+
+    mes = QString("%1本場  リーチ棒%2").arg(taku->m_iTsumibou).arg(taku->m_iRiichibou);
+
+    ui->m_labelState2->setText(mes);
 }

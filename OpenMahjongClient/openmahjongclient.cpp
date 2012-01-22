@@ -1,6 +1,7 @@
 #include <QString>
 #include <QDebug>
 #include <QMessageBox>
+#include <QSound>
 #include "openmahjongclient.h"
 #include "PaiButton.h"
 #include "MentsuWidget.h"
@@ -44,6 +45,7 @@ OpenMahjongClient::OpenMahjongClient(QWidget *parent) :
     QObject::connect(&m_client,SIGNAL(sigResponceCode(int)),SLOT(onResponce(int)));
     QObject::connect(&m_client,SIGNAL(sigKyokuEnd(OMString,OMTaku *)),SLOT(onKyokuEnd(OMString,OMTaku*)));
     QObject::connect(&m_client,SIGNAL(sigProgressed(int,OMTaku*)),SLOT(onProgressed(int,OMTaku*)));
+    QObject::connect(&m_client,SIGNAL(sigDahai()),SLOT(onDahai()));
 }
 
 OpenMahjongClient::~OpenMahjongClient()
@@ -846,4 +848,14 @@ void OpenMahjongClient::takuUpdate(OMTaku *taku)
     mes = QString("%1–{ê  ƒŠ[ƒ`–_%2").arg(taku->m_iTsumibou).arg(taku->m_iRiichibou);
 
     ui->m_labelState2->setText(mes);
+}
+
+void OpenMahjongClient::onTii()
+{
+    QSound::play("wav/tii.wav");
+}
+
+void OpenMahjongClient::onDahai()
+{
+    QSound::play("wav/dahai.wav");
 }

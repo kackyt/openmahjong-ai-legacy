@@ -448,12 +448,12 @@ OM_SYNC_STATE OMGenericClient::gameSync()
                     if(m_pListener != NULL){
                         if(code != CODE_WAITSYNC && code != CODE_BUSY && m_pCurTaku->m_event.m_command.m_iType == TYPE_RIICHI
                                 && m_pCurTaku->m_event.m_command.m_player.m_iId != m_players[i].m_iId
-                                && !m_pCurTaku->m_members[m_iPlayerIndex].m_gamestate.m_bRiichi){
+                                && !m_pCurTaku->m_members[m_iPlayerIndex].m_gamestate.m_bRiichi && m_gamestate != OM_GAME_STATE_WAITCOMMAND){
                             // ライバルがリーチ
                             m_pListener->onRivalRiichi();
                         }
 
-                        if(code != CODE_WAITSYNC){
+                        if(code != CODE_WAITSYNC && m_gamestate != OM_GAME_STATE_WAITCOMMAND){
                             switch(m_pCurTaku->m_event.m_command.m_iType){
                             case TYPE_DAHAI:
                                 m_pListener->onDahai();

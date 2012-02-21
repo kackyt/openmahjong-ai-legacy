@@ -70,7 +70,9 @@ static int issyuntsu(PAICOUNT *paicountlist,int length)
 			continue;
 
 		if(((pai/9) != (nextpai/9)) || ((pai/9) != (nnextpai/9))) continue;
-        if (pai == nextpai - 1 && pai == nnextpai - 2) return i;
+        if (pai == nextpai - 1 && pai == nnextpai - 2){
+			return i;
+		}
     }
     return -1;
 }
@@ -85,7 +87,9 @@ static int issyuntsul(PAICOUNT *paicountlist,int length){
 		if (pai>26) continue;
 		if ((paicountlist[i].count == 0) || (paicountlist[i-1].count == 0) || (paicountlist[i-2].count == 0)) continue;
 		if(((pai/9) != (nextpai/9)) || ((pai/9) != (nnextpai/9))) continue;
-		if (pai == nextpai + 1 && pai == nnextpai + 2) return i-2;
+		if (pai == nextpai + 1 && pai == nnextpai + 2){
+			return i-2;
+		}
 	}
 	
 	return -1;
@@ -206,6 +210,56 @@ static int setstartmentsu(int *paiarray, int *mentsu,int atamapos)
     return 0;
 }
 
+static int getKoritsuhai(PAICOUNT *paicountlist,int countSize)
+{
+	int count = 0,atama = 0;
+    int pai, prevpai,nextpai;
+    int i;
+
+	for(i = 0;i < countSize;i++){
+		pai = paicountlist[i].pai;
+		nextpai = - 1;
+		prevpai = - 1;
+		if(i < countSize - 1){
+			if(paicountlist[i+1].count){
+				nextpai = paicountlist[i+1].pai;
+			}
+		}
+		if(i>0){
+			if(paicountlist[i-1].count){
+				prevpai = paicountlist[i-1].pai;
+			}
+		}
+
+		switch(paicountlist[i].count){
+		case 4:
+		case 1:
+			if(pai > 26){
+				count++;
+			}else if(((pai/9) != (nextpai/9) || pai + 1 != nextpai) && ((pai/9) != (prevpai/9) || pai - 1 == prevpai)){
+					count++;
+			}
+			break;
+		case 2:
+			if(pai > 26){
+				atama++;
+			}else if(((pai/9) != (nextpai/9) || pai + 1 != nextpai) && ((pai/9) != (prevpai/9) || pai - 1 == prevpai)){
+					count++;
+			}
+			break;
+		case 3:
+		default:
+			break;
+		}
+	}
+
+	if(atama < 2){
+		return count;
+	}else{
+		return count - (atama - 1) * 2;
+	}
+}
+
 /* 牌の数を数える */
 int setpaicount(PAICOUNT *paicountlist,int *paiarray,int paiSize, int *mentsu)
 {
@@ -215,10 +269,8 @@ int setpaicount(PAICOUNT *paicountlist,int *paiarray,int paiSize, int *mentsu)
     paicountlist[pos].pai = AI_NIL_PAI;
     for (i = 0; i < paiSize; i++) {
         /* 浮き牌以外は集計に入れない */
-        if (mentsu[i] != AI_UKIHAI)
-            continue;
-        if ((paicountlist[pos].pai != AI_NIL_PAI) &&
-            (paicountlist[pos].pai == (paiarray[i] & 0xFF))) {
+        if (mentsu[i] != AI_UKIHAI){
+        }else if ((paicountlist[pos].pai == (paiarray[i] & 0xFF))) {
             paicountlist[pos].count++;
         } else {
             if (paicountlist[pos].pai != AI_NIL_PAI)
@@ -228,7 +280,7 @@ int setpaicount(PAICOUNT *paicountlist,int *paiarray,int paiSize, int *mentsu)
             paicountlist[pos].startpos = i;
         }
     }
-    if (paicountlist[0].pai != AI_NIL_PAI) {
+    if (paicountlist[pos].pai != AI_NIL_PAI) {
         pos++;
         paicountlist[pos].pai = AI_NIL_PAI;
     }
@@ -518,6 +570,9 @@ static int setkoutsu(PAICOUNT *paicountlist, int *mentsu,int length)
         mentsu[pos] = AI_KOUTSU;
         mentsu[pos + 1] = AI_KOUTSU;
         mentsu[pos + 2] = AI_KOUTSU;
+		paicountlist[listpos].startpos += 3;
+		paicountlist[listpos].count -= 3;
+
         return AI_TRUE;
     }
     return AI_FALSE;
@@ -533,6 +588,8 @@ static int setkoutsul(PAICOUNT *paicountlist,int *mentsu,int length){
 		mentsu[pos] = AI_KOUTSU;
 		mentsu[pos + 1] = AI_KOUTSU;
 		mentsu[pos + 2] = AI_KOUTSU;
+		paicountlist[listpos].startpos += 3;
+		paicountlist[listpos].count -= 3;
 		return AI_TRUE;
 	}
 	return AI_FALSE;
@@ -551,6 +608,13 @@ int setsyuntsu(PAICOUNT *paicountlist, int *mentsu,int length)
         mentsu[pos] = AI_SYUNTSU_MIDDLE;
         pos = paicountlist[listpos + 2].startpos;
         mentsu[pos] = AI_SYUNTSU_END;
+		paicountlist[listpos].startpos++;
+		paicountlist[listpos + 1].startpos++;
+		paicountlist[listpos + 2].startpos++;
+		paicountlist[listpos].count--;
+		paicountlist[listpos + 1].count--;
+		paicountlist[listpos + 2].count--;
+
 		if(length < 4 || (paicountlist[listpos + 2].pai + 1 != paicountlist[listpos + 3].pai)){
 			return 1;
 		}else{
@@ -572,6 +636,12 @@ static int setsyuntsul(PAICOUNT *paicountlist,int *mentsu,int length){
 		mentsu[pos] = AI_SYUNTSU_MIDDLE;
 		pos = paicountlist[listpos + 2].startpos;
 		mentsu[pos] = AI_SYUNTSU_END;
+		paicountlist[listpos].startpos++;
+		paicountlist[listpos + 1].startpos++;
+		paicountlist[listpos + 2].startpos++;
+		paicountlist[listpos].count--;
+		paicountlist[listpos + 1].count--;
+		paicountlist[listpos + 2].count--;
 		return AI_TRUE;
 	}
 	return AI_FALSE;
@@ -624,10 +694,13 @@ static int isatamamachi(PAICOUNT *paicountlist,int size,TENPAI_LIST *machilist){
 /* 上がりの組み合わせを探索する関数 */
 int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,void *inf,int (*getPoint)(AGARI_LIST*,void*))
 {
-    PAICOUNT paicountlist[AI_TEHAI_LIMIT + 20];
+    PAICOUNT paicountlist[16][AI_TEHAI_LIMIT + 20];
+	PAICOUNT paicountlisttmp[AI_TEHAI_LIMIT + 20];
+	PAICOUNT paicountlisttmp2[AI_TEHAI_LIMIT + 20];
     int atamaque[AI_TEHAI_LIMIT + 20];
     int atamaque_count, atamapos;
-    int mentsu_stack[256][AI_TEHAI_LIMIT + 20];
+    int mentsu_stack[16][AI_TEHAI_LIMIT + 20];
+    int count_stack[16];
     int mentsu[AI_TEHAI_LIMIT + 20];
     int stackpos;
     int i, j, initresult, flag;
@@ -638,6 +711,8 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,v
 	int pts,maxpts = 0;
 	int total = 0;
 	int resultcount = 0;
+	int koritsuhai;
+
 
 	if(pList != NULL) memset(pList,0,sizeof(AGARI_LIST));
 	memset(mentsu_stack,0,sizeof(mentsu_stack));
@@ -687,6 +762,16 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,v
 
 	}
 
+	memset(mentsu_stack[0],0,sizeof(int)*(AI_TEHAI_LIMIT + 20));
+
+	paicount_size = setpaicount(paicountlisttmp, paiarray,paiSize, mentsu_stack[0]);
+	koritsuhai = getKoritsuhai(paicountlisttmp,paicount_size);
+
+	if(koritsuhai > paiSize - actualPaiSize){
+		return 0;
+	}
+
+#if 1
     /* 頭として取ったあとで刻子/順子などの面子の状況を見る(両面、カンチャン、ペンチャン、シャンポン待ち) */
     for (i = 0; i < atamaque_count; i++) {
         atamapos = atamaque[i];
@@ -694,60 +779,79 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,v
 		
         /* 探索を開始する面子の初期状態を設定 */
         initresult = setstartmentsu(paiarray, mentsu_stack[0],atamapos);
-        if (initresult != 0)
-            return initresult;
+        if (initresult != 0){
+            return 0;
+		}
+
+		memcpy(paicountlist[0],paicountlisttmp,sizeof(paicountlisttmp));
+		for(j=0;j<paicount_size;j++){
+			if(paicountlist[0][j].pai == paiarray[atamapos]){
+				paicountlist[0][j].count -=2;
+				break;
+			}
+		}
+
+		count_stack[0] = 2;
+
         	
         /* 探索 */
         stackpos = 0;
         do {
-            paicount_size = setpaicount(paicountlist, paiarray,paiSize, mentsu_stack[stackpos]);
-			paicount=0;
-			for(j=0;j<paiSize;j++){
-				if(mentsu_stack[stackpos][j] != AI_UKIHAI) paicount++;
-			}
+            //paicount_size = setpaicount(paicountlist, paiarray,paiSize, mentsu_stack[stackpos],&paicount);
+			koritsuhai = getKoritsuhai(paicountlist[stackpos],paicount_size);
 
-			if (paicount < actualPaiSize){
-                memcpy(mentsu, mentsu_stack[stackpos], sizeof(mentsu));
-                flag = setkoutsu(paicountlist, mentsu_stack[stackpos],paicount_size);
-                if (flag) {
-                    stackpos++;
-					
-                    /* 次に備えて待避しておいた内容をコピー */
-                    memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
-                }
-
-                flag = setsyuntsu(paicountlist, mentsu_stack[stackpos],paicount_size);
-                if (flag) {
-                    stackpos++;
-                }
-
-            } else {
-				paicount=0;
-
-				for(j=0;j<paiSize;j++){
-					if(mentsu_stack[stackpos][j] != AI_UKIHAI){
-						agari_list.tehai[paicount++] = paiarray[j];
-					}
-				}
+			if(koritsuhai <= paiSize - actualPaiSize){
 				
-				agari_list.tehai_max = actualPaiSize;
-				if(memcmp(prevagari,&agari_list.tehai[0],actualPaiSize*sizeof(int))){
-					memcpy(prevagari,&agari_list.tehai[0],actualPaiSize*sizeof(int));
-					
-					pts = getPoint(&agari_list,inf);
-					
-					if(maxpts < pts){
-						maxpts = pts;
-						if(pList != NULL) *pList = agari_list;
-					}
-					total += pts;
-					resultcount++;
-				}
+				if (count_stack[stackpos] < actualPaiSize){
+					paicount = count_stack[stackpos];
+					memcpy(paicountlisttmp2,paicountlist[stackpos],sizeof(paicountlisttmp2));
+					memcpy(mentsu, mentsu_stack[stackpos], sizeof(mentsu));
+					flag = setkoutsu(paicountlist[stackpos], mentsu_stack[stackpos],paicount_size);
+					if (flag) {
+						count_stack[stackpos] += 3;
+						stackpos++;
 
-            }
+						
+						/* 次に備えて待避しておいた内容をコピー */
+						count_stack[stackpos] = paicount;
+						memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+						memcpy(paicountlist[stackpos], paicountlisttmp2,sizeof(paicountlisttmp2));
+					}
+					
+					flag = setsyuntsu(paicountlist[stackpos], mentsu_stack[stackpos],paicount_size);
+					if (flag) {
+						count_stack[stackpos] += 3;
+						stackpos++;
+					}
+					
+				} else {
+					paicount = 0;
+					for(j=0;j<paiSize;j++){
+						if(mentsu_stack[stackpos][j] != AI_UKIHAI){
+							agari_list.tehai[paicount++] = paiarray[j];
+						}
+					}
+					
+					agari_list.tehai_max = actualPaiSize;
+					if(memcmp(prevagari,&agari_list.tehai[0],actualPaiSize*sizeof(int))){
+						memcpy(prevagari,&agari_list.tehai[0],actualPaiSize*sizeof(int));
+						
+						pts = getPoint(&agari_list,inf);
+						
+						if(maxpts < pts){
+							maxpts = pts;
+							if(pList != NULL) *pList = agari_list;
+						}
+						total += pts;
+						resultcount++;
+					}
+					
+				}
+			}
             stackpos--;
         } while(stackpos >= 0);
     }
+#endif
 
 	return total;
 }

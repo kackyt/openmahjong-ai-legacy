@@ -34,11 +34,12 @@
 //#define AIDUMP_3
 //#define AIDUMP_STAT
 //#define AIDUMP_POINT
-#define AIDUMP_PARAM
+//#define AIDUMP_PARAM
+#define AIDUMP_STACKTRACE
 #endif
 #define DEBUG_MESSAGE
 
-#define SIMULATECOUNT      (2000)
+#define SIMULATECOUNT      (20000)
 
 #define SCORE_KOUKEI_BIAS        (1.0)
 #define SCORE_MENTSU_BIAS        (1.0)
@@ -200,6 +201,19 @@ static const TCHAR * num_table[] ={
 	TEXT("‹γ"),
 };
 
+static void printStackTrace(const char *trace, ...){
+	va_list list;
+	FILE *file;
+
+	va_start(list,trace);
+	
+	file = fopen(TEXT("./stacktrace.txt"),"a");
+	vfprintf(file,trace,list);
+	fclose(file);
+
+	va_end(list);
+}
+
 static const TCHAR * type_table[] ={
 	TEXT("δέ"),
 	TEXT("“›"),
@@ -272,17 +286,26 @@ void MahjongAI::destroyParam(void)
 int MahjongAI::getParam(int index)
 {
 	int i,p = current_p;
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START getParam\n");
+#endif
 
 	for(i=0;i<index;i++){
 		p /= param_size[i];
 	}
 	
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END getParam\n");
+#endif
 	return p % param_size[index];
 }
 
 void MahjongAI::printResult(int result)
 {
 	int i;
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START printResult\n");
+#endif
 	resultBuf[current_p] += 3 - result;
 #ifdef AIDUMP_PARAM
 	fclose(fp);
@@ -295,6 +318,9 @@ void MahjongAI::printResult(int result)
 	current_p++;
 	if(current_p == size_p) current_p = 0;
 
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END printResult\n");
+#endif
 }
 
 void MahjongAI::sendComment(int index)
@@ -310,10 +336,16 @@ void MahjongAI::sendComment(int index)
 // θ”v‚Μ’†‚©‚η”CΣ‚Μ”v‚π©‚Β‚―A‚»‚ΜΚ’u‚π•Τ‚·
 int MahjongAI::search(int obj,int start,int mask)
 {
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START search\n");
+#endif
 	while(start<(int)tehai.tehai_max){
 		if (!(mask&(1<<start)) && (int)tehai.tehai[start]==obj) break;
 		start++;
 	}
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END search\n");
+#endif
 	return start<(int)tehai.tehai_max ? start : -1;
 }
 
@@ -322,6 +354,9 @@ int MahjongAI::search(int obj,int start,int mask)
 void MahjongAI::set_machi(void)
 {
 	int i,j,cnt;
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START set_machi\n");
+#endif
 	(*MJSendMessage)(this,MJMI_GETMACHI,0,(UINT)machi);
 	tenpai_flag = 0;
 	for(i=0;i<34;i++){
@@ -335,6 +370,9 @@ void MahjongAI::set_machi(void)
 			tenpai_flag = -1;
 		}
 	}
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END set_machi\n");
+#endif
 }
 
 #include "MJ0.h"
@@ -353,6 +391,9 @@ void MahjongAI::set_Tehai(void)
 	double mentsu3[27+34];
 	int doralen;
 
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START set_Tehai\n");
+#endif
 	param[0].pTehai = (MJITehai1 *)&mjtehai[0];
 	param[1].pTehai = (MJITehai1 *)&mjtehai[1];
 	param[2].pTehai = (MJITehai1 *)&mjtehai[2];
@@ -372,7 +413,13 @@ void MahjongAI::set_Tehai(void)
 
 	doralen = (*MJSendMessage)(this,MJMI_GETDORA,(UINT)dora,0);
 
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START MJ0\n");
+#endif
 	MJ0(&param[0],(int*)dora,doralen,nokori,kikenhai,mentsu1,mentsu2,mentsu3);
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END MJ0\n");
+#endif
 
 #ifdef AIDUMP_1
 	fprintf(fp,TEXT("<NOKORI>"));
@@ -395,6 +442,20 @@ void MahjongAI::set_Tehai(void)
 	for(i=0;i<doralen;i++){
 		doranum += te_cnt[dora[i]];
 	}
+#ifdef AIDUMP_STACKTRACE
+	int j;
+	printStackTrace("END set_Tehai\n");
+	for(i=0;i<(int)tehai.tehai_max;i++) printStackTrace("%d ",tehai.tehai[i]);
+	printStackTrace("\n");
+	for(i=0;i<doralen;i++) printStackTrace("%d ",dora[i]);
+	printStackTrace("\n");
+	for(i=0;i<4;i++){
+		for(j=0;j<param[i].kawalength;j++){
+			printStackTrace("%d ",param[i].pKawahai[j]);
+		}
+		printStackTrace("\n");
+	}
+#endif
 }
 
 
@@ -409,13 +470,20 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 	int i,j,hai,del_hai,hai_remain,tmp,furiten,kazu;
 	int mhai,hais;
 	MJITehai tmphai;
+	unsigned int seed;
 
 	// –‰ρ srand‚πs‚¤(ƒfƒoƒbƒO‚µ‚β‚·‚­‚·‚ι‚½‚ί)
 #if 0
-	srand(0xDEADBEEA);
+	seed = 0xDEADBEEF;
 #else
-	srand((unsigned int)time(NULL));
+	seed = (unsigned int)time(NULL);
 #endif
+
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START sutehai_sub %d\n",seed);
+#endif
+
+	srand(seed);
 	debug_count = 0;
 
 	// »έ‚Μθ”v‚Μσ‘Τ‚πƒZƒbƒg‚·‚ι
@@ -506,7 +574,7 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 		if(mcount > 0) mpoint /= mcount;
 
 		if(furiten){
-			if(mpoint > 2000 && hais > 4){
+			if((mpoint > 2000 || doranum >= 2) && hais > 4){
 				rchk = MJPIR_REACH;
 			}
 		}else{
@@ -514,7 +582,7 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 				rchk = MJPIR_REACH;
 			}
 
-			if(mpoint > 2000 && hais > 2){
+			if((mpoint > 2000 || doranum >= 2) && hais > 2){
 				rchk = MJPIR_REACH;
 			}
 		}
@@ -548,6 +616,9 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 #endif
 		reach_flag[0] = 1;
 	}
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END sutehai_sub\n");
+#endif
 	return hai|rchk;
 }
 
@@ -557,6 +628,9 @@ double MahjongAI::eval_Tehai2(void)
 {
 	int i;
 	double ret;
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START eval_Tehai2\n");
+#endif
 
 	ret = eval_Tehai_sub(0) * 10;
 	for(i=0;i<34;i++){
@@ -564,9 +638,18 @@ double MahjongAI::eval_Tehai2(void)
 		ret *= eval_hai(i) + log10(te_cnt[i]);
 	}
 
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END eval_Tehai2\n");
+#endif
 	return ret;
 }
 
+#if 0
+static int getPoint(AGARI_LIST *pList,void *ptr)
+{
+	return 0;
+}
+#else
 static int getPoint(AGARI_LIST *pList,void *ptr)
 {
 	MJITehai resulthai;
@@ -577,15 +660,16 @@ static int getPoint(AGARI_LIST *pList,void *ptr)
 	int remain = (*MJSendMessage)(obj,MJMI_GETHAIREMAIN,0,0)/4;
 
 	memcpy(&resulthai,&obj->tehai,sizeof(resulthai));
+	
 	for(i=0;i<pList->tehai_max;i++){
+		//if(remain < pList->tehai[i] >> 8) return 0;
 		if(pList->tehai[i] >> 8) coef *= 0.8;
 		//for(j=0;j<(pList->tehai[i] >> 8);j++) coef *= 0.95635;
-		if(--remain > 0) coef *= 1.2;
 		pList->tehai[i] = pList->tehai[i] & 0xFF;
 	}
 	memcpy(&resulthai.tehai,pList->tehai,sizeof(int)*pList->tehai_max);
 	resulthai.tehai_max = pList->tehai_max-1;
-	qsort(&resulthai.tehai,pList->tehai_max,sizeof(int),(int (*)(const void*, const void*))compare_int);
+	//qsort(&resulthai.tehai,pList->tehai_max,sizeof(int),(int (*)(const void*, const void*))compare_int);
 	val = (*MJSendMessage)(obj,MJMI_GETAGARITEN,(UINT)&resulthai,(UINT)resulthai.tehai[pList->tehai_max-1]);
 
 	/* µ‘Ξq•β³ */
@@ -621,6 +705,7 @@ static int getPoint(AGARI_LIST *pList,void *ptr)
 #endif
 }
 
+#endif
 
 // θ”v‚π•]‰Ώ‚µ‚Δ•]‰Ώ’l‚π•Τ‚·
 double MahjongAI::eval_Tehai(double max_val)
@@ -628,12 +713,16 @@ double MahjongAI::eval_Tehai(double max_val)
 	int simtehai[34];
 	int remain = (*MJSendMessage)(this,MJMI_GETHAIREMAIN,0,0);
 	int i,j,k,res,painum,maxpts,pts,debug = 0;
-	double tmp,ret,index;
+	double tmp,tmp2,ret,index;
 	AGARI_LIST list;
 	MJITehai resulthai;
 	int paicount;
 	double nokorihais;
 	double nokoribuf[34];
+	int tmp_tecnt[34];
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START eval_Tehai\n");
+#endif
 
 	memcpy(&resulthai,&tehai,sizeof(resulthai));
 
@@ -645,37 +734,42 @@ double MahjongAI::eval_Tehai(double max_val)
 		/* 10–‡Θγ‚Νƒcƒ‚‚η‚Θ‚Ά */
 		paicount = remain/4 > 10 ? 10 : remain/4;
 	}
+
+	//if(paicount < 5){
+		paicount = 5;
+	//}
+
 	for(i=0;i<SIMULATECOUNT;i++){
-		/* –Κ“|‚Ύ‚―‚ΗA‚ά‚½θ”v‚Μ”z—ρ‚Ι–ί‚· (b’θ) */
-		painum = 0;
-		for(j=0;j<34;j++){
-			for(k=0;k<te_cnt[j];k++){
-				simtehai[painum++] = (j << 8);
-			}
-		}
 		tmp=0.0;
 		for(j=0;j<34;j++){
 			tmp+=nokori[j];
 		}
 		nokorihais = tmp;
 		memcpy(nokoribuf,nokori,sizeof(nokoribuf));
-
+		memcpy(tmp_tecnt,te_cnt,sizeof(tmp_tecnt));
+		
 		for(j=0;j<paicount;j++){
 			index = (nokorihais + 1.0) * (double)rand() / (double)(1.0 + RAND_MAX);
 			tmp=0.0;
 			for(k=0;k<34;k++){
 				tmp+=nokoribuf[k];
 				if(index < tmp){
-					simtehai[tehai.tehai_max+j]=(k << 8) + 1;
-					nokoribuf[k]-=1.0;
-					nokorihais -= 1.0;
+					tmp_tecnt[k]++;
+					tmp2 = nokoribuf[k] > 1.0 ? 1.0 : nokoribuf[k];
+					nokoribuf[k]-=tmp2;
+					nokorihais -= tmp2;
 					break;
 				}
 			}
 		}
 
-		/* ƒ\[ƒg‚·‚ι */
-		qsort(simtehai,tehai.tehai_max+paicount,sizeof(int),(int (*)(const void*, const void*))compare_int);
+		/* –Κ“|‚Ύ‚―‚ΗA‚ά‚½θ”v‚Μ”z—ρ‚Ι–ί‚· (b’θ) */
+		painum = 0;
+		for(j=0;j<34;j++){
+			for(k=0;k<tmp_tecnt[j];k++){
+				simtehai[painum++] = (j << 8);
+			}
+		}
 
 		for(k=0;k<tehai.tehai_max+paicount;k++){
 			simtehai[k] = (simtehai[k] >> 8) | ((simtehai[k] & 0xFF) << 8);
@@ -708,6 +802,9 @@ double MahjongAI::eval_Tehai(double max_val)
 	//fprintf(fp,"%d",debug);
 #ifdef AIDUMP_STAT
 	fprintf(fp,"\n");
+#endif
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END eval_Tehai\n");
 #endif
 	return value;
 }
@@ -807,6 +904,9 @@ double MahjongAI::eval_hai(int hai)
 	int j,doras;
 	UINT dora[6];
 	UINT tmp;
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START eval_hai\n");
+#endif
 
 	if (hai<27){
 		if((hai % 9) == 0 || (hai % 9) == 8){
@@ -840,6 +940,9 @@ double MahjongAI::eval_hai(int hai)
 #endif
 	for(j=0;j<doras;j++)
 		if (hai==(int)dora[j]) ret+=SCORE_DORA_BIAS;
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END eval_hai\n");
+#endif
 	return ret;
 }
 
@@ -850,6 +953,9 @@ double MahjongAI::eval_sutehai(int hai)
 	double ret = 0;
 	double minus = 0;
 	double plus = 0,tmp;
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START eval_sutehai\n");
+#endif
 
 	minus += SCORE_KIKENHAI * kikenhai[hai];
 	for(i=1;i<4;i++){
@@ -892,13 +998,19 @@ double MahjongAI::eval_sutehai(int hai)
 
 		plus += tmp;
 	}
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END eval_sutehai\n");
+#endif
 	return plus - minus;
 }
 
 void MahjongAI::select_Score(double sc_max,double scc_max)
 {
 	int i;
-#if 0
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START select_Score\n");
+#endif
+#if 1
 	for(i=0;i<14;i++){
 		hp[i].sc = hp[i].sc1;
 	}
@@ -930,7 +1042,7 @@ void MahjongAI::select_Score(double sc_max,double scc_max)
 			hp[i].sc = hp[i].scc;
 		}
 	}else{
-		if(sc_max < 1500){
+		if(sc_max < 10.0){
 			decision = AI_DECISION_AGARI2;
 			for(i=0;i<14;i++){
 				hp[i].sc = hp[i].sc2;
@@ -945,6 +1057,9 @@ void MahjongAI::select_Score(double sc_max,double scc_max)
 
 #endif
 
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END select_Score\n");
+#endif
 }
 
 // Μ‚Δ‚ι”v‚π‚ί‚ι
@@ -962,6 +1077,9 @@ int MahjongAI::calc_sutehai(void)
 	TCHAR haitext3[10];
 	TCHAR comment[512];
 
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START calc_sutehai\n");
+#endif
 	memset(hp,0,sizeof(hp));
 
 #ifdef AIDUMP_1
@@ -1039,6 +1157,9 @@ int MahjongAI::calc_sutehai(void)
 		fprintf(fp,"<RET>%d</RET>",ret);
 #endif
 
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END calc_sutehai\n");
+#endif
 	return ret>=0 ? ret : 13;
 }
 
@@ -1049,6 +1170,9 @@ int MahjongAI::calc_sutehai_easy(void)
 
 	// Μ‚Δ‚ι”v‚πκ‚Βκ‚Β‚µ‚Δ‚έ‚ΔA‚ΰ‚Α‚Ζ‚ΰ•]‰Ώ’l‚Μ‚‚Ά‚ΰ‚Μ‚π‚Ζ‚ι
 	double scc,scc_max=-DBL_MAX;
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START calc_sutehai_easy\n");
+#endif
 
 	for(i=0;i<34;i++){
 		if (!te_cnt[i]) continue;
@@ -1061,6 +1185,9 @@ int MahjongAI::calc_sutehai_easy(void)
 		te_cnt[i]++;
 	}
 
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END calc_sutehai_easy\n");
+#endif
 	return sh;
 }
 
@@ -1079,6 +1206,9 @@ int MahjongAI::nakability(int hai,int chii_flag)
 {
 	int x,i,ret=0,kazu,furiten;
 	UINT kawa[30];
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START nakability\n");
+#endif
 
 	if (machi[hai]){
 		kazu = (*MJSendMessage)(this,MJMI_GETKAWA,(30 << 16),(UINT)kawa);
@@ -1125,6 +1255,9 @@ int MahjongAI::nakability(int hai,int chii_flag)
 			}
 		}
 	}
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END nakability\n");
+#endif
 	return ret;
 }
 
@@ -1132,6 +1265,9 @@ int MahjongAI::tehai2Array(int *p)
 {
 	int size = 0;
 	int i,j;
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START tehai2Array\n");
+#endif
 
 	for(i=0;i<34;i++){
 		for(j=0;j<te_cnt[i];j++){
@@ -1139,6 +1275,9 @@ int MahjongAI::tehai2Array(int *p)
 		}
 	}
 
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END tehai2Array\n");
+#endif
 	return size;
 }
 
@@ -1163,6 +1302,9 @@ UINT MahjongAI::koe_req(int no,int hai)
 	TENPAI_LIST list;
 	int sthai;
 
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START koe_req\n");
+#endif
 	doralen = (*MJSendMessage)(this,MJMI_GETDORA,(UINT)dora,0);
 	set_Tehai();
 	set_machi();
@@ -1296,7 +1438,13 @@ UINT MahjongAI::koe_req(int no,int hai)
 		te_cnt[hai+1]++;
 		te_cnt[hai-1]++;
 		/* ƒVƒƒƒ“ƒeƒ“”‚π”‚¦‚ι */
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START search_tenpai\n");
+#endif
 		nextshanten = search_tenpai(tmptehai,tehaisize,NULL,&list,1,6);
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END search_tenpai\n");
+#endif
 		
 		if(nextshanten != 0){
 			nextshanten = list.shanten;
@@ -1306,6 +1454,9 @@ UINT MahjongAI::koe_req(int no,int hai)
 		
 		if(nextshanten < prevshanten && (menzen == 0 || hanpai)) return MJPIR_CHII3;
 	}
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END koe_req\n");
+#endif
 	return 0;
 }
 
@@ -1315,9 +1466,13 @@ UINT MahjongAI::koe_req(int no,int hai)
 UINT MahjongAI::on_start_kyoku(int k,int c)
 {
 	int i,j,sc_max = 0,mysc;
+
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("START on_start_kyoku\n");
+#endif
 	kyokustate = AI_KYOKUSTS_NORMAL;
 	decision = AI_DECISION_AGARI1;
-	set_Tehai();
+	//set_Tehai();
 	for(i=0;i<34;i++) {
 		for (j=0;j<4;j++) anpai[i][j] = 0;
 	}
@@ -1332,8 +1487,8 @@ UINT MahjongAI::on_start_kyoku(int k,int c)
 		reach_flag[i] = 0;
 		ippatsu_flag[i] = 0;
 	}
-	tehai_score = eval_Tehai(0);
-	set_machi();
+	//tehai_score = eval_Tehai(0);
+	//set_machi();
 
 	mysc = (*MJSendMessage)(this,MJMI_GETSCORE,0,0);
 
@@ -1346,6 +1501,9 @@ UINT MahjongAI::on_start_kyoku(int k,int c)
 		sendComment(AI_MESSAGE_TSUYOGARI);
 	}
 
+#ifdef AIDUMP_STACKTRACE
+	printStackTrace("END on_start_kyoku\n");
+#endif
 	return 0;
 }
 
@@ -1550,6 +1708,9 @@ UINT MahjongAI::InterfaceFunc(UINT message,UINT param1,UINT param2)
 	case MJPI_ENDKYOKU :
 #ifdef AIDUMP_COMMAND
 		fprintf(fp,TEXT("ENDKYOKU %u %u\n"),param1,param2);
+#endif
+#ifdef AIDUMP_STACKTRACE
+		remove(TEXT("./stacktrace.txt"));
 #endif
 		ret = on_end_kyoku(param1,(LONG*)param2);
 		break;

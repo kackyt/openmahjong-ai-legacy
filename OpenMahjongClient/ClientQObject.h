@@ -5,6 +5,7 @@
 #include <QNetworkAccessManager>
 #include <QThread>
 #include <QTimer>
+#include <QMap>
 #include "common/GenericClient.h"
 #include "common/ClientListener.h"
 #include "common/TakuListener.h"
@@ -22,10 +23,12 @@ class OMClientQObject : public QObject,public OMGenericClient,public OMTakuListe
         SELECT_STATE_RIICHI
     } SELECT_STATE;
 public:
-    OMUICommander m_commander;
     explicit OMClientQObject(QObject *parent = 0);
     virtual ~OMClientQObject();
+    QMap<OMString,QLibrary *> m_playerTemplate;
+    OMUICommander m_commander;
     void setDestination(QUrl &url);
+    void setComp(OMString *name,int size);
     virtual void tehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void tehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void dahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
@@ -46,6 +49,7 @@ public:
     void onStatusCode(int code);
 protected:
     void sendString(OMString &sendMessage, OMString &recvMessage);
+    virtual void createCompInstance(OMPlayer &player);
 private:
     QUrl m_dstUrl;
     QNetworkAccessManager m_naManager;

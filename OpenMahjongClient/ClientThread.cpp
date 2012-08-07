@@ -19,7 +19,7 @@ void OMClientThread::run()
     QNetworkRequest request;
     request.setUrl(m_dstUrl);
 
-    m_pReply = manager.post(request,m_sendString.toLocal8Bit());
+    m_pReply = manager.post(request,m_sendString.toUtf8());
 
     /* 受信スロットの登録 */
     QObject::connect(m_pReply,SIGNAL(readyRead()),SLOT(readProgress()),Qt::DirectConnection);

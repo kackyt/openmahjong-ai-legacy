@@ -73,6 +73,25 @@ void ConnectDialog::getUrl(QUrl &url) const
     url = QUrl(ui->cmbUrl->currentText());
 }
 
+void ConnectDialog::setClientQObject(OMClientQObject &obj)
+{
+    QList<OMString> keys = obj.m_playerTemplate.keys();
+    int i;
+    ui->cmbComp1->clear();
+    ui->cmbComp2->clear();
+    ui->cmbComp3->clear();
+
+    ui->cmbComp1->addItem("");
+    ui->cmbComp2->addItem("");
+    ui->cmbComp3->addItem("");
+
+    for(i=0;i<keys.size();i++){
+        ui->cmbComp1->addItem(keys[i]);
+        ui->cmbComp2->addItem(keys[i]);
+        ui->cmbComp3->addItem(keys[i]);
+    }
+}
+
 void ConnectDialog::on_rdConnect_clicked()
 {
     ui->edTakuNum->setEnabled(true);

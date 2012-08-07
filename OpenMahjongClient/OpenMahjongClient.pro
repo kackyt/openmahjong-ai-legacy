@@ -39,7 +39,10 @@ SOURCES += main.cpp\
     common/OMXMLCommonQt.cpp \
     common/UICommander.cpp \
     AgariDialog.cpp \
-    MentsuWidget.cpp
+    MentsuWidget.cpp \
+    AILib/YakuCheck.c \
+    AILib/MJ0.c \
+    AILib/AILib.c
 
 HEADERS  += openmahjongclient.h \
     common/OMXMLCommon.h \
@@ -71,7 +74,9 @@ HEADERS  += openmahjongclient.h \
     common/TakuListener.h \
     common/UICommander.h \
     AgariDialog.h \
-    MentsuWidget.h
+    MentsuWidget.h \
+    AILib/MJ0.h \
+    AILib/AILib.h
 
 FORMS    += openmahjongclient.ui \
     ConnectDialog.ui \
@@ -79,3 +84,5 @@ FORMS    += openmahjongclient.ui \
 
 RESOURCES += \
     OMResource.qrc
+
+INCLUDEPATH += ./AILib

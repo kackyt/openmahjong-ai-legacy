@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QVector>
-#include "common/GenericClient.h"
+#include "ClientQObject.h"
 
 namespace Ui {
     class ConnectDialog;
@@ -21,6 +21,7 @@ public:
     void getCompName(OMArray<OMString> &compnames) const;
     int getSessionNum() const;
     void getUrl(QUrl& url) const;
+    void setClientQObject(OMClientQObject &obj);
 private slots:
     void on_rdConnect_clicked();
 

@@ -5,10 +5,46 @@
 #include "ClientQObject.h"
 #include "ClientThread.h"
 
+static OMClientQObject *thisObj;
+
+static UINT WINAPI MJSendMessageAPI(LPVOID inst,UINT message,UINT param1,UINT param2)
+{
+    return thisObj->MJSendMessage(inst,message,param1,param2);
+}
+
+
 OMClientQObject::OMClientQObject(QObject *parent) :
     QObject(parent)
 {
+    QString path = QCoreApplication::applicationDirPath() + "/comp";
+    QDir compDir(path);
+    QFileInfoList list;
     int i;
+
+    thisObj = this;
+
+    /* compディレクトリに入っているdllをQLibraryに入れる */
+    compDir.setFilter(QDir::Files);
+
+    list = compDir.entryInfoList();
+
+    for(i=0;i<list.size();i++){
+        try{
+            QFileInfo info = list.at(i);
+
+            if(QLibrary::isLibrary(info.filePath())){
+                QLibrary *lib = new QLibrary(info.filePath());
+                MJPIFunc func = (MJPIFunc)lib->resolve("MJPInterfaceFunc");
+                QTextCodec *codec = QTextCodec::codecForName("Shift-JIS");
+                OMString name = codec->toUnicode((const char*)func(NULL,MJPI_YOURNAME,0,0));
+                m_playerTemplate[name] = lib;
+            }
+
+        }catch(...){
+
+        }
+    }
+
     setClientListener(this);
     for(i=0;i<4;i++){
         m_aTakuAll[i].setTakuListener(this);
@@ -32,6 +68,21 @@ void OMClientQObject::sendString(OMString &sendMessage, OMString &recvMessage)
     }catch(...){
 
     }
+}
+
+void OMClientQObject::createCompInstance(OMPlayer &player)
+{
+    QLibrary *lib = m_playerTemplate[player.m_strName];
+    int size;
+    player.m_pFunc = (MJPIFunc)lib->resolve("MJPInterfaceFunc");
+    size = player.m_pFunc(NULL,MJPI_CREATEINSTANCE,0,0);
+    if(size > 0)
+    {
+        player.m_pInst = malloc(size);
+        memset(player.m_pInst,0,size);
+    }
+
+    player.m_pFunc(player.m_pInst,MJPI_INITIALIZE,0,(UINT)MJSendMessageAPI);
 }
 
 void OMClientQObject::clientStart()
@@ -230,3 +281,4 @@ void OMClientQObject::clientStopImpl()
     gameStop();
     m_pTimer->stop();
 }
+

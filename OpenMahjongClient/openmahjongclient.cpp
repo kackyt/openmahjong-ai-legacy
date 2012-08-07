@@ -57,6 +57,8 @@ void OpenMahjongClient::on_m_btnConnect_clicked()
 {
     ConnectDialog dialog(this);
 
+    dialog.setClientQObject(m_client);
+
     if(dialog.exec() == QDialog::Accepted){
         /* ƒpƒ‰ƒ[ƒ^‚ğİ’è‚µ‚ÄÚ‘± */
         OMArray<OMString> playernames,compnames;

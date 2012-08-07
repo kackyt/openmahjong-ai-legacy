@@ -1,3 +1,4 @@
+#include "AILib.h"
 #include "GenericClient.h"
 #include "Player.h"
 #include "Message.h"
@@ -17,7 +18,9 @@ static const TCHAR *posStrTable[] = {_T("Ž©•ª"),_T("‰º‰Æ"),_T("‘Î–Ê"),_T("ã‰Æ")
 
 OMGenericClient::OMGenericClient()
     : m_gamestate(OM_GAME_STATE_STOPED),
-      m_pListener(NULL)
+      m_pListener(NULL),
+      m_pCurTaku(NULL),
+      m_pCurPlayer(NULL)
 {
 
 }
@@ -527,6 +530,298 @@ OM_SYNC_STATE OMGenericClient::gameSync()
 
 }
 
+typedef struct {
+    GAMESTATE gamestate;
+    int agarihai;
+} MJ_GAMESTATE;
+
+static int scoreCallback(int*paiarray,int*mentsu,int length,int machi,void *inf)
+{
+    RESULT_ITEM item;
+    MJ_GAMESTATE *state = (MJ_GAMESTATE *)inf;
+    make_resultitem(paiarray,mentsu,length,&item,&state->gamestate,state->agarihai,machi);
+
+    return item.score;
+}
+
+static const UINT ruleTable[] =
+{
+    1,0,0,0,
+    250,0,0,0,
+    0,0,0,1,
+    0,1,2,0,
+    0,1,3,1,
+    1,0xf,0,0,
+    0,0
+};
+
+
+UINT OMGenericClient::MJSendMessage(void *inst, UINT message, UINT param1, UINT param2)
+{
+    UINT ret;
+    int idx,i,score,stmode = 0;
+    MJITehai *pTehai;
+    OMMember *member;
+    OMMessage mes;
+    UINT *p;
+
+    switch(message){
+    case MJMI_GETTEHAI:
+        for(i=0;i<m_iPlayerNum + m_iCompNum;i++){
+            if(m_players[i].m_pInst == inst){
+                stmode = m_players[i].m_iStructMode;
+                break;
+            }
+        }
+
+        idx = m_pCurTaku->getMemberIndex(m_pCurPlayer);
+        idx = (idx + param1) % 4;
+        pTehai = (MJITehai *)param2;
+        if(stmode == 1){
+            m_pCurTaku->getMJITehai(idx,(MJITehai1*)pTehai,m_rule);
+        }else{
+            m_pCurTaku->getMJITehai(idx,pTehai);
+        }
+        ret = 1;
+        break;
+    case MJMI_GETMACHI:
+        p = (UINT*)param2;
+        for(i=0;i<34;i++){
+            p[i] = 0;
+        }
+        idx = m_pCurTaku->getMemberIndex(m_pCurPlayer);
+        member = &m_pCurTaku->m_members[idx];
+
+        if(param1 != 0){
+            TENPAI_LIST tlist;
+            int num;
+
+            pTehai = (MJITehai*)param1;
+            num = search_tenpai((int*)pTehai->tehai,pTehai->tehai_max,(int*)p,&tlist,1,0);
+
+            ret = num > 0 ? 1 : 0;
+
+        }else{
+            for(i=0;i<member->m_aResultList.size();i++){
+                OMResult& result = member->m_aResultList[i];
+                idx = (UINT)result.m_machihai;
+                p[idx] = 1;
+            }
+
+            ret = member->m_aResultList.size() > 0 ? 1 : 0;
+        }
+
+        break;
+    case MJMI_GETAGARITEN:
+        idx = m_pCurTaku->getMemberIndex(m_pCurPlayer);
+        member = &m_pCurTaku->m_members[idx];
+        score = 0;
+
+        if(param1 != 0){
+            MJ_GAMESTATE gs;
+            pTehai = (MJITehai*)param1;
+
+            memset(&gs,0,sizeof(gs));
+
+            for(i=0;i<pTehai->ankan_max;i++){
+                gs.gamestate.nakilist[gs.gamestate.naki].category = AI_ANKAN;
+                gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->ankan[0];
+                gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->ankan[1];
+                gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->ankan[2];
+                gs.gamestate.naki++;
+            }
+
+            for(i=0;i<pTehai->minkan_max;i++){
+                gs.gamestate.nakilist[gs.gamestate.naki].category = AI_MINKAN;
+                gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->minkan[i];
+                gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->minkan[i];
+                gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->minkan[i];
+                gs.gamestate.naki++;
+            }
+
+            for(i=0;i<pTehai->minkou_max;i++){
+                gs.gamestate.nakilist[gs.gamestate.naki].category = AI_KOUTSU;
+                gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->minkou[i];
+                gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->minkou[i];
+                gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->minkou[i];
+                gs.gamestate.naki++;
+            }
+
+            for(i=0;i<pTehai->minshun_max;i++){
+                gs.gamestate.nakilist[gs.gamestate.naki].category = AI_SYUNTSU;
+                gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->minshun[i];
+                gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->minshun[i]+1;
+                gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->minshun[i]+2;
+                gs.gamestate.naki++;
+            }
+
+            p = (unsigned int *)&gs.gamestate.dorapai[0];
+            for(i=0;i<m_pCurTaku->m_aDora.size();i++){
+                *p = m_pCurTaku->m_aDora[i];
+                p++;
+            }
+
+            gs.gamestate.dorasize = m_pCurTaku->m_aDora.size();
+            gs.gamestate.bakaze = m_pCurTaku->m_iBakaze;
+            gs.gamestate.zikaze = member->m_gamestate.m_iZikaze;
+            gs.gamestate.count = member->m_gamestate.m_iCount;
+            gs.gamestate.riichi = member->m_gamestate.m_bRiichi;
+            gs.gamestate.oya = member->m_gamestate.m_bOya;
+
+            gs.agarihai = (int)param2;
+
+            ret = search_score((int *)pTehai->tehai,pTehai->tehai_max,&gs,scoreCallback);
+
+        }else{
+            for(i=0;i<member->m_aResultList.size();i++){
+                OMResult& result = member->m_aResultList[i];
+                if(result.m_iHan == 0) continue;
+                idx = (UINT)result.m_machihai;
+                if(idx == (int)param2){
+                    score = result.m_iScore;
+                    break;
+                }
+            }
+
+            ret = score;
+        }
+
+        break;
+    case MJMI_GETKAWA:
+        idx = m_pCurTaku->getMemberIndex(m_pCurPlayer);
+        idx = (idx + LOWORD(param1)) % 4;
+        ret = m_pCurTaku->getKawahai(idx,(UINT*)param2);
+        break;
+    case MJMI_GETKAWAEX:
+        idx = m_pCurTaku->getMemberIndex(m_pCurPlayer);
+        idx = (idx + LOWORD(param1)) % 4;
+        ret = m_pCurTaku->getKawahaiEx(idx,(MJIKawahai*)param2);
+        break;
+    case MJMI_GETDORA:
+        p = (UINT*)param1;
+        for(i=0;i<m_pCurTaku->m_aDora.size();i++){
+            OMPai pai;
+            m_pCurTaku->m_aDora[i].getDora(pai);
+
+            *p++ = pai;
+        }
+
+        ret = m_pCurTaku->m_aDora.size();
+        break;
+    case MJMI_GETSCORE:
+        idx = m_pCurTaku->getMemberIndex(m_pCurPlayer);
+        idx = (idx + LOWORD(param1)) % 4;
+        ret = m_pCurTaku->m_members[idx].m_iPoint;
+        break;
+    case MJMI_GETKYOKU:
+        ret = m_pCurTaku->m_iKyokuCount;
+        break;
+    case MJMI_GETHONBA:
+        ret = m_pCurTaku->m_iTsumibou;
+        break;
+    case MJMI_GETREACHBOU:
+        ret = m_pCurTaku->m_iRiichibou;
+        break;
+    case MJMI_GETHAIREMAIN:
+        ret = m_pCurTaku->m_iYama;
+        break;
+    case MJMI_GETVISIBLEHAIS:
+        idx = m_pCurTaku->getMemberIndex(m_pCurPlayer);
+        ret = m_pCurTaku->getVisibleHais(param1,idx);
+        break;
+    case MJMI_ANKANABILITY:
+        idx = m_pCurTaku->getMemberIndex(m_pCurPlayer);
+        member = &m_pCurTaku->m_members[idx];
+        idx = 0;
+        p = (UINT*)param1;
+        for(i=0;i<member->m_aCommandList.size();i++){
+            if(member->m_aCommandList[i].m_iType == TYPE_ANKAN ||
+                    member->m_aCommandList[i].m_iType == TYPE_KUWAEKAN){
+                p[idx] = member->m_aCommandList[i].m_pai;
+                idx++;
+            }
+        }
+
+        ret = idx;
+        break;
+    case MJMI_KKHAIABILITY:
+        ret = 0;
+        break;
+    case MJMI_SSPUTOABILITY:
+        ret = 0;
+        break;
+    case MJMI_LASTTSUMOGIRI:
+        ret = 0;
+        break;
+    case MJMI_GETRULE:
+        switch(param1){
+        case MJRL_KUITAN:
+            ret = m_rule.m_iKuitan;
+            break;
+        case MJRL_AKA5:
+            if(m_rule.m_iAka != 0){
+                ret = 1;
+            }else{
+                ret = 0;
+            }
+            break;
+        case MJRL_AKA5S:
+            if(m_rule.m_iAka == 1){
+                ret = 0x111;
+            }else if(m_rule.m_iAka == 2){
+                ret = 0x121;
+            }else{
+                ret = 0;
+            }
+            break;
+        default:
+            ret = ruleTable[param1-1];
+            break;
+        }
+
+        break;
+    case MJMI_SETSTRUCTTYPE:
+        ret = MJR_NOTCARED;
+        for(i=0;i<m_iPlayerNum + m_iCompNum;i++){
+            if(m_players[i].m_pInst == inst){
+                ret = m_players[i].m_iStructMode;
+                m_players[i].m_iStructMode = param1;
+                break;
+            }
+        }
+        break;
+    case MJMI_FUKIDASHI:
+        if(m_pCurTaku != NULL){
+            idx = m_pCurTaku->getMemberIndex(m_pCurPlayer);
+            for(i=0;i<4;i++){
+                if(i != idx){
+                    mes.m_aPlayerTo.append(m_pCurTaku->m_members[i].m_player);
+                }
+
+                mes.m_playerFrom = *m_pCurPlayer;
+                /* UTF-8‚É•ÏŠ·‚·‚é TODO */
+                mes.m_strText = (const char *)param1;
+
+                //queueMessage(mes);
+            }
+        }
+        ret = 1;
+        break;
+    case MJMI_SETAUTOFUKIDASHI:
+    case MJMI_GETWAREME:
+        ret = 0;
+        break;
+    case MJMI_GETVERSION:
+        ret = 12;
+        break;
+    default:
+        ret = 0;
+        break;
+    }
+
+    return ret;
+}
+
 void OMGenericClient::sendCommand(OMArray<OMCommand>& aCommand, OMString& recvMessage)
 {
     OMDomDocument doc;
@@ -644,6 +939,7 @@ void OMGenericClient::setPlayerName(OMArray<OMString> &playernames, OMArray<OMSt
         m_players[i + m_iPlayerNum].m_bIsComp = true;
         m_players[i + m_iPlayerNum].m_pFunc = NULL;
         m_players[i + m_iPlayerNum].m_pInst = NULL;
+        createCompInstance(m_players[i + m_iPlayerNum]);
     }
 
     m_gamestate = OM_GAME_STATE_PLAYERSETNAME;

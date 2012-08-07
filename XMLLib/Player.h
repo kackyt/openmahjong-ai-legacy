@@ -62,6 +62,7 @@ public:
     BOOL m_bIsComp;
     OMString m_strName;
     int m_iId;
+    int m_iStructMode;
     OMPlayer();
     virtual ~OMPlayer();
 

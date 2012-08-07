@@ -128,6 +128,8 @@ typedef uint UINT;
 typedef long LONG;
 typedef ushort USHORT;
 typedef void* LPVOID;
+#define LOWORD(val) ((val) & 0xFFFF)
+#define HIWORD(val) (((val) >> 16) & 0xFFFF)
 #define WINAPI __stdcall
 #define _T(str) (str)
 #define AfxDebugBreak()

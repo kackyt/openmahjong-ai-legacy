@@ -36,6 +36,7 @@ public:
     OMGenericClient();
     virtual ~OMGenericClient() {}
     OM_SYNC_STATE gameSync();
+    UINT MJSendMessage(void *inst,UINT message,UINT param1,UINT param2);
     void gameStart();
     void gameStop();
     void sendLibrary(OMLibrary&);
@@ -66,6 +67,7 @@ protected:
     OMClientListener *m_pListener;
     /* HTTPによりサーバーに文字列を送受信するメソッドをサブクラスで実装してください */
     virtual void sendString(OMString& sendMessage,OMString& recvMessage) = 0;
+    virtual void createCompInstance(OMPlayer &player) = 0;
 
 };
 

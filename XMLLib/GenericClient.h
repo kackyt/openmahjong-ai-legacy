@@ -46,7 +46,7 @@ public:
     void setClientListener(OMClientListener *pListener);
     void setPlayerName(OMArray<OMString>&playernames,OMArray<OMString>&compnames);
     void getPlayerName(OMArray<OMString>&playernames) const;
-    int getPlayerIndex() const;
+    int getPlayerIndex();
     int getSessionNum() const;
 private:
     void debugPrint();

@@ -39,14 +39,38 @@ OMDomElement OMGetElement(OMDomNode &inst,OMString name)
     return node;
 }
 
+static void OMGetElementListSub(OMDomNode &node,OMDomNodeList &nodelist,QStringList &list,int idx)
+{
+    OMDomElement element;
+
+    element = node.firstChildElement(list.at(idx));
+
+    while(!element.isNull()){
+        if(idx == list.count() - 1){
+            nodelist.append(element);
+        }else{
+            OMGetElementListSub(element,nodelist,list,idx+1);
+        }
+
+        element = element.nextSiblingElement(list.at(idx));
+    }
+
+}
+
+
 OMDomNodeList OMGetElementList(OMDomNode &inst,OMString name)
 {
     QStringList list = name.split("/");
-    OMDomElement node;
     OMDomNodeList nodelist;
+#if 1
+    OMGetElementListSub(inst,nodelist,list,0);
+
+    return nodelist;
+
+#else
+    OMDomElement node;
     QString nm;
     bool isFirst = true;
-
     while(list.size() > 1){
         nm = list.takeFirst();
         if(isFirst){
@@ -68,6 +92,7 @@ OMDomNodeList OMGetElementList(OMDomNode &inst,OMString name)
     }
 
     return nodelist;
+#endif
 }
 
 void OMToXML(OMDomDocument &inst,OMString &str)

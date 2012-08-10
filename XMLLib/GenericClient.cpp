@@ -945,9 +945,9 @@ void OMGenericClient::setPlayerName(OMArray<OMString> &playernames, OMArray<OMSt
     m_gamestate = OM_GAME_STATE_PLAYERSETNAME;
 }
 
-int OMGenericClient::getPlayerIndex() const
+int OMGenericClient::getPlayerIndex()
 {
-    return m_iPlayerIndex;
+    return m_pCurTaku->getMemberIndex(&m_players[0]);
 }
 
 void OMGenericClient::gameStart()

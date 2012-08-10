@@ -72,8 +72,54 @@ static inline void OM_GETATTRIBUTE(QDomNode inst,LPCTSTR name,QString &text){
 typedef QDomNode OMDomNode;
 typedef QDomElement OMDomElement;
 typedef QDomDocument OMDomDocument;
-typedef QDomNodeList OMDomNodeList;
 #define XMLOBJ_ISPOINTER (0)
+
+class OMDomNodeList {
+public:
+    OMDomNodeList(){}
+    virtual ~OMDomNodeList(){}
+    OMDomNode	at ( int index ) const{
+        return m_list[index];
+    }
+    int	count () const{
+        return m_list.count();
+    }
+    bool	isEmpty () const{
+        return m_list.isEmpty();
+    }
+    QDomNode	item ( int index ) const{
+        return m_list[index];
+    }
+
+    int	length () const{
+        return m_list.length();
+    }
+    int	size () const{
+        return m_list.length();
+    }
+
+    OMDomNodeList &	operator= ( const OMDomNodeList & n ){
+        m_list = n.m_list;
+        return *this;
+    }
+
+    bool	operator== ( const OMDomNodeList & n ) const{
+        return m_list == n.m_list;
+    }
+
+
+    void	append ( const OMDomNode & value ){
+        m_list.append(value);
+    }
+
+    void	append ( const OMDomNodeList & value ){
+        m_list.append(value.m_list);
+    }
+
+private:
+    QList<OMDomNode> m_list;
+};
+
 
 class OMString : public QString {
 public:

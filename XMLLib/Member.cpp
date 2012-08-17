@@ -105,14 +105,14 @@ void OMMember::parseXML(OMDomNode pElem)
         pNode = OMGetElement(pElem,_T(TAG_TSUMOHAI));
 
         if(!OMIsNull(pNode)){
-		m_gamestate.m_bTsumo = TRUE;
-                pNode = OMGetElement(pElem,_T(TAG_TSUMOHAI "/" TAG_PAI));
-                if(!OMIsNull(pNode)){
-			m_tsumohai.parseXML(pNode);
-		}
-	}else{
-		m_gamestate.m_bTsumo = FALSE;
-	}
+            m_gamestate.m_bTsumo = TRUE;
+            pNode = OMGetElement(pElem,_T(TAG_TSUMOHAI "/" TAG_PAI));
+            if(!OMIsNull(pNode)){
+                m_tsumohai.parseXML(pNode);
+            }
+        }else{
+            m_gamestate.m_bTsumo = FALSE;
+        }
 
 
 	/* ÉvÉåÅ[ÉÑÅ[ÇÃäiî[ */

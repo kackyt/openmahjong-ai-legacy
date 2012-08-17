@@ -484,6 +484,7 @@ OM_SYNC_STATE OMGenericClient::gameSync()
                     if(code == CODE_PROGRESSED){
                         if(m_pListener != NULL){
                             m_pListener->onProgressed(m_iPlayerIndex,m_pCurTaku);
+                            retVal = OM_SYNC_STATE_PROGRESSED;
                         }
                     }else if(code == CODE_WAITCOMMAND && m_gamestate != OM_GAME_STATE_WAITCOMMAND){
                         int index = m_pCurTaku->getMemberIndex(&m_players[i]);
@@ -520,7 +521,7 @@ OM_SYNC_STATE OMGenericClient::gameSync()
 
     m_bBusy = FALSE;
 
-    if(retVal == OM_SYNC_STATE_USERCOMMAND){
+    if(retVal == OM_SYNC_STATE_USERCOMMAND || retVal == OM_SYNC_STATE_NEXTKYOKU){
         m_pCurPlayer = &m_players[iPlayerDlgIndex];
         m_pCurTaku = &m_aTakuAll[iPlayerDlgIndex];
         m_iPlayerIndex = m_pCurTaku->getMemberIndex(m_pCurPlayer);

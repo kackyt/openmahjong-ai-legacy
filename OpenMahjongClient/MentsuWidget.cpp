@@ -1,4 +1,5 @@
 #include <QPainter>
+#include "FilePath.h"
 #include "MentsuWidget.h"
 
 OMMentsuWidget::OMMentsuWidget(QWidget *parent) :
@@ -44,17 +45,17 @@ void OMMentsuWidget::setMentsu(OMNakiMentsu &mentsu,int rotate,int distance)
         /* ‰ñ“]‚µ‚½‰æ‘œ‚ðŽæ“¾‚·‚é(— ) */
         switch(rotate){
         case 0:
-            filepath = QString(":/haiga/%1.gif").arg(hainame);
+            filepath = getFilePath(QString("haiga/%1.gif").arg(hainame));
             break;
         case 1:
-            filepath = QString(":/haiga/y%1.gif").arg(hainame);
+            filepath = getFilePath(QString("haiga/y%1.gif").arg(hainame));
             break;
         case 2:
-            filepath = QString(":/haiga/t%1.gif").arg(hainame);
+            filepath = getFilePath(QString("haiga/t%1.gif").arg(hainame));
             break;
         case 3:
         default:
-            filepath = QString(":/haiga/ty%1.gif").arg(hainame);
+            filepath = getFilePath(QString("haiga/ty%1.gif").arg(hainame));
             break;
         }
 
@@ -84,17 +85,17 @@ void OMMentsuWidget::setMentsu(OMNakiMentsu &mentsu,int rotate,int distance)
         /* ‰ñ“]‚µ‚½‰æ‘œ‚ðŽæ“¾‚·‚é(•\) */
         switch(rotate){
         case 0:
-            filepath = QString(":/haiga/%1.gif").arg(hainame);
+            filepath = getFilePath(QString("haiga/%1.gif").arg(hainame));
             break;
         case 1:
-            filepath = QString(":/haiga/y%1.gif").arg(hainame);
+            filepath = getFilePath(QString("haiga/y%1.gif").arg(hainame));
             break;
         case 2:
-            filepath = QString(":/haiga/t%1.gif").arg(hainame);
+            filepath = getFilePath(QString("haiga/t%1.gif").arg(hainame));
             break;
         case 3:
         default:
-            filepath = QString(":/haiga/ty%1.gif").arg(hainame);
+            filepath = getFilePath(QString("haiga/ty%1.gif").arg(hainame));
             break;
         }
 
@@ -148,16 +149,16 @@ void OMMentsuWidget::setMentsu(OMNakiMentsu &mentsu,int rotate,int distance)
             switch(i == rotate_pos ? (rotate + 1) : rotate){
             case 0:
             default:
-                filepath = QString(":/haiga/%1.gif").arg(hainame);
+                filepath = getFilePath(QString("haiga/%1.gif").arg(hainame));
                 break;
             case 1:
-                filepath = QString(":/haiga/y%1.gif").arg(hainame);
+                filepath = getFilePath(QString("haiga/y%1.gif").arg(hainame));
                 break;
             case 2:
-                filepath = QString(":/haiga/t%1.gif").arg(hainame);
+                filepath = getFilePath(QString("haiga/t%1.gif").arg(hainame));
                 break;
             case 3:
-                filepath = QString(":/haiga/ty%1.gif").arg(hainame);
+                filepath = getFilePath(QString("haiga/ty%1.gif").arg(hainame));
                 break;
             }
 

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QMetaType>
+#include <QSound>
 #include "ClientQObject.h"
 #include "common/ClientListener.h"
 #include "PaiButton.h"
@@ -24,14 +25,16 @@ public slots:
     void onStarted(int index, OMTaku *);
     void onStatusCode(int code);
     void onDahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
-    void onTehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
-    void onTehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void onTehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai,bool tsumo);
+    void onTehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai,bool tsumo);
     void onDahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void onNakiAdded(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu,bool kuwae);
     void onNakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu);
     void onProgressed(int index, OMTaku *);
     void onTii();
     void onDahai();
+    void onPon();
+    void onRiichi();
 
 private slots:
     void onMyTurn(OMTaku *);

@@ -12,17 +12,23 @@ OMClientThread::OMClientThread(QObject *parent) :
 {
 }
 
+QTime time;
+
 /* Client Thread */
 void OMClientThread::run()
 {
     QNetworkAccessManager manager;
     QNetworkRequest request;
+
+    qDebug() << "thread " << time.restart();
     request.setUrl(m_dstUrl);
+
+    request.setHeader(QNetworkRequest::ContentTypeHeader,"application/xml");
 
     m_pReply = manager.post(request,m_sendString.toUtf8());
 
     /* 受信スロットの登録 */
-    QObject::connect(m_pReply,SIGNAL(readyRead()),SLOT(readProgress()),Qt::DirectConnection);
+    //QObject::connect(m_pReply,SIGNAL(readyRead()),SLOT(readProgress()),Qt::DirectConnection);
     QObject::connect(m_pReply,SIGNAL(error(QNetworkReply::NetworkError)),SLOT(error(QNetworkReply::NetworkError)),Qt::DirectConnection);
     QObject::connect(m_pReply,SIGNAL(finished()),SLOT(finish()),Qt::DirectConnection);
     //QObject::connect(this,SIGNAL(finished()),SLOT(deleteLater()));
@@ -56,6 +62,8 @@ void OMClientThread::sendString(QUrl &dst, QString &sendString, QString &recvStr
     m_sendString = sendString;
     m_dstUrl = dst;
 
+    time.start();
+
     start();
 
     /* 送信完了を待つ */
@@ -83,7 +91,7 @@ void OMClientThread::sendString(QUrl &dst, QString &sendString, QString &recvStr
 
 void OMClientThread::readProgress()
 {
-    m_recvBuf += m_pReply->readAll();
+    qDebug() << "read " << time.restart();
 }
 
 void OMClientThread::error(QNetworkReply::NetworkError errCode)
@@ -95,6 +103,8 @@ void OMClientThread::error(QNetworkReply::NetworkError errCode)
 
 void OMClientThread::finish()
 {
+    qDebug() << "finish " << time.restart();
+    m_recvBuf += m_pReply->readAll();
     m_wait.wakeAll();
     /* スレッドの終了 */
     quit();

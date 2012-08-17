@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSound>
+#include "FilePath.h"
 #include "openmahjongclient.h"
 #include "PaiButton.h"
 #include "MentsuWidget.h"
@@ -23,6 +24,7 @@ OpenMahjongClient::OpenMahjongClient(QWidget *parent) :
     qRegisterMetaType<OMPai*>();
     qRegisterMetaType<OMPai>();
     qRegisterMetaType<OMString>();
+
     ui->setupUi(this);
 
     /* レイアウト方向の変更 */
@@ -38,14 +40,18 @@ OpenMahjongClient::OpenMahjongClient(QWidget *parent) :
     QObject::connect(&m_client,SIGNAL(sigStarted(int,OMTaku*)),SLOT(onStarted(int,OMTaku*)));
     QObject::connect(&m_client,SIGNAL(sigDahaiAdded(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onDahaiAdded(OMTaku*,int,OMMember*,int,OMPai)));
     QObject::connect(&m_client,SIGNAL(sigDahaiNaki(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onDahaiNaki(OMTaku*,int,OMMember*,int,OMPai)));
-    QObject::connect(&m_client,SIGNAL(sigTehaiAdded(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onTehaiAdded(OMTaku*,int,OMMember*,int,OMPai)));
-    QObject::connect(&m_client,SIGNAL(sigTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai)),SLOT(onTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai)));
+    QObject::connect(&m_client,SIGNAL(sigTehaiAdded(OMTaku*,int,OMMember*,int,OMPai,bool)),SLOT(onTehaiAdded(OMTaku*,int,OMMember*,int,OMPai,bool)));
+    QObject::connect(&m_client,SIGNAL(sigTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai,bool)),SLOT(onTehaiRemoved(OMTaku*,int,OMMember*,int,OMPai,bool)));
     QObject::connect(&m_client,SIGNAL(sigNakiAdded(OMTaku*,int,OMMember*,int,OMNakiMentsu,bool)),SLOT(onNakiAdded(OMTaku*,int,OMMember*,int,OMNakiMentsu,bool)));
     QObject::connect(&m_client,SIGNAL(sigUserTurn(OMTaku*)),SLOT(onMyTurn(OMTaku*)));
     QObject::connect(&m_client,SIGNAL(sigResponceCode(int)),SLOT(onResponce(int)));
     QObject::connect(&m_client,SIGNAL(sigKyokuEnd(OMString,OMTaku *)),SLOT(onKyokuEnd(OMString,OMTaku*)));
     QObject::connect(&m_client,SIGNAL(sigProgressed(int,OMTaku*)),SLOT(onProgressed(int,OMTaku*)));
     QObject::connect(&m_client,SIGNAL(sigDahai()),SLOT(onDahai()));
+    QObject::connect(&m_client,SIGNAL(sigPon()),SLOT(onPon()));
+    QObject::connect(&m_client,SIGNAL(sigTii()),SLOT(onTii()));
+    QObject::connect(&m_client,SIGNAL(sigRiichi()),SLOT(onRiichi()));
+
 }
 
 OpenMahjongClient::~OpenMahjongClient()
@@ -399,9 +405,13 @@ void OpenMahjongClient::onStarted(int index, OMTaku *taku)
         ui->m_layout_dahai31->addItem(ui->m_spacer_d31);
         ui->m_layout_dahai32->addItem(ui->m_spacer_d32);
 
+        ui->m_layout_tehai0->addItem(ui->m_spacer_t01);
         ui->m_layout_tehai0->addItem(ui->m_spacer_t0);
+        ui->m_layout_tehai1->addItem(ui->m_spacer_t11);
         ui->m_layout_tehai1->addItem(ui->m_spacer_t1);
+        ui->m_layout_tehai2->addItem(ui->m_spacer_t21);
         ui->m_layout_tehai2->addItem(ui->m_spacer_t2);
+        ui->m_layout_tehai3->addItem(ui->m_spacer_t31);
         ui->m_layout_tehai3->addItem(ui->m_spacer_t3);
 
         ui->m_layout_dora->addItem(ui->m_spacer_dora);
@@ -447,15 +457,27 @@ void OpenMahjongClient::onStarted(int index, OMTaku *taku)
             }
 
             if(member->m_aTehai.size() > 0){
-                for(j=0;j<member->m_aTehai.size();j++){
+                for(j=0;j<member->m_aTehai.size()-1;j++){
                     layoutTehai(member->m_aTehai[j],i,j);
                 }
+
+                if(member->m_gamestate.m_bTsumo){
+                    layoutTehai(member->m_aTehai[j],i,j+1);
+                }else{
+                    layoutTehai(member->m_aTehai[j],i,j);
+                }
+
+
             }else{
                 OMPai nilPai;
                 nilPai.m_iCategory = 0;
                 nilPai.m_iNo = 0;
                 for(j=0;j<13-member->m_gamestate.m_aNakiList.size()*3;j++){
                     layoutTehai(nilPai,i,j);
+                }
+
+                if(member->m_gamestate.m_bTsumo){
+                    layoutTehai(nilPai,i,j+1);
                 }
             }
 
@@ -490,6 +512,7 @@ void OpenMahjongClient::onStarted(int index, OMTaku *taku)
             ui->m_layout_uradora->insertWidget(i,btn,0,Qt::AlignLeft | Qt::AlignBottom);
         }
 
+
     }
 
 }
@@ -507,15 +530,19 @@ void OpenMahjongClient::onDahaiAdded(OMTaku *taku, int memberIndex, OMMember *me
     layoutDahai(pai,cha,member->getDahaiRealPos(pai));
 }
 
-void OpenMahjongClient::onTehaiAdded(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai pai)
+void OpenMahjongClient::onTehaiAdded(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai pai,bool tsumo)
 {
     int ind = m_client.getPlayerIndex();
     int cha = OMMember::getChaDistance(ind,memberIndex);
 
+    if(tsumo){
+        paiIndex++;
+    }
+
     layoutTehai(pai,cha,paiIndex);
 }
 
-void OpenMahjongClient::onTehaiRemoved(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai pai)
+void OpenMahjongClient::onTehaiRemoved(OMTaku *taku, int memberIndex, OMMember *member, int paiIndex, OMPai pai,bool tsumo)
 {
     int ind = m_client.getPlayerIndex();
     int cha = OMMember::getChaDistance(ind,memberIndex);
@@ -536,6 +563,10 @@ void OpenMahjongClient::onTehaiRemoved(OMTaku *taku, int memberIndex, OMMember *
         break;
     default:
         break;
+    }
+
+    if(tsumo){
+        paiIndex++;
     }
 
     if(layout != NULL){
@@ -571,6 +602,8 @@ void OpenMahjongClient::onMyTurn(OMTaku *taku)
     ui->m_btnPass->setEnabled(m_client.m_commander.isPassAvailable());
     ui->m_btnTouhai->setEnabled(m_client.m_commander.isTouhaiAvailable());
     ui->m_btnDecide->setEnabled(true);
+
+    QSound::play(getFilePath("wav/command.wav"));
 }
 
 void OpenMahjongClient::endTurn()
@@ -685,9 +718,11 @@ void OpenMahjongClient::onKyokuEnd(OMString message,OMTaku *taku)
     int i;
     OMArray<OMPai> *pTehai;
     QLayoutItem *item;
+    OMArray<OMNakiMentsu> *pNakiList;
 
     /* 手牌をレイアウト */
     pTehai = &taku->m_members[(ind + 1) % 4].m_aTehai;
+    pNakiList = &taku->m_members[(ind + 1) % 4].m_gamestate.m_aNakiList;
     if(pTehai->size() != 0){
         while(ui->m_layout_tehai1->count() > 0){
             item = ui->m_layout_tehai1->itemAt(0);
@@ -700,8 +735,15 @@ void OpenMahjongClient::onKyokuEnd(OMString message,OMTaku *taku)
         for(i=0;i<pTehai->size();i++){
             layoutTehai((*pTehai)[i],1,i);
         }
+
+        for(i=0;i<pNakiList->size();i++){
+            OMMentsuWidget *widget = new OMMentsuWidget();
+            widget->setMentsu((*pNakiList)[i],1,OMMember::getChaDistance(ind,(*pNakiList)[i].m_iAite));
+            ui->m_layout_tehai1->insertWidget(ui->m_layout_tehai1->count() - 1 - i,widget);
+        }
     }
     pTehai = &taku->m_members[(ind + 2) % 4].m_aTehai;
+    pNakiList = &taku->m_members[(ind + 2) % 4].m_gamestate.m_aNakiList;
     if(pTehai->size() != 0){
         while(ui->m_layout_tehai2->count() > 0){
             item = ui->m_layout_tehai2->itemAt(0);
@@ -714,8 +756,14 @@ void OpenMahjongClient::onKyokuEnd(OMString message,OMTaku *taku)
         for(i=0;i<pTehai->size();i++){
             layoutTehai((*pTehai)[i],2,i);
         }
+        for(i=0;i<pNakiList->size();i++){
+            OMMentsuWidget *widget = new OMMentsuWidget();
+            widget->setMentsu((*pNakiList)[i],2,OMMember::getChaDistance(ind,(*pNakiList)[i].m_iAite));
+            ui->m_layout_tehai1->insertWidget(ui->m_layout_tehai1->count() - 1 - i,widget);
+        }
     }
     pTehai = &taku->m_members[(ind + 3) % 4].m_aTehai;
+    pNakiList = &taku->m_members[(ind + 3) % 4].m_gamestate.m_aNakiList;
     if(pTehai->size() != 0){
         while(ui->m_layout_tehai3->count() > 0){
             item = ui->m_layout_tehai3->itemAt(0);
@@ -727,6 +775,11 @@ void OpenMahjongClient::onKyokuEnd(OMString message,OMTaku *taku)
         ui->m_layout_tehai3->addItem(ui->m_spacer_t3);
         for(i=0;i<pTehai->size();i++){
             layoutTehai((*pTehai)[i],3,i);
+        }
+        for(i=0;i<pNakiList->size();i++){
+            OMMentsuWidget *widget = new OMMentsuWidget();
+            widget->setMentsu((*pNakiList)[i],3,OMMember::getChaDistance(ind,(*pNakiList)[i].m_iAite));
+            ui->m_layout_tehai1->insertWidget(ui->m_layout_tehai1->count() - 1 - i,widget);
         }
     }
 
@@ -757,6 +810,7 @@ void OpenMahjongClient::onKyokuEnd(OMString message,OMTaku *taku)
         }
     }
 
+
     QMessageBox::information(this,"終局",message);
 
     m_client.clientStart();
@@ -785,9 +839,9 @@ void OpenMahjongClient::onNakiAdded(OMTaku *taku, int memberIndex, OMMember *mem
 
     switch(cha){
     case 0:
-        ui->m_layout_tehai0->insertWidget(ui->m_layout_tehai0->count() - mentsuIndex,widget,0,Qt::AlignRight | Qt::AlignBottom);
+        ui->m_layout_tehai0->insertWidget(ui->m_layout_tehai0->count() + 1 - mentsuIndex,widget,0,Qt::AlignRight | Qt::AlignBottom);
         if(!kuwae && member->m_aTehai.size() == 0){
-            for(i=0;i<3;i++){
+            for(i=0;i<2;i++){
                 item = ui->m_layout_tehai0->itemAt(0);
                 ui->m_layout_tehai0->removeItem(item);
                 item->widget()->deleteLater();
@@ -795,9 +849,9 @@ void OpenMahjongClient::onNakiAdded(OMTaku *taku, int memberIndex, OMMember *mem
         }
         break;
     case 1:
-        ui->m_layout_tehai1->insertWidget(ui->m_layout_tehai1->count() - mentsuIndex,widget,0,Qt::AlignRight | Qt::AlignTop);
+        ui->m_layout_tehai1->insertWidget(ui->m_layout_tehai1->count() + 1 - mentsuIndex,widget,0,Qt::AlignRight | Qt::AlignTop);
         if(!kuwae && member->m_aTehai.size() == 0){
-            for(i=0;i<3;i++){
+            for(i=0;i<2;i++){
                 item = ui->m_layout_tehai1->itemAt(0);
                 ui->m_layout_tehai1->removeItem(item);
                 item->widget()->deleteLater();
@@ -805,9 +859,9 @@ void OpenMahjongClient::onNakiAdded(OMTaku *taku, int memberIndex, OMMember *mem
         }
         break;
     case 2:
-        ui->m_layout_tehai2->insertWidget(ui->m_layout_tehai2->count() - mentsuIndex,widget,0,Qt::AlignLeft | Qt::AlignTop);
+        ui->m_layout_tehai2->insertWidget(ui->m_layout_tehai2->count() + 1 - mentsuIndex,widget,0,Qt::AlignLeft | Qt::AlignTop);
         if(!kuwae && member->m_aTehai.size() == 0){
-            for(i=0;i<3;i++){
+            for(i=0;i<2;i++){
                 item = ui->m_layout_tehai2->itemAt(0);
                 ui->m_layout_tehai2->removeItem(item);
                 item->widget()->deleteLater();
@@ -815,9 +869,9 @@ void OpenMahjongClient::onNakiAdded(OMTaku *taku, int memberIndex, OMMember *mem
         }
         break;
     case 3:
-        ui->m_layout_tehai3->insertWidget(ui->m_layout_tehai3->count() - mentsuIndex,widget,0,Qt::AlignLeft | Qt::AlignBottom);
+        ui->m_layout_tehai3->insertWidget(ui->m_layout_tehai3->count() + 1 - mentsuIndex,widget,0,Qt::AlignLeft | Qt::AlignBottom);
         if(!kuwae && member->m_aTehai.size() == 0){
-            for(i=0;i<3;i++){
+            for(i=0;i<2;i++){
                 item = ui->m_layout_tehai3->itemAt(0);
                 ui->m_layout_tehai3->removeItem(item);
                 item->widget()->deleteLater();
@@ -844,6 +898,7 @@ void OpenMahjongClient::onProgressed(int index, OMTaku *taku)
 void OpenMahjongClient::takuUpdate(OMTaku *taku)
 {
     QString mes;
+
     mes = QString("%1%2局  残り：%3").arg(taku->m_iKyokuCount < 4 ? "東" : "南").arg((taku->m_iKyokuCount % 4)  + 1).arg(taku->m_iYama);
     ui->m_labelState1->setText(mes);
 
@@ -854,10 +909,23 @@ void OpenMahjongClient::takuUpdate(OMTaku *taku)
 
 void OpenMahjongClient::onTii()
 {
-    QSound::play("wav/tii.wav");
+    QSound::play(getFilePath("wav/voice_tii.wav"));
+    QSound::play(getFilePath("wav/naki.wav"));
 }
 
 void OpenMahjongClient::onDahai()
 {
-    QSound::play("wav/dahai.wav");
+    QSound::play(getFilePath("wav/dahai.wav"));
+}
+
+void OpenMahjongClient::onPon()
+{
+    QSound::play(getFilePath("wav/voice_pon.wav"));
+    QSound::play(getFilePath("wav/naki.wav"));
+}
+
+void OpenMahjongClient::onRiichi()
+{
+    QSound::play(getFilePath("wav/voice_riichi.wav"));
+    QSound::play(getFilePath("wav/riichi.wav"));
 }

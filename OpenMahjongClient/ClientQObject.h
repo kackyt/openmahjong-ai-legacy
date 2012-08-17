@@ -2,7 +2,6 @@
 #define CLIENTQOBJECT_H
 
 #include <QObject>
-#include <QNetworkAccessManager>
 #include <QThread>
 #include <QTimer>
 #include <QMap>
@@ -11,6 +10,7 @@
 #include "common/TakuListener.h"
 #include "common/Pai.h"
 #include "common/UICommander.h"
+#include "ClientThread.h"
 
 class OMClientQObject : public QObject,public OMGenericClient,public OMTakuListener,public OMClientListener
 {
@@ -29,8 +29,8 @@ public:
     OMUICommander m_commander;
     void setDestination(QUrl &url);
     void setComp(OMString *name,int size);
-    virtual void tehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
-    void tehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    virtual void tehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai,bool tsumo);
+    void tehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai,bool tsumo);
     void dahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void dahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void nakiAdded(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu,bool kuwae);
@@ -52,7 +52,7 @@ protected:
     virtual void createCompInstance(OMPlayer &player);
 private:
     QUrl m_dstUrl;
-    QNetworkAccessManager m_naManager;
+    OMClientThread m_clientThread;
     QWidget *m_pTakuWidget;
     QThread m_thread;
     QTimer *m_pTimer;
@@ -60,8 +60,8 @@ private:
 
 signals:
     void waitingUserCommand();
-    void sigTehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
-    void sigTehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
+    void sigTehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai,bool tsumo);
+    void sigTehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai,bool tsumo);
     void sigDahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void sigDahaiNaki(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai);
     void sigNakiAdded(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu,bool kuwae);

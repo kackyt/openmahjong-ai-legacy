@@ -76,7 +76,8 @@ HEADERS  += openmahjongclient.h \
     AgariDialog.h \
     MentsuWidget.h \
     AILib/MJ0.h \
-    AILib/AILib.h
+    AILib/AILib.h \
+    FilePath.h
 
 FORMS    += openmahjongclient.ui \
     ConnectDialog.ui \

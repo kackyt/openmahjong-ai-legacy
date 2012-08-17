@@ -1,4 +1,5 @@
 #include <QPainter>
+#include "FilePath.h"
 #include "PaiButton.h"
 
 OMPaiButton::OMPaiButton(QWidget *parent) :
@@ -24,13 +25,13 @@ void OMPaiButton::setPai(OMPai &pai, int rotate)
     /* ‰ñ“]‚µ‚½‰æ‘œ‚ðŽæ“¾‚·‚é */
     switch(rotate){
     case 0:
-        filepath = QString(":/haiga/%1.gif").arg(hainame);
+        filepath = getFilePath(QString("haiga/%1.gif").arg(hainame));
         setMaximumSize(24,34);
         setMinimumSize(24,34);
         resize(24,34);
         break;
     case 1:
-        filepath = QString(":/haiga/y%1.gif").arg(hainame);
+        filepath = getFilePath(QString("haiga/y%1.gif").arg(hainame));
         if(pai != PAI_NIL){
             setMaximumSize(32,24);
             setMinimumSize(32,24);
@@ -41,14 +42,14 @@ void OMPaiButton::setPai(OMPai &pai, int rotate)
         }
         break;
     case 2:
-        filepath = QString(":/haiga/t%1.gif").arg(hainame);
+        filepath = getFilePath(QString("haiga/t%1.gif").arg(hainame));
         setMaximumSize(24,34);
         setMinimumSize(24,34);
         resize(24,34);
         break;
     case 3:
     default:
-        filepath = QString(":/haiga/ty%1.gif").arg(hainame);
+        filepath = getFilePath(QString("haiga/ty%1.gif").arg(hainame));
         if(pai != PAI_NIL){
             setMaximumSize(32,24);
             setMinimumSize(32,24);

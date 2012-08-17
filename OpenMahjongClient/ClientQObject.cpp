@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include "ClientQObject.h"
 #include "ClientThread.h"
+#include "FilePath.h"
 
 static OMClientQObject *thisObj;
 
@@ -16,7 +17,7 @@ static UINT WINAPI MJSendMessageAPI(LPVOID inst,UINT message,UINT param1,UINT pa
 OMClientQObject::OMClientQObject(QObject *parent) :
     QObject(parent)
 {
-    QString path = QCoreApplication::applicationDirPath() + "/comp";
+    QString path = getFilePath("comp");
     QDir compDir(path);
     QFileInfoList list;
     int i;
@@ -46,9 +47,7 @@ OMClientQObject::OMClientQObject(QObject *parent) :
     }
 
     setClientListener(this);
-    for(i=0;i<4;i++){
-        m_aTakuAll[i].setTakuListener(this);
-    }
+    m_aTakuAll[0].setTakuListener(this);
     moveToThread(&m_thread);
     m_thread.start();
 }
@@ -107,7 +106,7 @@ void OMClientQObject::confirmCommand()
     qDebug() << "confirmCommand" << bCommand;
 
     if(bCommand){
-        com.m_player = *m_pCurPlayer;
+        com.m_player = m_players[0];
 
         do{
             res = sendCommand(com,recvMessage);
@@ -130,7 +129,9 @@ void OMClientQObject::takuUpdate()
     OM_SYNC_STATE state;
     int i;
 
+
     state = gameSync();
+
     if(state == OM_SYNC_STATE_USERCOMMAND){
         m_commander.initialize(m_pCurTaku->m_members[getPlayerIndex()]);
         emit sigUserTurn(m_pCurTaku);
@@ -138,34 +139,39 @@ void OMClientQObject::takuUpdate()
         OMString text;
         m_commander.initialize(m_pCurTaku->m_members[getPlayerIndex()]);
 
+        text = "<font size='6'><strong>";
+
 
         if(m_pCurTaku->m_event.m_command.m_iType == TYPE_KOUHAI){
-            text = "荒牌平局";
+            text += "荒牌平局";
         }else{
             OMString pt;
             for(i=0;i<m_pCurTaku->m_event.m_result.m_aYaku.size();i++){
                 text += m_pCurTaku->m_event.m_result.m_aYaku[i];
-                text += "\n";
+                text += "<br />";
             }
+            text += "<br />";
 
-            pt = QString("%1飜 %2符 %3点\n").arg(m_pCurTaku->m_event.m_result.m_iHan).arg(m_pCurTaku->m_event.m_result.m_iFu).arg(m_pCurTaku->m_event.m_result.m_iScore);
+            pt = QString("%1飜 %2符 %3点<br />").arg(m_pCurTaku->m_event.m_result.m_iHan).arg(m_pCurTaku->m_event.m_result.m_iFu).arg(m_pCurTaku->m_event.m_result.m_iScore);
 
             text += pt;
         }
+
+        text += "</strong></font>";
 
         clientStop();
         emit sigKyokuEnd(text,m_pCurTaku);
     }
 }
 
-void OMClientQObject::tehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai)
+void OMClientQObject::tehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai,bool tsumo)
 {
-    emit sigTehaiAdded(taku,memberIndex,member,paiIndex,pai);
+    emit sigTehaiAdded(taku,memberIndex,member,paiIndex,pai,tsumo);
 }
 
-void OMClientQObject::tehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai)
+void OMClientQObject::tehaiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai,bool tsumo)
 {
-    emit sigTehaiRemoved(taku,memberIndex,member,paiIndex,pai);
+    emit sigTehaiRemoved(taku,memberIndex,member,paiIndex,pai,tsumo);
 }
 
 void OMClientQObject::dahaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai)
@@ -255,25 +261,27 @@ void OMClientQObject::clientStartImpl()
 
     if(m_commander.setStart()){
         OMCommand com;
-        int res;
+        int res,i;
         OMString recvMessage;
 
         m_commander.getCommand(com);
-        com.m_player = *m_pCurPlayer;
 
-        do{
-            res = sendCommand(com,recvMessage);
-            qDebug() << "res = " << res;
-        }while(res < 0);
+        for(i=0;i<m_iPlayerNum+m_iCompNum;i++){
+            com.m_player = m_players[i];
+
+            do{
+                res = sendCommand(com,recvMessage);
+                qDebug() << "res = " << res;
+            }while(res < 0);
+        }
     }
 
     /* タイマーのスタート */
     gameStart();
     m_pTimer = new QTimer(this);
     QObject::connect(m_pTimer,SIGNAL(timeout()),SLOT(takuUpdate()));
-    m_pTimer->setInterval(3000);
     m_pTimer->setSingleShot(false);
-    m_pTimer->start();
+    m_pTimer->start(1000);
 }
 
 void OMClientQObject::clientStopImpl()

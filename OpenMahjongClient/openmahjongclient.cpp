@@ -51,6 +51,7 @@ OpenMahjongClient::OpenMahjongClient(QWidget *parent) :
     QObject::connect(&m_client,SIGNAL(sigPon()),SLOT(onPon()));
     QObject::connect(&m_client,SIGNAL(sigTii()),SLOT(onTii()));
     QObject::connect(&m_client,SIGNAL(sigRiichi()),SLOT(onRiichi()));
+    QObject::connect(ui->m_chkMySync,SIGNAL(toggled(bool)),&m_client,SLOT(setMyTurnSync(bool)));
 
 }
 
@@ -928,4 +929,12 @@ void OpenMahjongClient::onRiichi()
 {
     QSound::play(getFilePath("wav/voice_riichi.wav"));
     QSound::play(getFilePath("wav/riichi.wav"));
+}
+
+
+void OpenMahjongClient::on_m_btnSyncUpdate_clicked()
+{
+    int interval = ui->m_edSyncInterval->text().toInt();
+
+    m_client.setSyncInterval(interval);
 }

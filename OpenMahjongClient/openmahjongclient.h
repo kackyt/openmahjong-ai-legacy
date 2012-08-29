@@ -61,6 +61,8 @@ private slots:
 
     void on_m_btnDecide_clicked();
 
+    void on_m_btnSyncUpdate_clicked();
+
 private:
     Ui::OpenMahjongClient *ui;
     OMClientQObject m_client;

@@ -15,7 +15,10 @@ static UINT WINAPI MJSendMessageAPI(LPVOID inst,UINT message,UINT param1,UINT pa
 
 
 OMClientQObject::OMClientQObject(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    m_pTimer(NULL),
+    m_iSyncInterval(1000),
+    m_bMyTurnSync(true)
 {
     QString path = getFilePath("comp");
     QDir compDir(path);
@@ -117,6 +120,8 @@ void OMClientQObject::confirmCommand()
             emit sigResponceCode(res);
         }
     }
+
+    m_pTimer->start();
 }
 
 void OMClientQObject::setDestination(QUrl &url)
@@ -134,6 +139,9 @@ void OMClientQObject::takuUpdate()
 
     if(state == OM_SYNC_STATE_USERCOMMAND){
         m_commander.initialize(m_pCurTaku->m_members[getPlayerIndex()]);
+        if(!m_bMyTurnSync){
+            m_pTimer->stop();
+        }
         emit sigUserTurn(m_pCurTaku);
     }else if(state == OM_SYNC_STATE_NEXTKYOKU){
         OMString text;
@@ -162,6 +170,19 @@ void OMClientQObject::takuUpdate()
         clientStop();
         emit sigKyokuEnd(text,m_pCurTaku);
     }
+}
+
+void OMClientQObject::setSyncInterval(int interval)
+{
+    m_iSyncInterval = interval;
+    if(m_pTimer != NULL){
+        m_pTimer->setInterval(interval);
+    }
+}
+
+void OMClientQObject::setMyTurnSync(bool sync)
+{
+    m_bMyTurnSync = sync;
 }
 
 void OMClientQObject::tehaiAdded(OMTaku *taku,int memberIndex,OMMember *member,int paiIndex,OMPai pai,bool tsumo)
@@ -281,7 +302,7 @@ void OMClientQObject::clientStartImpl()
     m_pTimer = new QTimer(this);
     QObject::connect(m_pTimer,SIGNAL(timeout()),SLOT(takuUpdate()));
     m_pTimer->setSingleShot(false);
-    m_pTimer->start(1000);
+    m_pTimer->start(m_iSyncInterval);
 }
 
 void OMClientQObject::clientStopImpl()

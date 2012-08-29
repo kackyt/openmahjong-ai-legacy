@@ -157,7 +157,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>361</width>
+     <width>351</width>
      <height>22</height>
     </rect>
    </property>
@@ -177,6 +177,12 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="maximumSize">
+       <size>
+        <width>280</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="editable">
        <bool>true</bool>
       </property>
@@ -192,7 +198,7 @@
       </item>
       <item>
        <property name="text">
-        <string>http://localhost:10080/index.rb</string>
+        <string>http://127.0.0.1:10080/index.rb</string>
        </property>
       </item>
      </widget>

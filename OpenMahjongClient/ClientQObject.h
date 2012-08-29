@@ -56,6 +56,8 @@ private:
     QWidget *m_pTakuWidget;
     QThread m_thread;
     QTimer *m_pTimer;
+    int m_iSyncInterval;
+    bool m_bMyTurnSync;
 
 
 signals:
@@ -87,6 +89,8 @@ public slots:
     void clientStop();
     void confirmCommand();
     void takuUpdate();
+    void setSyncInterval(int interval);
+    void setMyTurnSync(bool sync);
 private slots:
     void clientStartImpl();
     void clientStopImpl();

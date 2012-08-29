@@ -39,9 +39,11 @@ OMClientQObject::OMClientQObject(QObject *parent) :
             if(QLibrary::isLibrary(info.filePath())){
                 QLibrary *lib = new QLibrary(info.filePath());
                 MJPIFunc func = (MJPIFunc)lib->resolve("MJPInterfaceFunc");
-                QTextCodec *codec = QTextCodec::codecForName("Shift-JIS");
-                OMString name = codec->toUnicode((const char*)func(NULL,MJPI_YOURNAME,0,0));
-                m_playerTemplate[name] = lib;
+                if(func != NULL){
+                    QTextCodec *codec = QTextCodec::codecForName("Shift-JIS");
+                    OMString name = codec->toUnicode((const char*)func(NULL,MJPI_YOURNAME,0,0));
+                    m_playerTemplate[name] = lib;
+                }
             }
 
         }catch(...){

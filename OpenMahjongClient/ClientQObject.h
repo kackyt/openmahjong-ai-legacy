@@ -83,6 +83,7 @@ signals:
     void sigResponceCode(int code);
     void sigUserTurn(OMTaku *);
     void sigKyokuEnd(OMString message,OMTaku *);
+    void sigDisconnected();
 
 public slots:
     void clientStart();

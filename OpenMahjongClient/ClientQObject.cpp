@@ -171,6 +171,9 @@ void OMClientQObject::takuUpdate()
 
         clientStop();
         emit sigKyokuEnd(text,m_pCurTaku);
+    }else if(state == OM_SYNC_STATE_ERROR){
+        clientStop();
+        emit sigDisconnected();
     }
 }
 

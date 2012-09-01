@@ -51,6 +51,7 @@ OpenMahjongClient::OpenMahjongClient(QWidget *parent) :
     QObject::connect(&m_client,SIGNAL(sigPon()),SLOT(onPon()));
     QObject::connect(&m_client,SIGNAL(sigTii()),SLOT(onTii()));
     QObject::connect(&m_client,SIGNAL(sigRiichi()),SLOT(onRiichi()));
+    QObject::connect(&m_client,SIGNAL(sigDisconnected()),SLOT(onDisconnected()));
     QObject::connect(ui->m_chkMySync,SIGNAL(toggled(bool)),&m_client,SLOT(setMyTurnSync(bool)));
 
 }
@@ -740,7 +741,7 @@ void OpenMahjongClient::onKyokuEnd(OMString message,OMTaku *taku)
         for(i=0;i<pNakiList->size();i++){
             OMMentsuWidget *widget = new OMMentsuWidget();
             widget->setMentsu((*pNakiList)[i],1,OMMember::getChaDistance(ind,(*pNakiList)[i].m_iAite));
-            ui->m_layout_tehai1->insertWidget(ui->m_layout_tehai1->count() - 1 - i,widget);
+            ui->m_layout_tehai1->insertWidget(ui->m_layout_tehai1->count() - i,widget);
         }
     }
     pTehai = &taku->m_members[(ind + 2) % 4].m_aTehai;
@@ -760,7 +761,7 @@ void OpenMahjongClient::onKyokuEnd(OMString message,OMTaku *taku)
         for(i=0;i<pNakiList->size();i++){
             OMMentsuWidget *widget = new OMMentsuWidget();
             widget->setMentsu((*pNakiList)[i],2,OMMember::getChaDistance(ind,(*pNakiList)[i].m_iAite));
-            ui->m_layout_tehai1->insertWidget(ui->m_layout_tehai1->count() - 1 - i,widget);
+            ui->m_layout_tehai2->insertWidget(ui->m_layout_tehai2->count() - i,widget);
         }
     }
     pTehai = &taku->m_members[(ind + 3) % 4].m_aTehai;
@@ -780,7 +781,7 @@ void OpenMahjongClient::onKyokuEnd(OMString message,OMTaku *taku)
         for(i=0;i<pNakiList->size();i++){
             OMMentsuWidget *widget = new OMMentsuWidget();
             widget->setMentsu((*pNakiList)[i],3,OMMember::getChaDistance(ind,(*pNakiList)[i].m_iAite));
-            ui->m_layout_tehai1->insertWidget(ui->m_layout_tehai1->count() - 1 - i,widget);
+            ui->m_layout_tehai3->insertWidget(ui->m_layout_tehai3->count() - i,widget);
         }
     }
 
@@ -894,6 +895,11 @@ void OpenMahjongClient::onNakiRemoved(OMTaku *taku, int memberIndex, OMMember *m
 void OpenMahjongClient::onProgressed(int index, OMTaku *taku)
 {
     takuUpdate(taku);
+}
+
+void OpenMahjongClient::onDisconnected()
+{
+    QMessageBox::information(this,"終了","セッションは終了しました。再接続をお願いします。");
 }
 
 void OpenMahjongClient::takuUpdate(OMTaku *taku)

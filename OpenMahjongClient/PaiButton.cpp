@@ -75,7 +75,7 @@ void OMPaiButton::paintEvent(QPaintEvent *)
         painter.setOpacity(0.5);
     }
 
-    painter.drawImage(0,0,m_image);
+    painter.drawImage(0,0,m_image,0,0,width(),height());
 
     pen.setWidth(5);
     pen.setBrush(Qt::red);

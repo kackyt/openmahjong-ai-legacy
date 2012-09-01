@@ -31,6 +31,7 @@ public slots:
     void onNakiAdded(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu,bool kuwae);
     void onNakiRemoved(OMTaku *taku,int memberIndex,OMMember *member,int mentsuIndex,OMNakiMentsu mentsu);
     void onProgressed(int index, OMTaku *);
+    void onDisconnected();
     void onTii();
     void onDahai();
     void onPon();

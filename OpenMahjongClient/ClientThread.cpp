@@ -3,8 +3,8 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include "ClientThread.h"
-#include "common/IllegalStateException.h"
-#include "common/ConnectionException.h"
+#include "IllegalStateException.h"
+#include "ConnectionException.h"
 
 OMClientThread::OMClientThread(QObject *parent) :
     QThread(parent),

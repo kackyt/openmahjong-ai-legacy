@@ -11,8 +11,6 @@
 
 //static const QString ieStrTable[] = {QString("東家"),QString("南家"),QString("西家"),QString("北家")};
 
-static const TCHAR *ieStrTable[] = {_T("東家"),_T("南家"),_T("西家"),_T("北家")};
-
 
 OpenMahjongClient::OpenMahjongClient(QWidget *parent) :
     QWidget(parent),
@@ -54,6 +52,9 @@ OpenMahjongClient::OpenMahjongClient(QWidget *parent) :
     QObject::connect(&m_client,SIGNAL(sigDisconnected()),SLOT(onDisconnected()));
     QObject::connect(ui->m_chkMySync,SIGNAL(toggled(bool)),&m_client,SLOT(setMyTurnSync(bool)));
 
+    bool success = m_translator[1].load("OpenMahjong_en");
+
+    qDebug()  << success;
 }
 
 OpenMahjongClient::~OpenMahjongClient()
@@ -260,6 +261,9 @@ void OpenMahjongClient::layoutTehai(OMPai &pai, int index,int num)
 
 void OpenMahjongClient::onStarted(int index, OMTaku *taku)
 {
+    static const char *ieStrTable[] = {
+        QT_TR_NOOP("東家"),QT_TR_NOOP("南家"),QT_TR_NOOP("西家"),QT_TR_NOOP("北家")
+    };
     if(index == 0){
         int i,j,ind;
         OMPai pai;
@@ -448,9 +452,9 @@ void OpenMahjongClient::onStarted(int index, OMTaku *taku)
                 break;
             }
 
-            label = QString("%1 %2").arg(member->m_player.m_strName).arg(ieStrTable[member->m_gamestate.m_iZikaze-1]);
+            label = QString("%1 %2").arg(member->m_player.m_strName).arg(tr(ieStrTable[member->m_gamestate.m_iZikaze-1]));
             pLabelName->setText(label);
-            label = QString("%1点").arg(member->m_iPoint);
+            label = tr("%1点").arg(member->m_iPoint);
             pLabelPoint->setText(label);
 
             /* 牌を置いていく */
@@ -705,7 +709,7 @@ void OpenMahjongClient::on_m_btnDecide_clicked()
     if(m_client.m_commander.setConfirm()){
         endTurn();
     }else{
-        QMessageBox::warning(this,"コマンド失敗","その牌では実行できません。");
+        QMessageBox::warning(this,tr("コマンド失敗"),tr("その牌では実行できません。"));
     }
 
 }
@@ -813,7 +817,7 @@ void OpenMahjongClient::onKyokuEnd(OMString message,OMTaku *taku)
     }
 
 
-    QMessageBox::information(this,"終局",message);
+    QMessageBox::information(this,tr("終局"),message);
 
     m_client.clientStart();
 }
@@ -899,17 +903,17 @@ void OpenMahjongClient::onProgressed(int index, OMTaku *taku)
 
 void OpenMahjongClient::onDisconnected()
 {
-    QMessageBox::information(this,"終了","セッションは終了しました。再接続をお願いします。");
+    QMessageBox::information(this,tr("終了"),tr("セッションは終了しました。再接続をお願いします。"));
 }
 
 void OpenMahjongClient::takuUpdate(OMTaku *taku)
 {
     QString mes;
 
-    mes = QString("%1%2局  残り：%3").arg(taku->m_iKyokuCount < 4 ? "東" : "南").arg((taku->m_iKyokuCount % 4)  + 1).arg(taku->m_iYama);
+    mes = tr("%1%2局  残り：%3").arg(taku->m_iKyokuCount < 4 ? tr("東") : tr("南")).arg((taku->m_iKyokuCount % 4)  + 1).arg(taku->m_iYama);
     ui->m_labelState1->setText(mes);
 
-    mes = QString("%1本場  リーチ棒%2").arg(taku->m_iTsumibou).arg(taku->m_iRiichibou);
+    mes = tr("%1本場  リーチ棒%2").arg(taku->m_iTsumibou).arg(taku->m_iRiichibou);
 
     ui->m_labelState2->setText(mes);
 }
@@ -943,4 +947,44 @@ void OpenMahjongClient::on_m_btnSyncUpdate_clicked()
     int interval = ui->m_edSyncInterval->text().toInt();
 
     m_client.setSyncInterval(interval);
+}
+
+void OpenMahjongClient::on_m_cmbLanguage_activated(const QString &arg1)
+{
+    /*
+    int start = arg1.indexOf("(")+1;
+    int end = arg1.lastIndexOf(")");
+    int index = ui->comboBox->currentIndex();
+    QString locale = arg1.mid(start,end-start);
+    bool success;
+
+    QTranslator translator;
+
+    success = translator.load(QString("OpenMahjong_") + locale);
+
+    qDebug() << locale << success;
+
+    if(success){
+        QApplication::instance()->installTranslator(&translator);
+
+        ui->retranslateUi(this);
+        ui->cmbLanguage->setCurrentIndex(index);
+    }
+    */
+
+}
+
+
+void OpenMahjongClient::on_m_cmbLanguage_activated(int index)
+{
+    int i;
+
+    for(i=0;i<TRANSLATES;i++)
+    {
+        QApplication::instance()->removeTranslator(&m_translator[i]);
+    }
+
+    QApplication::instance()->installTranslator(&m_translator[index]);
+    ui->retranslateUi(this);
+
 }

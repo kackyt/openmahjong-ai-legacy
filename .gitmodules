@@ -1,0 +1,3 @@
+[submodule "OpenMahjongClient/common"]
+	path = OpenMahjongClient/common
+	url = kacky@git.sourceforge.jp:/gitroot/openmahjong/OpenMahjongClientCommon.git

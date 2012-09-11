@@ -5,11 +5,11 @@
 #include <QThread>
 #include <QTimer>
 #include <QMap>
-#include "common/GenericClient.h"
-#include "common/ClientListener.h"
-#include "common/TakuListener.h"
-#include "common/Pai.h"
-#include "common/UICommander.h"
+#include "GenericClient.h"
+#include "ClientListener.h"
+#include "TakuListener.h"
+#include "Pai.h"
+#include "UICommander.h"
 #include "ClientThread.h"
 
 class OMClientQObject : public QObject,public OMGenericClient,public OMTakuListener,public OMClientListener

@@ -12,78 +12,84 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         openmahjongclient.cpp \
-    common/NakiMentsu.cpp \
-    common/Message.cpp \
-    common/Mentsu.cpp \
-    common/Member.cpp \
-    common/Library.cpp \
-    common/GameState.cpp \
-    common/Command.cpp \
-    common/TakuEvent.cpp \
-    common/Taku.cpp \
-    common/Rule.cpp \
-    common/Result.cpp \
-    common/Player.cpp \
-    common/Pai.cpp \
-    common/GenericClient.cpp \
-    common/ClientListener.cpp \
     PaiButton.cpp \
     ConnectDialog.cpp \
     ClientQObject.cpp \
-    common/Exception.cpp \
-    common/ConnectionException.cpp \
-    common/IllegalParamException.cpp \
-    common/IllegalStateException.cpp \
     ClientThread.cpp \
-    common/TakuListener.cpp \
-    common/OMXMLCommonQt.cpp \
-    common/UICommander.cpp \
     AgariDialog.cpp \
     MentsuWidget.cpp \
-    AILib/YakuCheck.c \
-    AILib/MJ0.c \
-    AILib/AILib.c
+    common/XMLLib/UICommander.cpp \
+    common/XMLLib/TakuListener.cpp \
+    common/XMLLib/TakuEvent.cpp \
+    common/XMLLib/Taku.cpp \
+    common/XMLLib/StdAfx.cpp \
+    common/XMLLib/Rule.cpp \
+    common/XMLLib/Result.cpp \
+    common/XMLLib/Player.cpp \
+    common/XMLLib/Pai.cpp \
+    common/XMLLib/OMXMLCommonQt.cpp \
+    common/XMLLib/NakiMentsu.cpp \
+    common/XMLLib/Message.cpp \
+    common/XMLLib/Mentsu.cpp \
+    common/XMLLib/Member.cpp \
+    common/XMLLib/Library.cpp \
+    common/XMLLib/IllegalStateException.cpp \
+    common/XMLLib/IllegalParamException.cpp \
+    common/XMLLib/GenericClient.cpp \
+    common/XMLLib/GameState.cpp \
+    common/XMLLib/Exception.cpp \
+    common/XMLLib/ConnectionException.cpp \
+    common/XMLLib/Command.cpp \
+    common/XMLLib/ClientListener.cpp \
+    common/AILib/YakuCheck.c \
+    common/AILib/MJ0.c \
+    common/AILib/AILib.c
 
 HEADERS  += openmahjongclient.h \
-    common/OMXMLCommon.h \
-    common/NakiMentsu.h \
-    common/Message.h \
-    common/Mentsu.h \
-    common/Member.h \
-    common/Library.h \
-    common/GameState.h \
-    common/Command.h \
-    common/TakuEvent.h \
-    common/Taku.h \
-    common/Rule.h \
-    common/Result.h \
-    common/Player.h \
-    common/Pai.h \
-    common/OpenMahjongDef.h \
-    common/MIPIface.h \
-    common/GenericClient.h \
-    common/ClientListener.h \
     PaiButton.h \
     ConnectDialog.h \
     ClientQObject.h \
-    common/Exception.h \
-    common/ConnectionException.h \
-    common/IllegalParamException.h \
-    common/IllegalStateException.h \
     ClientThread.h \
-    common/TakuListener.h \
-    common/UICommander.h \
     AgariDialog.h \
     MentsuWidget.h \
-    AILib/MJ0.h \
-    AILib/AILib.h \
-    FilePath.h
+    FilePath.h \
+    common/XMLLib/UICommander.h \
+    common/XMLLib/TakuListener.h \
+    common/XMLLib/TakuEvent.h \
+    common/XMLLib/Taku.h \
+    common/XMLLib/StdAfx.h \
+    common/XMLLib/Rule.h \
+    common/XMLLib/Result.h \
+    common/XMLLib/Player.h \
+    common/XMLLib/Pai.h \
+    common/XMLLib/OpenMahjongDef.h \
+    common/XMLLib/OMXMLCommon.h \
+    common/XMLLib/NakiMentsu.h \
+    common/XMLLib/MIPIface.h \
+    common/XMLLib/Message.h \
+    common/XMLLib/Mentsu.h \
+    common/XMLLib/Member.h \
+    common/XMLLib/Library.h \
+    common/XMLLib/IllegalStateException.h \
+    common/XMLLib/IllegalParamException.h \
+    common/XMLLib/GenericClient.h \
+    common/XMLLib/GameState.h \
+    common/XMLLib/Exception.h \
+    common/XMLLib/ConnectionException.h \
+    common/XMLLib/Command.h \
+    common/XMLLib/ClientListener.h \
+    common/AILib/MJ0.h \
+    common/AILib/AILib.h
 
 FORMS    += openmahjongclient.ui \
     ConnectDialog.ui \
     AgariDialog.ui
 
-RESOURCES += \
-    OMResource.qrc
+RESOURCES +=
 
-INCLUDEPATH += ./AILib
+INCLUDEPATH += ./common/AILib ./common/XMLLib
+
+CODECFORTR = SJIS
+CODECFORSRC = SJIS
+TRANSLATIONS = OpenMahjong_en.ts
+

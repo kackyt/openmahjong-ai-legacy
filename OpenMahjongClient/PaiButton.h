@@ -2,9 +2,9 @@
 #define PAIBUTTON_H
 
 #include <QPushButton>
-#include "common/OpenMahjongDef.h"
-#include "common/Pai.h"
-#include "common/Rule.h"
+#include "OpenMahjongDef.h"
+#include "Pai.h"
+#include "Rule.h"
 
 class OMPaiButton : public QPushButton
 {

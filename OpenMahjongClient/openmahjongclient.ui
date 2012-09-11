@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>OpenMahjongClient</class>
  <widget class="QWidget" name="OpenMahjongClient">
@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>901</width>
-    <height>739</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>901</width>
-    <height>739</height>
+    <height>700</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>901</width>
-    <height>739</height>
+    <height>700</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -902,7 +902,7 @@ background-color: rgb(0, 170, 0);
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>330</y>
+     <y>320</y>
      <width>271</width>
      <height>261</height>
     </rect>
@@ -983,7 +983,7 @@ background-color: rgb(0, 170, 0);
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>610</y>
+     <y>630</y>
      <width>771</width>
      <height>51</height>
     </rect>
@@ -1249,6 +1249,39 @@ background-color: rgb(0, 170, 0);
    </property>
    <property name="text">
     <string>更新</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="m_cmbLanguage">
+   <property name="geometry">
+    <rect>
+     <x>690</x>
+     <y>590</y>
+     <width>121</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Japanese</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>English(en)</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>620</x>
+     <y>590</y>
+     <width>61</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Language</string>
    </property>
   </widget>
  </widget>

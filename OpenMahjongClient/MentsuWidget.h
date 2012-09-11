@@ -2,7 +2,7 @@
 #define MENTSUWIDGET_H
 
 #include <QWidget>
-#include "common/NakiMentsu.h"
+#include "NakiMentsu.h"
 
 class OMMentsuWidget : public QWidget
 {

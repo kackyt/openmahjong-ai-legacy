@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QApplication>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QMessageBox>
@@ -12,6 +13,54 @@ static UINT WINAPI MJSendMessageAPI(LPVOID inst,UINT message,UINT param1,UINT pa
 {
     return thisObj->MJSendMessage(inst,message,param1,param2);
 }
+
+static const char *keywords[] = {
+    QT_TRANSLATE_NOOP("OpenMahjong", "ìå"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ìÏ"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "êº"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ñk"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ã«"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "óßíº"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ífåˆã„"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "„ îv"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ñÂëOê¥é©ñÃ"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "àÍî≠"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "äCíÍñÃåé"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "âÕíÍùùãõ"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ó‰è„äJâ‘"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ïΩòa"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ëÑû»"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "àÍîuå˚"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ÉhÉâ"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "éµëŒéq"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ç¨ëSë—åˆ"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "éOêFìØèá"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "àÍãCí ä—"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ëŒÅXòa"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "éOà√çè"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "É_ÉuÉãóßíº"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "éOêFìØçè"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "éOû»éq"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "èÉëSë—åˆ"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ìÒîuå˚"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ç¨òVì™"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "è¨éOå≥"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ç¨àÍêF"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ê¥àÍêF"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "çëémñ≥ëo"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "élà√çè"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ëÂéOå≥"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "è¨éläÏ"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ëÂéläÏ"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "éöàÍêF"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ê¥òVì™"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "óŒàÍêF"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ã„ò@ïÛìï"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "élû»éq"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ìVòa"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "ínòa"),
+    QT_TRANSLATE_NOOP("OpenMahjong", "êlòa")
+};
 
 
 OMClientQObject::OMClientQObject(QObject *parent) :
@@ -153,18 +202,19 @@ void OMClientQObject::takuUpdate()
 
 
         if(m_pCurTaku->m_event.m_command.m_iType == TYPE_KOUHAI){
-            text += "çrîvïΩã«";
+            text += tr("çrîvïΩã«");
         }else{
             OMString pt;
             for(i=0;i<m_pCurTaku->m_event.m_result.m_aYaku.size();i++){
-                text += m_pCurTaku->m_event.m_result.m_aYaku[i];
+                text += QApplication::instance()->translate("OpenMahjong",m_pCurTaku->m_event.m_result.m_aYaku[i].toLocal8Bit().constData());
                 text += "<br />";
             }
             text += "<br />";
 
-            pt = QString("%1„  %2ïÑ %3ì_<br />").arg(m_pCurTaku->m_event.m_result.m_iHan).arg(m_pCurTaku->m_event.m_result.m_iFu).arg(m_pCurTaku->m_event.m_result.m_iScore);
+            pt = tr("%1„  %2ïÑ %3ì_").arg(m_pCurTaku->m_event.m_result.m_iHan).arg(m_pCurTaku->m_event.m_result.m_iFu).arg(m_pCurTaku->m_event.m_result.m_iScore);
 
             text += pt;
+            text += "<br />";
         }
 
         text += "</strong></font>";

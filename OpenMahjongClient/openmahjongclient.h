@@ -4,10 +4,12 @@
 #include <QWidget>
 #include <QMetaType>
 #include <QSound>
+#include <QTranslator>
 #include "ClientQObject.h"
-#include "common/ClientListener.h"
+#include "ClientListener.h"
 #include "PaiButton.h"
 
+#define TRANSLATES (2)
 
 namespace Ui {
     class OpenMahjongClient;
@@ -64,6 +66,10 @@ private slots:
 
     void on_m_btnSyncUpdate_clicked();
 
+    void on_m_cmbLanguage_activated(const QString &arg1);
+
+    void on_m_cmbLanguage_activated(int index);
+
 private:
     Ui::OpenMahjongClient *ui;
     OMClientQObject m_client;
@@ -73,6 +79,8 @@ private:
     void endTurn();
     void takuUpdate(OMTaku *taku);
     QVector<OMPaiButton *> m_aButton;
+    QTranslator m_translator[TRANSLATES];
+
 };
 
 Q_DECLARE_METATYPE(OMTaku*)

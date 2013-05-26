@@ -168,14 +168,18 @@ public:
     }
 };
 
-typedef char TCHAR;
+#define TCHAR char
 typedef int BOOL;
 typedef uint UINT;
 typedef long LONG;
 typedef ushort USHORT;
 typedef void* LPVOID;
+#ifndef LOWORD
 #define LOWORD(val) ((val) & 0xFFFF)
+#endif
+#ifndef HIWORD
 #define HIWORD(val) (((val) >> 16) & 0xFFFF)
+#endif
 #define WINAPI __stdcall
 #define _T(str) (str)
 #define AfxDebugBreak()

@@ -1,0 +1,37 @@
+//{{NO_DEPENDENCIES}}
+// Microsoft Developer Studio generated include file.
+// Used by MahjongAITestGUI.rc
+//
+#define IDD_MAHJONAITESTGUI_DIALOG      102
+#define IDR_MAINFRAME                   128
+#define IDC_BTNPREV                     1000
+#define IDC_BTNNEXT                     1001
+#define IDC_MESSAGE                     1002
+#define IDC_BTNNEW                      1003
+#define IDC_BTNAUTO                     1004
+#define IDC_KYOKU                       1005
+#define IDC_BTNMJ                       1006
+#define IDC_EDITWAIT                    1007
+#define IDC_BTNWAIT                     1008
+#define IDC_HOURA                       1009
+#define IDC_TENPAI                      1010
+#define IDC_HOURA2                      1011
+#define IDC_HOURAR                      1012
+#define IDC_TENPAIR                     1013
+#define IDC_HOURAR2                     1014
+#define IDC_AI                          1015
+#define IDC_EDTSEEK                     1016
+#define IDC_BTNRDDUMP                   1017
+#define IDC_BTNSEEK                     1018
+#define IDC_DEBUGP                      1019
+
+// Next default values for new objects
+// 
+#ifdef APSTUDIO_INVOKED
+#ifndef APSTUDIO_READONLY_SYMBOLS
+#define _APS_NEXT_RESOURCE_VALUE        129
+#define _APS_NEXT_COMMAND_VALUE         32771
+#define _APS_NEXT_CONTROL_VALUE         1020
+#define _APS_NEXT_SYMED_VALUE           101
+#endif
+#endif

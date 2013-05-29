@@ -1,0 +1,205 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 日本語 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+#ifdef _WIN32
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+#pragma code_page(932)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 17, 1\r\n"
+    "#pragma code_page(932)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\MahjongAITestGUI.rc2""  // Microsoft Visual C++ 以外のツールで編集されたリソース\r\n"
+    "#include ""l.jpn\\afxres.rc""          // 標準のコンポーネント\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\MahjongAITestGUI.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MAHJONAITESTGUI_DIALOG DIALOGEX 0, 0, 363, 239
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "MahjongAITestGUI"
+FONT 9, "ＭＳ Ｐゴシック"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,306,7,50,14
+    PUSHBUTTON      "ｷｬﾝｾﾙ",IDCANCEL,306,23,50,14
+    PUSHBUTTON      "<< 前へ",IDC_BTNPREV,21,173,50,14
+    PUSHBUTTON      ">> 次へ",IDC_BTNNEXT,92,174,50,14
+    EDITTEXT        IDC_MESSAGE,233,146,123,86,ES_MULTILINE | ES_WANTRETURN | 
+                    WS_VSCROLL
+    LTEXT           "Message",IDC_STATIC,235,130,27,8
+    PUSHBUTTON      "オート実行",IDC_BTNAUTO,92,204,50,14
+    LTEXT           "統計情報",IDC_STATIC,21,95,28,8
+    LTEXT           "局数",IDC_STATIC,21,111,15,8
+    LTEXT           "0",IDC_KYOKU,51,111,29,8
+    LTEXT           "和了数",IDC_STATIC,21,130,22,8
+    LTEXT           "聴牌数",IDC_STATIC,21,151,22,8
+    PUSHBUTTON      "Button5",IDC_BTNMJ,21,7,277,64
+    EDITTEXT        IDC_EDITWAIT,182,175,40,14,ES_AUTOHSCROLL
+    LTEXT           "ウエイト",IDC_STATIC,153,177,24,8
+    PUSHBUTTON      "ウエイト更新",IDC_BTNWAIT,172,195,50,14
+    LTEXT           "0",IDC_HOURA,51,130,29,8
+    LTEXT           "0",IDC_TENPAI,51,151,29,8
+    LTEXT           "0",IDC_HOURA2,113,130,29,8
+    LTEXT           "(00.0%)",IDC_HOURAR,80,130,26,8
+    LTEXT           "(00.0%)",IDC_TENPAIR,80,152,25,8
+    LTEXT           "(00.0%)",IDC_HOURAR2,149,130,24,8
+    PUSHBUTTON      "AI変更",IDC_AI,190,79,50,14
+    EDITTEXT        IDC_EDTSEEK,249,102,40,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "読込ファイル",IDC_BTNRDDUMP,191,101,50,14
+    PUSHBUTTON      "読込実行",IDC_BTNSEEK,298,101,45,14
+    LTEXT           "0",IDC_DEBUGP,21,214,46,8
+    LTEXT           "debug",IDC_STATIC,21,197,18,8
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041104B0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "MahjongAITestGUI MFC ｱﾌﾟﾘｹｰｼｮﾝ\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "MahjongAITestGUI\0"
+            VALUE "LegalCopyright", "Copyright (C) 2012\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "MahjongAITestGUI.EXE\0"
+            VALUE "ProductName", "MahjongAITestGUI ｱﾌﾟﾘｹｰｼｮﾝ\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x411, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_MAHJONAITESTGUI_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 356
+        VERTGUIDE, 21
+        VERTGUIDE, 80
+        VERTGUIDE, 92
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 232
+        HORZGUIDE, 130
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // 日本語 resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+#ifdef _WIN32
+LANGUAGE 17, 1
+#pragma code_page(932)
+#endif //_WIN32
+#include "res\MahjongAITestGUI.rc2"  // Microsoft Visual C++ 以外のツールで編集されたリソース
+#include "l.jpn\afxres.rc"          // 標準のコンポーネント
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

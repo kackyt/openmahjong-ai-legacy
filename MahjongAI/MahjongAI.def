@@ -1,5 +1,5 @@
 LIBRARY      MahjongAI
 
 EXPORTS
-	MJPInterfaceFunc
+	MJPInterfaceFunc @1
 

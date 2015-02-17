@@ -2,23 +2,23 @@
  * Copyright (c) 2010, Takaya Kakizaki(kacky)
  * All rights reserved.
 
-  ソースコード形式かバイナリ形式か、変更するかしないかを問わず、以下の条件を満たす場合に限り、再頒布および使用が許可されます。 
+ ソースコード形式かバイナリ形式か、変更するかしないかを問わず、以下の条件を満たす場合に限り、再頒布および使用が許可されます。
 
-  ・ソースコードを再頒布する場合、上記の著作権表示、本条件一覧、および下記免責条項を含めること。 
+ ・ソースコードを再頒布する場合、上記の著作権表示、本条件一覧、および下記免責条項を含めること。
 
-  ・バイナリ形式で再頒布する場合、頒布物に付属のドキュメント等の資料に、上記の著作権表示、本条件一覧、および下記免責条項を含めること。 
+ ・バイナリ形式で再頒布する場合、頒布物に付属のドキュメント等の資料に、上記の著作権表示、本条件一覧、および下記免責条項を含めること。
 
-  ・書面による特別の許可なしに、本ソフトウェアから派生した製品の宣伝または販売促進に、オープン麻雀の名前またはコントリビューターの名前を使用してはならない。
+ ・書面による特別の許可なしに、本ソフトウェアから派生した製品の宣伝または販売促進に、オープン麻雀の名前またはコントリビューターの名前を使用してはならない。
 
 
-  本ソフトウェアは、著作権者およびコントリビューターによって「現状のまま」提供されており、明示黙示を問わず、
-  商業的な使用可能性、および特定の目的に対する適合性に関する暗黙の保証も含め、またそれに限定されない、いかなる保証もありません。
-  著作権者もコントリビューターも、事由のいかんを問わず、 損害発生の原因いかんを問わず、かつ責任の根拠が契約であるか厳格責任であるか
-  （過失その他の）不法行為であるかを問わず、仮にそのような損害が発生する可能性を知らされていたとしても、本ソフトウェアの使用によって発生した
-  （代替品または代用サービスの調達、使用の喪失、データの喪失、利益の喪失、業務の中断も含め、またそれに限定されない）
-  直接損害、間接損害、偶発的な損害、特別損害、懲罰的損害、または結果損害について、一切責任を負わないものとします。 
+ 本ソフトウェアは、著作権者およびコントリビューターによって「現状のまま」提供されており、明示黙示を問わず、
+ 商業的な使用可能性、および特定の目的に対する適合性に関する暗黙の保証も含め、またそれに限定されない、いかなる保証もありません。
+ 著作権者もコントリビューターも、事由のいかんを問わず、 損害発生の原因いかんを問わず、かつ責任の根拠が契約であるか厳格責任であるか
+ （過失その他の）不法行為であるかを問わず、仮にそのような損害が発生する可能性を知らされていたとしても、本ソフトウェアの使用によって発生した
+ （代替品または代用サービスの調達、使用の喪失、データの喪失、利益の喪失、業務の中断も含め、またそれに限定されない）
+ 直接損害、間接損害、偶発的な損害、特別損害、懲罰的損害、または結果損害について、一切責任を負わないものとします。
 
-****************************************************************************************/
+ ****************************************************************************************/
 #include <windows.h>
 #include <stdio.h>
 #include <math.h>
@@ -28,7 +28,7 @@
 #include "AILib.h"
 #include "MahjongScoreAI.h"
 
-//#define AIDUMP
+#define AIDUMP
 #ifdef AIDUMP
 //#define AIDUMP_1
 //#define AIDUMP_2
@@ -36,10 +36,9 @@
 //#define AIDUMP_STAT
 //#define AIDUMP_POINT
 //#define AIDUMP_PARAM
-#define AIDUMP_STACKTRACE
+#define AIDUMP_COMMAND
+//#define AIDUMP_STACKTRACE
 #endif
-#define DEBUG_MESSAGE
-
 
 /*typedef struct {
 	double sc;
@@ -47,7 +46,7 @@
 	double sc2;
 	double scc;
 	int no;
-} HAIPOINT;*/
+	} HAIPOINT;*/
 
 static const int param_size[] = {
 	9,
@@ -59,20 +58,25 @@ typedef enum {
 	AI_DECISION_ORI,
 } AI_DECISION;
 
-static MahjongAIType1 type1;
-static MahjongAIType2 type2;
-static MahjongAIType4 type4;
-static MahjongAIKikenhai kikenhai;
+#define MAHJONGAI( method ) MahjongAI##method
+#define PLAYERNAME( method ) "KING" #method
+
+
+#define MAHJONGAITYPE MAHJONGAI(Type4)
+#define AINAME PLAYERNAME(Type4)
+
+MAHJONGAITYPE ai;
+MahjongAIKikenhai kikenhai;
 
 
 class MahjongAI {
-public :
-	UINT InterfaceFunc(UINT message,UINT param1,UINT param2);
+public:
+	UINT InterfaceFunc(UINT message, UINT param1, UINT param2);
 
 #ifdef AIDUMP
 	FILE *fp;
 #endif
-protected :
+protected:
 	MahjongAIState state;
 	int machi[34];
 	int menzen;
@@ -94,21 +98,21 @@ protected :
 	void destroyParam(void);
 	int getParam(int index);
 	void printResult(int result);
-	int search(int obj,int start,int mask);
+	int search(int obj, int start, int mask);
 	void set_machi(void);
 	void set_Tehai(int);
-	int select_Score(double sc_max,double scc_max);
+	int select_Score(double scc_max);
 	UINT sutehai_sub(int tsumohai);
 	int calc_sutehai(void);
 	int calc_sutehai_easy(void);
-	int nakability(int hai,int chii_flag);
-	UINT koe_req(int no,int hai);
-	UINT on_start_kyoku(int k,int c);
-	UINT on_end_kyoku(UINT reason,LONG* inc_sc);
-	UINT on_action(int player,int taishou,UINT action);
+	int nakability(int hai, int chii_flag);
+	UINT koe_req(int no, int hai);
+	UINT on_start_kyoku(int k, int c);
+	UINT on_end_kyoku(UINT reason, LONG* inc_sc);
+	UINT on_action(int player, int taishou, UINT action);
 	UINT on_start_game(void);
-	UINT on_end_game(int rank,LONG score);
-	UINT on_exchange(UINT state,UINT option);
+	UINT on_end_game(int rank, LONG score);
+	UINT on_exchange(UINT state, UINT option);
 	void sendComment(int index);
 };
 enum {
@@ -158,7 +162,7 @@ static const TCHAR *message_table[] = {
 	TEXT("おれはそういう強くて美しいものが好きなんだ！"),
 };
 
-static const TCHAR * num_table[] ={
+static const TCHAR * num_table[] = {
 	TEXT("一"),
 	TEXT("二"),
 	TEXT("三"),
@@ -174,16 +178,16 @@ static void printStackTrace(const char *trace, ...){
 	va_list list;
 	FILE *file = NULL;
 
-	va_start(list,trace);
-	
-	file = fopen(TEXT("./stacktrace.txt"),"a");
-	vfprintf(file,trace,list);
+	va_start(list, trace);
+
+	file = fopen(TEXT("./stacktrace.txt"), "a");
+	vfprintf(file, trace, list);
 	fclose(file);
 
 	va_end(list);
 }
 
-static const TCHAR * type_table[] ={
+static const TCHAR * type_table[] = {
 	TEXT("萬"),
 	TEXT("筒"),
 	TEXT("索"),
@@ -197,71 +201,74 @@ static const TCHAR * type_table[] ={
 };
 
 
-static void sethaitext(TCHAR *p,int no)
+static void sethaitext(TCHAR *p, int no)
 {
-	if(no < 27){
-		sprintf(p,"%s%s",num_table[no%9],type_table[no/9]);
-	}else{
-		sprintf(p,"%s",type_table[no-27+3]);
+	if (no < 27){
+		sprintf(p, "%s%s", num_table[no % 9], type_table[no / 9]);
+	}
+	else{
+		sprintf(p, "%s", type_table[no - 27 + 3]);
 	}
 }
 
 static int compare_hp(const HAIPOINT *a, const HAIPOINT *b)
 {
-    double res = a->sc - b->sc;
-	if(res < 0){
+	double res = a->sc - b->sc;
+	if (res < 0){
 		return 1;
-	}else if(res > 0){
+	}
+	else if (res > 0){
 		return -1;
-	}else{
+	}
+	else{
 		return 0;
 	}
 }
 
 
-TCHAR player_name[] = TEXT("ＫＩＮＧ2");
+TCHAR player_name[] = TEXT(AINAME);
 
-UINT (WINAPI *MJSendMessage)(MahjongAI*,UINT,UINT,UINT);
+UINT(WINAPI *MJSendMessage)(MahjongAI*, UINT, UINT, UINT);
 
 static int debug_count = 0;
 
 static int compare_int(const int *a, const int *b)
 {
-    return *a - *b;
+	return *a - *b;
 }
 
 #define PARAM_MAX (sizeof(param_size)/sizeof(int))
 
 void MahjongAI::initParam(void)
 {
-	int siz = 1,i;
+	int siz = 1, i;
 
-	for(i=0;i<PARAM_MAX;i++){
+	for (i = 0; i < PARAM_MAX; i++){
 		siz *= param_size[i];
 	}
 
 	resultBuf = (int*)malloc(siz*sizeof(int));
-	memset(resultBuf,0x00,siz*sizeof(int));
+	memset(resultBuf, 0x00, siz*sizeof(int));
 	current_p = 0;
 	size_p = siz;
 }
 
 void MahjongAI::destroyParam(void)
 {
-	if(resultBuf) free(resultBuf);
+	if (resultBuf) free(resultBuf);
 }
 
 int MahjongAI::getParam(int index)
 {
-	int i,p = current_p;
+	int i, p = current_p;
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START getParam\n");
 #endif
 
-	for(i=0;i<index;i++){
+	for (i = 0; i < index; i++){
 		p /= param_size[i];
 	}
-	
+
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END getParam\n");
 #endif
@@ -284,7 +291,7 @@ void MahjongAI::printResult(int result)
 	fprintf(fp,"\n");
 #endif
 	current_p++;
-	if(current_p == size_p) current_p = 0;
+	if (current_p == size_p) current_p = 0;
 
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END printResult\n");
@@ -295,43 +302,43 @@ void MahjongAI::sendComment(int index)
 {
 	time_t tim = time(NULL);
 
-	if((tim % 3) == 0){
-		MJSendMessage(this,MJMI_FUKIDASHI,(UINT)message_table[index],0);
+	if ((tim % 3) == 0){
+		MJSendMessage(this, MJMI_FUKIDASHI, (UINT)message_table[index], 0);
 	}
 }
 
 
 // 手牌の中から任意の牌を見つけ、その位置を返す
-int MahjongAI::search(int obj,int start,int mask)
+int MahjongAI::search(int obj, int start, int mask)
 {
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START search\n");
 #endif
-	while(start<(int)state.tehai.tehai_max){
-		if (!(mask&(1<<start)) && (int)state.tehai.tehai[start]==obj) break;
+	while (start < (int)state.tehai.tehai_max){
+		if (!(mask&(1 << start)) && (int)state.tehai.tehai[start] == obj) break;
 		start++;
 	}
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END search\n");
 #endif
-	return start<(int)state.tehai.tehai_max ? start : -1;
+	return start < (int)state.tehai.tehai_max ? start : -1;
 }
 
 // 当たり牌を調べ、配列machiに入れる。
 // また張っているかどうか調べてtenpai_flagをセットする。
 void MahjongAI::set_machi(void)
 {
-	int i,j,cnt;
+	int i, j, cnt;
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START set_machi\n");
 #endif
-	(*MJSendMessage)(this,MJMI_GETMACHI,0,(UINT)machi);
+	(*MJSendMessage)(this, MJMI_GETMACHI, 0, (UINT)machi);
 	tenpai_flag = 0;
-	for(i=0;i<34;i++){
+	for (i = 0; i < 34; i++){
 		if (machi[i]) {
 			cnt = 0;
-			for(j=0;j<(int)state.tehai.tehai_max;j++) if ((int)state.tehai.tehai[j]==i) cnt++;
-			if (cnt+(*MJSendMessage)(this,MJMI_GETVISIBLEHAIS,i,0)<4){
+			for (j = 0; j < (int)state.tehai.tehai_max; j++) if ((int)state.tehai.tehai[j] == i) cnt++;
+			if (cnt + (*MJSendMessage)(this, MJMI_GETVISIBLEHAIS, i, 0) < 4){
 				tenpai_flag = 1;
 				return;
 			}
@@ -354,9 +361,9 @@ void MahjongAI::set_Tehai(int tsumohai)
 	MJITehai mjtehai[4];
 	MJIKawahai kawahai[4][20];
 	UINT dora[8];
-	double mentsu1[27+34];
-	double mentsu2[27+34];
-	double mentsu3[27+34];
+	double mentsu1[27 + 34];
+	double mentsu2[27 + 34];
+	double mentsu3[27 + 34];
 	int doralen;
 
 	state.tsumohai = tsumohai;
@@ -368,25 +375,25 @@ void MahjongAI::set_Tehai(int tsumohai)
 	param[1].pTehai = (MJITehai1 *)&mjtehai[1];
 	param[2].pTehai = (MJITehai1 *)&mjtehai[2];
 	param[3].pTehai = (MJITehai1 *)&mjtehai[3];
-	(*MJSendMessage)(this,MJMI_GETTEHAI,0,(UINT)&mjtehai[0]);
-	(*MJSendMessage)(this,MJMI_GETTEHAI,1,(UINT)&mjtehai[1]);
-	(*MJSendMessage)(this,MJMI_GETTEHAI,2,(UINT)&mjtehai[2]);
-	(*MJSendMessage)(this,MJMI_GETTEHAI,3,(UINT)&mjtehai[3]);
+	(*MJSendMessage)(this, MJMI_GETTEHAI, 0, (UINT)&mjtehai[0]);
+	(*MJSendMessage)(this, MJMI_GETTEHAI, 1, (UINT)&mjtehai[1]);
+	(*MJSendMessage)(this, MJMI_GETTEHAI, 2, (UINT)&mjtehai[2]);
+	(*MJSendMessage)(this, MJMI_GETTEHAI, 3, (UINT)&mjtehai[3]);
 	param[0].pKawahai = &kawahai[0][0];
 	param[1].pKawahai = &kawahai[1][0];
 	param[2].pKawahai = &kawahai[2][0];
 	param[3].pKawahai = &kawahai[3][0];
-	param[0].kawalength = (*MJSendMessage)(this,MJMI_GETKAWAEX,(20 << 16) + 0,(UINT)&kawahai[0][0]);
-	param[1].kawalength = (*MJSendMessage)(this,MJMI_GETKAWAEX,(20 << 16) + 1,(UINT)&kawahai[1][0]);
-	param[2].kawalength = (*MJSendMessage)(this,MJMI_GETKAWAEX,(20 << 16) + 2,(UINT)&kawahai[2][0]);
-	param[3].kawalength = (*MJSendMessage)(this,MJMI_GETKAWAEX,(20 << 16) + 3,(UINT)&kawahai[3][0]);
+	param[0].kawalength = (*MJSendMessage)(this, MJMI_GETKAWAEX, (20 << 16) + 0, (UINT)&kawahai[0][0]);
+	param[1].kawalength = (*MJSendMessage)(this, MJMI_GETKAWAEX, (20 << 16) + 1, (UINT)&kawahai[1][0]);
+	param[2].kawalength = (*MJSendMessage)(this, MJMI_GETKAWAEX, (20 << 16) + 2, (UINT)&kawahai[2][0]);
+	param[3].kawalength = (*MJSendMessage)(this, MJMI_GETKAWAEX, (20 << 16) + 3, (UINT)&kawahai[3][0]);
 
-	doralen = (*MJSendMessage)(this,MJMI_GETDORA,(UINT)dora,0);
+	doralen = (*MJSendMessage)(this, MJMI_GETDORA, (UINT)dora, 0);
 
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START MJ0\n");
 #endif
-	MJ0(&param[0],(int*)dora,doralen,state.nokori,state.kikenhai,mentsu1,mentsu2,mentsu3);
+	MJ0(&param[0], (int*)dora, doralen, state.nokori, state.kikenhai, mentsu1, mentsu2, mentsu3);
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END MJ0\n");
 #endif
@@ -401,15 +408,15 @@ void MahjongAI::set_Tehai(int tsumohai)
 	fprintf(fp,TEXT("</NOKORI>"));
 #endif
 
-	(*MJSendMessage)(this,MJMI_GETTEHAI,0,(UINT)&state.tehai);
+	(*MJSendMessage)(this, MJMI_GETTEHAI, 0, (UINT)&state.tehai);
 #ifdef AIDUMP_COMMAND
-	fprintf(fp,TEXT("GET TEHAI\n"));
+	fprintf(fp, TEXT("GET TEHAI\n"));
 #endif
-	for(i=0;i<34;i++) state.te_cnt[i] = 0;
-	for(i=0;i<(int)state.tehai.tehai_max;i++) state.te_cnt[state.tehai.tehai[i]]++;
+	for (i = 0; i < 34; i++) state.te_cnt[i] = 0;
+	for (i = 0; i < (int)state.tehai.tehai_max; i++) state.te_cnt[state.tehai.tehai[i]]++;
 
 	doranum = 0;
-	for(i=0;i<doralen;i++){
+	for (i = 0; i < doralen; i++){
 		doranum += state.te_cnt[dora[i]];
 	}
 #ifdef AIDUMP_STACKTRACE
@@ -435,10 +442,10 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 {
 	int mc[34];
 	UINT kawa[30];
-	int mcount,mpoint;
-	UINT rchk=MJPIR_SUTEHAI;
-	int i,j,hai,del_hai,hai_remain,tmp,furiten,kazu;
-	int mhai,hais;
+	int mcount, mpoint;
+	UINT rchk = MJPIR_SUTEHAI;
+	int i, j, hai, del_hai, hai_remain, tmp, furiten, kazu;
+	int mhai, hais;
 	MJITehai tmphai;
 	unsigned int seed;
 
@@ -458,36 +465,36 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 
 	// 現在の手牌の状態をセットする
 	if (!state.reach_flag[0])set_Tehai(tsumohai);
-	
+
 	// 現在の待ち牌を取得する
 	set_machi();
 
 	// ツモった場合は「ツモ」る
-	if (tsumohai>=0 && tsumohai<34) if (machi[tsumohai]) return MJPIR_TSUMO;
+	if (tsumohai >= 0 && tsumohai < 34) if (machi[tsumohai]) return MJPIR_TSUMO;
 
 	// リーチをかけている場合は「ツモ切り」
 	if (state.reach_flag[0]) return MJPIR_SUTEHAI | 13;
 
 	// 九種九牌で流せる場合は流す
-	tmp = (*MJSendMessage)(this,MJMI_KKHAIABILITY,0,0);
+	tmp = (*MJSendMessage)(this, MJMI_KKHAIABILITY, 0, 0);
 
 #ifdef AIDUMP_COMMAND
-	fprintf(fp,TEXT("KKHAIABILITY %u\n"),tmp);
+	fprintf(fp, TEXT("KKHAIABILITY %u\n"), tmp);
 #endif
 
 	if (tmp) return MJPIR_NAGASHI;
-	
+
 	// もしツモってきた牌があるなら、その牌を入れる
-	if (tsumohai>=0 && tsumohai<34) state.te_cnt[tsumohai]++;
-	
+	if (tsumohai >= 0 && tsumohai < 34) state.te_cnt[tsumohai]++;
+
 	// 捨てる牌を決める
 	hai = calc_sutehai();
-	if (hai<(int)state.tehai.tehai_max) del_hai = state.tehai.tehai[hai]; else del_hai = tsumohai;
+	if (hai < (int)state.tehai.tehai_max) del_hai = state.tehai.tehai[hai]; else del_hai = tsumohai;
 
 #ifdef AIDUMP_POINT
 	fprintf(fp,"\n");
 #endif
-	
+
 	if (machi[hai]){
 	}
 	// 門前で、テンパった場合はリーチをかけようかなぁ？
@@ -497,40 +504,40 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 		furiten = 0;
 		hais = 0;
 
-		memcpy(&tmphai,&state.tehai,sizeof(tmphai));
+		memcpy(&tmphai, &state.tehai, sizeof(tmphai));
 		state.te_cnt[del_hai]--;
 		tmphai.tehai_max = 0;
-		for(i=0;i<34;i++){
-			for(j=0;j<state.te_cnt[i];j++){
+		for (i = 0; i < 34; i++){
+			for (j = 0; j < state.te_cnt[i]; j++){
 				tmphai.tehai[tmphai.tehai_max++] = i;
 			}
 		}
 		state.te_cnt[del_hai]++;
 
-		hai_remain = (*MJSendMessage)(this,MJMI_GETHAIREMAIN,0,0);
+		hai_remain = (*MJSendMessage)(this, MJMI_GETHAIREMAIN, 0, 0);
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("GETHAIREMAIN %u\n"),hai_remain);
+		fprintf(fp, TEXT("GETHAIREMAIN %u\n"), hai_remain);
 #endif
-		tenpai_flag = (*MJSendMessage)(this,MJMI_GETMACHI,(UINT)&tmphai,(UINT)mc);
+		tenpai_flag = (*MJSendMessage)(this, MJMI_GETMACHI, (UINT)&tmphai, (UINT)mc);
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("GETMACHI %u\n"),tenpai_flag);
+		fprintf(fp, TEXT("GETMACHI %u\n"), tenpai_flag);
 #endif
-		for(i=0;i<34;i++){
+		for (i = 0; i < 34; i++){
 			if (mc[i]){
 				mcount++;
-				tmp = (*MJSendMessage)(this,MJMI_GETVISIBLEHAIS,i,0);
+				tmp = (*MJSendMessage)(this, MJMI_GETVISIBLEHAIS, i, 0);
 #ifdef AIDUMP_COMMAND
-				fprintf(fp,TEXT("GETVISIBLEHAIS %u\n"),tmp);
+				fprintf(fp, TEXT("GETVISIBLEHAIS %u\n"), tmp);
 #endif
-				if (state.te_cnt[i]+tmp<4 && hai_remain>60){ rchk = MJPIR_REACH; break;}
+				if (state.te_cnt[i] + tmp < 4 && hai_remain>60){ rchk = MJPIR_REACH; break; }
 				hais += 4 - (state.te_cnt[i] + tmp);
-				mpoint += (*MJSendMessage)(this,MJMI_GETAGARITEN,(UINT)&tmphai,i);
+				mpoint += (*MJSendMessage)(this, MJMI_GETAGARITEN, (UINT)&tmphai, i);
 				mhai = i;
-				if(!furiten){
-					kazu = (*MJSendMessage)(this,MJMI_GETKAWA,(30 << 16),(UINT)kawa);
+				if (!furiten){
+					kazu = (*MJSendMessage)(this, MJMI_GETKAWA, (30 << 16), (UINT)kawa);
 
-					for(j=0;j<kazu;j++){
-						if(mc[kawa[j]]){
+					for (j = 0; j < kazu; j++){
+						if (mc[kawa[j]]){
 							furiten = 1;
 							break;
 						}
@@ -541,28 +548,32 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 		}
 
 		TCHAR comment[256];
-		if(mcount > 0) mpoint /= mcount;
+		if (mcount > 0) mpoint /= mcount;
 
-		if(furiten){
-			if((mpoint > 2000 || doranum >= 2) && hais > 4){
+		if (furiten){
+			if ((mpoint > 2000 || doranum >= 2) && hais > 4){
 				rchk = MJPIR_REACH;
 			}
-		}else{
-			if(((mpoint > 1300 && mhai >= 27 && mhai <=30 && mhai != 27 + state.kaze && mhai != 27 + state.kyoku/4 ) || hais > getParam(0))){
+		}
+		else{
+			if (((mpoint > 1300 && mhai >= 27 && mhai <= 30 && mhai != 27 + state.kaze && mhai != 27 + state.kyoku / 4) || hais > getParam(0))){
 				rchk = MJPIR_REACH;
 			}
 
-			if((mpoint > 2000 || doranum >= 2) && hais > 2){
+			if ((mpoint > 2000 || doranum >= 2) && hais > 2){
 				rchk = MJPIR_REACH;
 			}
 		}
 
+#ifdef DEBUG
 		sprintf(comment,"mpoint %d,mcount %d,hais %d",mpoint,mcount,hais);
-		
-		MJSendMessage(this,MJMI_FUKIDASHI,(UINT)comment,0);	}
+
+		MJSendMessage(this,MJMI_FUKIDASHI,(UINT)comment,0);
+#endif
+	}
 
 	// 各種フラグのセット
-	if (rchk==MJPIR_REACH){
+	if (rchk == MJPIR_REACH){
 #ifdef AIDUMP_2
 		TCHAR haitext[10];
 		TCHAR haitext2[10];
@@ -575,7 +586,7 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 			}
 		}
 		fprintf(fp,"</TEHAI>");
-		
+
 		for(i=0;i<14;i++){
 			sethaitext(haitext,hp[i].no);
 
@@ -589,59 +600,49 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END sutehai_sub\n");
 #endif
-	return hai|rchk;
+	return hai | rchk;
 }
 
 
 
 
 
-int MahjongAI::select_Score(double sc_max,double scc_max)
+int MahjongAI::select_Score(double scc_max)
 {
 	int i;
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START select_Score\n");
 #endif
-#if 1
-	//if(sc_max < 100.0){
-	if(1){
-		decision = AI_DECISION_AGARI2;
-	}else{
-		decision = AI_DECISION_AGARI1;
-	}
-#else
+
 	int rnum = 0;
 	int shanten = 0;
 	TENPAI_LIST list;
 
 	/* シャンテン数を数える */
-	shanten = search_tenpai((int*)state.tehai.tehai,state.tehai.tehai_max,NULL,&list,1,6);
+	shanten = search_tenpai((int*)state.tehai.tehai, state.tehai.tehai_max, NULL, &list, 1, 6);
 
-	if(shanten != 0){
+	if (shanten != 0){
 		shanten = list.shanten;
-	}else{
+	}
+	else{
 		shanten = 4;
 	}
 
 
-
 	/* オリるか攻めるかの判断 */
-	for(i=1;i<4;i++){
-		if(state.reach_flag[i]) rnum++;
+	for (i = 1; i < 4; i++){
+		if (state.reach_flag[i]) rnum++;
 	}
 
 
-	if(rnum > 0 && rnum + shanten > 2){
+	if (rnum > 0 && rnum + shanten > 2){
 		decision = AI_DECISION_ORI;
-	}else{
-		if(sc_max < 10.0){
-			decision = AI_DECISION_AGARI2;
-		}else{
-			decision = AI_DECISION_AGARI1;
-		}
+	}
+	else{
+		decision = AI_DECISION_AGARI1;
 	}
 
-#endif
+
 
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END select_Score\n");
@@ -653,27 +654,26 @@ int MahjongAI::select_Score(double sc_max,double scc_max)
 // 捨てる牌を決める
 int MahjongAI::calc_sutehai(void)
 {
-	int i,ret;
+	int i, ret;
 
 	// 捨てる牌を一つ一つ試してみて、もっとも評価値の高いものをとる
 	double sc_max = -DBL_MAX;
 	int sh;
-	double sc,scc,scc_max=-DBL_MAX;
+	double sc, scc, scc_max = -DBL_MAX;
 	int index = 0;
 	TCHAR haitext[10];
 	TCHAR haitext2[10];
 	TCHAR haitext3[10];
 	TCHAR comment[512];
-	HAIPOINT hp1[14],hp2[14],hp3[14];
-	int size1,size2,size3;
+	HAIPOINT hp1[14], hp2[14];
+	int size1, size2;
 	int decision;
 
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START calc_sutehai\n");
 #endif
-	memset(hp1,0,sizeof(hp1));
-	memset(hp2,0,sizeof(hp2));
-	memset(hp3,0,sizeof(hp3));
+	memset(hp1, 0, sizeof(hp1));
+	memset(hp2, 0, sizeof(hp2));
 
 #ifdef AIDUMP_1
 	int j;
@@ -687,23 +687,21 @@ int MahjongAI::calc_sutehai(void)
 
 #endif
 
-	sc_max = 0;//type1.evalSutehai(state,hp1,size1);
-	scc_max = type4.evalSutehai(state,hp2,size2);
-	kikenhai.evalSutehai(state,hp3,size3);
+	scc_max = ai.evalSutehai(state, hp1, size1);
+	kikenhai.evalSutehai(state, hp2, size2);
 
-	decision = select_Score(sc_max,scc_max);
+	decision = select_Score(scc_max);
 
-	if(decision == AI_DECISION_AGARI1){
-		memcpy(hp,hp1,sizeof(hp1));
-	}else if(decision == AI_DECISION_AGARI2){
-		memcpy(hp,hp2,sizeof(hp2));
-	}else{
-		memcpy(hp,hp3,sizeof(hp3));
+	if (decision == AI_DECISION_AGARI1){
+		memcpy(hp, hp1, sizeof(hp1));
+	}
+	else{
+		memcpy(hp, hp2, sizeof(hp2));
 	}
 
-	qsort(hp,size2,sizeof(HAIPOINT),(int (*)(const void*, const void*))compare_hp);
-	
-#ifdef DEBUG_MESSAGE
+	qsort(hp, size1, sizeof(HAIPOINT), (int(*)(const void*, const void*))compare_hp);
+
+#ifdef DEBUG
 	{
 		int max1=-1,max2=-1,max3=-1;
 		double maxd1=0,maxd2=0,maxd3=0;
@@ -728,12 +726,12 @@ int MahjongAI::calc_sutehai(void)
 		sethaitext(haitext,max1);
 		sethaitext(haitext2,max2);
 		sethaitext(haitext3,max3);
-		
+
 		sprintf(comment,"%s:%.1f %s:%.1f %s:%.1f",
 			haitext,maxd1,
 			haitext2,maxd2,
 			haitext3,maxd3);
-		
+
 		MJSendMessage(this,MJMI_FUKIDASHI,(UINT)comment,0);
 
 	}
@@ -742,10 +740,10 @@ int MahjongAI::calc_sutehai(void)
 	sethaitext(haitext2,hp[1].no);
 	sethaitext(haitext3,hp[2].no);
 
-	sprintf(comment,"%s:%.1f,%.1f,%.1f\n%s:%.1f,%.1f,%.1f\n%s:%.1f,%.1f,%.1f",
-		haitext,hp1[0].sc,hp2[0].sc,hp3[0].sc,
-		haitext2,hp1[1].sc,hp2[1].sc,hp3[1].sc,
-		haitext3,hp1[2].sc,hp2[2].sc,hp3[2].sc);
+	sprintf(comment,"%s:%.1f,%.1f\n%s:%.1f,%.1f\n%s:%.1f,%.1f",
+		haitext,hp1[0].sc,hp2[0].sc,
+		haitext2,hp1[1].sc,hp2[1].sc,
+		haitext3,hp1[2].sc,hp2[2].sc);
 
 	MJSendMessage(this,MJMI_FUKIDASHI,(UINT)comment,0);
 
@@ -753,38 +751,38 @@ int MahjongAI::calc_sutehai(void)
 #endif	
 
 	tehai_score = hp[0].sc;
-	ret = search(hp[0].no,0,0);
+	ret = search(hp[0].no, 0, 0);
 #ifdef AIDUMP_1
-		fprintf(fp,"</CALC>");
-		fprintf(fp,"<MAX>%d</MAX>",hp1[0].no);
-		fprintf(fp,"<RET>%d</RET>",ret);
+	fprintf(fp,"</CALC>");
+	fprintf(fp,"<MAX>%d</MAX>",hp1[0].no);
+	fprintf(fp,"<RET>%d</RET>",ret);
 #endif
 
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END calc_sutehai\n");
 #endif
-	return ret>=0 ? ret : 13;
+	return ret >= 0 ? ret : 13;
 }
 
 // 捨てる牌を決める
 int MahjongAI::calc_sutehai_easy(void)
 {
-	int i,sh;
+	int i, sh;
 	HAIPOINT hp[14];
 	int size;
 
-	memset(hp,0,sizeof(hp));
+	memset(hp, 0, sizeof(hp));
 	// 捨てる牌を一つ一つ試してみて、もっとも評価値の高いものをとる
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START calc_sutehai_easy\n");
 #endif
-	type2.evalSutehai(state,hp,size);
+	ai.evalSutehai(state, hp, size);
 
-	qsort(hp,size,sizeof(HAIPOINT),(int (*)(const void*, const void*))compare_hp);
+	qsort(hp, size, sizeof(HAIPOINT), (int(*)(const void*, const void*))compare_hp);
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END calc_sutehai_easy\n");
 #endif
-	sh = search(hp[0].no,0,0);
+	sh = search(hp[0].no, 0, 0);
 	return sh;
 }
 
@@ -799,56 +797,57 @@ int MahjongAI::calc_sutehai_easy(void)
 //		 8 : チー２（右）できる
 //		16 : チー３（中）できる
 //		32 : ロンできる
-int MahjongAI::nakability(int hai,int chii_flag)
+int MahjongAI::nakability(int hai, int chii_flag)
 {
-	int x,i,ret=0,kazu,furiten;
+	int x, i, ret = 0, kazu, furiten;
 	UINT kawa[30];
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START nakability\n");
 #endif
 
 	if (machi[hai]){
-		kazu = (*MJSendMessage)(this,MJMI_GETKAWA,(30 << 16),(UINT)kawa);
+		kazu = (*MJSendMessage)(this, MJMI_GETKAWA, (30 << 16), (UINT)kawa);
 		furiten = 0;
 
-		for(i=0;i<kazu;i++){
-			if(machi[kawa[i]]){
+		for (i = 0; i < kazu; i++){
+			if (machi[kawa[i]]){
 				furiten = 1;
 				break;
 			}
 		}
 
-		if(furiten){
-#ifdef DEBUG_MESSAGE
+		if (furiten){
+#ifdef DEBUG
 			(*MJSendMessage)(this,MJMI_FUKIDASHI,(UINT)TEXT("フリテン"),0);
 #endif
-		}else{
+		}
+		else{
 			ret |= 32;
 		}
 	}
 	if (state.reach_flag[0]) return ret;
-	if ((*MJSendMessage)(this,MJMI_GETHAIREMAIN,0,0)==0) return ret;
-	if ((x=search(hai,0,0))>=0){
-		if (x<(int)state.tehai.tehai_max-1){
-			if ((int)state.tehai.tehai[x+1]==hai){
+	if ((*MJSendMessage)(this, MJMI_GETHAIREMAIN, 0, 0) == 0) return ret;
+	if ((x = search(hai, 0, 0)) >= 0){
+		if (x < (int)state.tehai.tehai_max - 1){
+			if ((int)state.tehai.tehai[x + 1] == hai){
 				ret |= 1;
-				if (x<(int)state.tehai.tehai_max-2){
-					if ((int)state.tehai.tehai[x+2]==hai) ret |= 2;
+				if (x < (int)state.tehai.tehai_max - 2){
+					if ((int)state.tehai.tehai[x + 2] == hai) ret |= 2;
 				}
 			}
 		}
 	}
 	if (chii_flag){
-		if (hai<27){
-			kazu = hai%9;
-			if (kazu>1){
-				if (state.te_cnt[hai-2]>0 && state.te_cnt[hai-1]>0) ret |= 8;
+		if (hai < 27){
+			kazu = hai % 9;
+			if (kazu > 1){
+				if (state.te_cnt[hai - 2] > 0 && state.te_cnt[hai - 1] > 0) ret |= 8;
 			}
-			if (kazu<7){
-				if (state.te_cnt[hai+2]>0 && state.te_cnt[hai+1]>0) ret |= 4;
+			if (kazu < 7){
+				if (state.te_cnt[hai + 2] > 0 && state.te_cnt[hai + 1] > 0) ret |= 4;
 			}
-			if (kazu>0 && kazu<8){
-				if (state.te_cnt[hai-1]>0 && state.te_cnt[hai+1]>0) ret |= 16;
+			if (kazu > 0 && kazu < 8){
+				if (state.te_cnt[hai - 1] > 0 && state.te_cnt[hai + 1] > 0) ret |= 16;
 			}
 		}
 	}
@@ -861,13 +860,13 @@ int MahjongAI::nakability(int hai,int chii_flag)
 int MahjongAI::tehai2Array(int *p)
 {
 	int size = 0;
-	int i,j;
+	int i, j;
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START tehai2Array\n");
 #endif
 
-	for(i=0;i<34;i++){
-		for(j=0;j<state.te_cnt[i];j++){
+	for (i = 0; i < 34; i++){
+		for (j = 0; j < state.te_cnt[i]; j++){
 			p[size++] = i;
 		}
 	}
@@ -882,7 +881,7 @@ int MahjongAI::tehai2Array(int *p)
 // no : だれが捨てたか
 // hai : 何を捨てたか
 // return : アクション
-UINT MahjongAI::koe_req(int no,int hai)
+UINT MahjongAI::koe_req(int no, int hai)
 {
 	int chii_flag;
 	int naki_ok;
@@ -902,154 +901,160 @@ UINT MahjongAI::koe_req(int no,int hai)
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START koe_req\n");
 #endif
-	doralen = (*MJSendMessage)(this,MJMI_GETDORA,(UINT)dora,0);
+	doralen = (*MJSendMessage)(this, MJMI_GETDORA, (UINT)dora, 0);
 	set_Tehai(-1);
 	set_machi();
 	chii_flag = (no == 3);
-	naki_ok = nakability(hai,chii_flag);
+	naki_ok = nakability(hai, chii_flag);
 	if (!naki_ok) return 0;
-	if (naki_ok&32){
-		tmp = (*MJSendMessage)(this,MJMI_GETAGARITEN,0,hai);
+	if (naki_ok & 32){
+		tmp = (*MJSendMessage)(this, MJMI_GETAGARITEN, 0, hai);
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("GETAGARITEN %u\n"),tmp);
+		fprintf(fp, TEXT("GETAGARITEN %u\n"), tmp);
 #endif
-		if (tmp>0) {
+		if (tmp > 0) {
 			return MJPIR_RON;
 		}
 	}
 
 	/* テンパイまたはオリているばあいは鳴かない */
-	if (tenpai_flag==1 || decision == AI_DECISION_ORI) return 0;
+	if (tenpai_flag == 1 || decision == AI_DECISION_ORI) return 0;
 	sthai = -1;
 
 	hanpai = 0;
-	for(i=27;i<34;i++){
-		if ((state.te_cnt[i] >= 3)&&(i>=31 || i-27==state.cha || i-27==state.kaze)){
+	for (i = 27; i < 34; i++){
+		if ((state.te_cnt[i] >= 3) && (i >= 31 || i - 27 == state.cha || i - 27 == state.kaze)){
 			hanpai++;
 		}
 	}
 
 	tehaisize = tehai2Array(tmptehai);
 	/* シャンテン数を数える */
-	prevshanten = search_tenpai(tmptehai,tehaisize,NULL,&list,1,6);
+	prevshanten = search_tenpai(tmptehai, tehaisize, NULL, &list, 1, 6);
 
-	if(prevshanten != 0){
+	if (prevshanten != 0){
 		prevshanten = list.shanten;
-	}else{
+	}
+	else{
 		prevshanten = 6;
 	}
 
-	if (naki_ok&1){
-		if(menzen == 0){
-			if (state.te_cnt[hai]==2){
-				state.te_cnt[hai]-=2;
+	if (naki_ok & 1){
+		if (menzen == 0){
+			if (state.te_cnt[hai] == 2){
+				state.te_cnt[hai] -= 2;
 				sthai = calc_sutehai_easy();
 				state.te_cnt[sthai]--;
 				tehaisize = tehai2Array(tmptehai);
 				state.te_cnt[sthai]++;
-				state.te_cnt[hai]+=2;
+				state.te_cnt[hai] += 2;
 				/* シャンテン数を数える */
-				nextshanten = search_tenpai(tmptehai,tehaisize,NULL,&list,1,6);
-				
-				if(nextshanten != 0){
+				nextshanten = search_tenpai(tmptehai, tehaisize, NULL, &list, 1, 6);
+
+				if (nextshanten != 0){
 					nextshanten = list.shanten;
-				}else{
+				}
+				else{
 					nextshanten = 6;
 				}
 
-				if(nextshanten < prevshanten) return MJPIR_PON;
+				if (nextshanten < prevshanten) return MJPIR_PON;
 			}
 
 		}
-		if (hai>=27){
+		if (hai >= 27){
 
-			if (state.te_cnt[hai]==2){
-				if ((doranum >= 2)&&(hai>=31 || hai-27==state.cha || hai-27==state.kaze)){
+			if (state.te_cnt[hai] == 2){
+				if ((doranum >= 2) && (hai >= 31 || hai - 27 == state.cha || hai - 27 == state.kaze)){
 					return MJPIR_PON;
 				}
 			}
-		} else {
+		}
+		else {
 			doraflag = 0;
 
-			for(i=0;i<doralen;i++){
-				if(dora[i] == hai){
+			for (i = 0; i < doralen; i++){
+				if (dora[i] == hai){
 					doraflag = 1;
 					break;
 				}
 			}
 
-			if(hanpai > 0 && doraflag >= 0){
+			if (hanpai > 0 && doraflag >= 0){
 				return MJPIR_PON;
 			}
 
 		}
 	}
 
-	if(naki_ok & 4){
-		state.te_cnt[hai+1]--;
-		state.te_cnt[hai+2]--;
+	if (naki_ok & 4){
+		state.te_cnt[hai + 1]--;
+		state.te_cnt[hai + 2]--;
 		sthai = calc_sutehai_easy();
 		state.te_cnt[sthai]--;
 		tehaisize = tehai2Array(tmptehai);
 		state.te_cnt[sthai]++;
-		state.te_cnt[hai+1]++;
-		state.te_cnt[hai+2]++;
+		state.te_cnt[hai + 1]++;
+		state.te_cnt[hai + 2]++;
 		/* シャンテン数を数える */
-		nextshanten = search_tenpai(tmptehai,tehaisize,NULL,&list,1,6);
-		
-		if(nextshanten != 0){
+		nextshanten = search_tenpai(tmptehai, tehaisize, NULL, &list, 1, 6);
+
+		if (nextshanten != 0){
 			nextshanten = list.shanten;
-		}else{
+		}
+		else{
 			nextshanten = 6;
 		}
-		
-		if(nextshanten < prevshanten && (menzen == 0 || hanpai)) return MJPIR_CHII1;
+
+		if (nextshanten < prevshanten && (menzen == 0 || hanpai)) return MJPIR_CHII1;
 	}
-	if(naki_ok & 8){
-		state.te_cnt[hai-1]--;
-		state.te_cnt[hai-2]--;
+	if (naki_ok & 8){
+		state.te_cnt[hai - 1]--;
+		state.te_cnt[hai - 2]--;
 		sthai = calc_sutehai_easy();
 		state.te_cnt[sthai]--;
 		tehaisize = tehai2Array(tmptehai);
 		state.te_cnt[sthai]++;
-		state.te_cnt[hai-1]++;
-		state.te_cnt[hai-2]++;
+		state.te_cnt[hai - 1]++;
+		state.te_cnt[hai - 2]++;
 		/* シャンテン数を数える */
-		nextshanten = search_tenpai(tmptehai,tehaisize,NULL,&list,1,6);
-		
-		if(nextshanten != 0){
+		nextshanten = search_tenpai(tmptehai, tehaisize, NULL, &list, 1, 6);
+
+		if (nextshanten != 0){
 			nextshanten = list.shanten;
-		}else{
+		}
+		else{
 			nextshanten = 6;
 		}
-		
-		if(nextshanten < prevshanten && (menzen == 0 || hanpai)) return MJPIR_CHII2;
+
+		if (nextshanten < prevshanten && (menzen == 0 || hanpai)) return MJPIR_CHII2;
 	}
-	if(naki_ok & 16){
-		state.te_cnt[hai+1]--;
-		state.te_cnt[hai-1]--;
+	if (naki_ok & 16){
+		state.te_cnt[hai + 1]--;
+		state.te_cnt[hai - 1]--;
 		sthai = calc_sutehai_easy();
 		state.te_cnt[sthai]--;
 		tehaisize = tehai2Array(tmptehai);
 		state.te_cnt[sthai]++;
-		state.te_cnt[hai+1]++;
-		state.te_cnt[hai-1]++;
+		state.te_cnt[hai + 1]++;
+		state.te_cnt[hai - 1]++;
 		/* シャンテン数を数える */
 #ifdef AIDUMP_STACKTRACE
-	printStackTrace("START search_tenpai\n");
+		printStackTrace("START search_tenpai\n");
 #endif
-		nextshanten = search_tenpai(tmptehai,tehaisize,NULL,&list,1,6);
+		nextshanten = search_tenpai(tmptehai, tehaisize, NULL, &list, 1, 6);
 #ifdef AIDUMP_STACKTRACE
-	printStackTrace("END search_tenpai\n");
+		printStackTrace("END search_tenpai\n");
 #endif
-		
-		if(nextshanten != 0){
+
+		if (nextshanten != 0){
 			nextshanten = list.shanten;
-		}else{
+		}
+		else{
 			nextshanten = 6;
 		}
-		
-		if(nextshanten < prevshanten && (menzen == 0 || hanpai)) return MJPIR_CHII3;
+
+		if (nextshanten < prevshanten && (menzen == 0 || hanpai)) return MJPIR_CHII3;
 	}
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END koe_req\n");
@@ -1060,9 +1065,9 @@ UINT MahjongAI::koe_req(int no,int hai)
 // 局開始時の処理
 // k : 局
 // c : 家
-UINT MahjongAI::on_start_kyoku(int k,int c)
+UINT MahjongAI::on_start_kyoku(int k, int c)
 {
-	int i,j,sc_max = 0,mysc;
+	int i, j, sc_max = 0, mysc;
 
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START on_start_kyoku\n");
@@ -1070,31 +1075,31 @@ UINT MahjongAI::on_start_kyoku(int k,int c)
 	kyokustate = AI_KYOKUSTS_NORMAL;
 	decision = AI_DECISION_AGARI1;
 	//set_Tehai();
-	for(i=0;i<34;i++) {
-		for (j=0;j<4;j++) state.anpai[i][j] = 0;
+	for (i = 0; i < 34; i++) {
+		for (j = 0; j < 4; j++) state.anpai[i][j] = 0;
 	}
 	state.kyoku = k;
-	state.kaze = state.kyoku/4;
+	state.kaze = state.kyoku / 4;
 	state.cha = c;
 	menzen = 1;
 	nakiok_flag = 0;
 	jun = 0;
 	sthai = -1;
-	for(i=0;i<4;i++){
+	for (i = 0; i < 4; i++){
 		state.reach_flag[i] = 0;
 		state.ippatsu_flag[i] = 0;
 	}
 	//tehai_score = eval_Tehai(0);
 	//set_machi();
 
-	mysc = (*MJSendMessage)(this,MJMI_GETSCORE,0,0);
+	mysc = (*MJSendMessage)(this, MJMI_GETSCORE, 0, 0);
 
-	for(i=1;i<4;i++){
-		j = (*MJSendMessage)(this,MJMI_GETSCORE,i,0);
-		if(j > sc_max) sc_max = j;
+	for (i = 1; i<4; i++){
+		j = (*MJSendMessage)(this, MJMI_GETSCORE, i, 0);
+		if (j > sc_max) sc_max = j;
 	}
 
-	if(k > 4 && sc_max - mysc > 20000){
+	if (k > 4 && sc_max - mysc > 20000){
 		sendComment(AI_MESSAGE_TSUYOGARI);
 	}
 
@@ -1107,44 +1112,52 @@ UINT MahjongAI::on_start_kyoku(int k,int c)
 // 局終了時の処理
 // reason : 終了した理由
 // inc_sc : 点数の変化
-UINT MahjongAI::on_end_kyoku(UINT reason,LONG* inc_sc)
+UINT MahjongAI::on_end_kyoku(UINT reason, LONG* inc_sc)
 {
 	int sc = *inc_sc;
 
-	switch(kyokustate){
+	switch (kyokustate){
 	case AI_KYOKUSTS_TSUMO:
-		if(sc < 4000){
+		if (sc < 4000){
 			sendComment(AI_MESSAGE_TSUMOLITTLE);
-		}else if(sc < 16000){
+		}
+		else if (sc < 16000){
 			sendComment(AI_MESSAGE_TSUMOMIDDLE);
-		}else{
+		}
+		else{
 			sendComment(AI_MESSAGE_TSUMOBIG);
 		}
 		break;
 	case AI_KYOKUSTS_RON:
-		if(sc < 4000){
+		if (sc < 4000){
 			sendComment(AI_MESSAGE_RONLITTLE);
-		}else if(sc < 16000){
+		}
+		else if (sc < 16000){
 			sendComment(AI_MESSAGE_RONMIDDLE);
-		}else{
+		}
+		else{
 			sendComment(AI_MESSAGE_RONBIG);
 		}
 		break;
 	case AI_KYOKUSTS_TEKIAGARI:
-		if(sc > -2000){
+		if (sc > -2000){
 			sendComment(AI_MESSAGE_TEKIAGARILITTLE);
-		}else if(sc > -6000){
+		}
+		else if (sc > -6000){
 			sendComment(AI_MESSAGE_TEKIAGARIMIDDLE);
-		}else{
+		}
+		else{
 			sendComment(AI_MESSAGE_TEKIAGARIBIG);
 		}
 		break;
 	case AI_KYOKUSTS_FURIKOMI:
-		if(sc > -4000){
+		if (sc > -4000){
 			sendComment(AI_MESSAGE_FURIKOMILITTLE);
-		}else if(sc > -16000){
+		}
+		else if (sc > -16000){
 			sendComment(AI_MESSAGE_FURIKOMIMIDDLE);
-		}else{
+		}
+		else{
 			sendComment(AI_MESSAGE_FURIKOMIBIG);
 		}
 		break;
@@ -1156,63 +1169,67 @@ UINT MahjongAI::on_end_kyoku(UINT reason,LONG* inc_sc)
 }
 
 // アクションに対する応答をする
-UINT MahjongAI::on_action(int player,int taishou,UINT action)
+UINT MahjongAI::on_action(int player, int taishou, UINT action)
 {
-	int hai = action&63;
+	int hai = action & 63;
 
 	if (action & MJPIR_REACH){
 		state.reach_flag[player] = 1;
 		state.ippatsu_flag[player] = 1;
-		if(player == 0){
+		if (player == 0){
 			sendComment(AI_MESSAGE_RIICHI);
 		}
-	}else{
+	}
+	else{
 		state.ippatsu_flag[player] = 0;
 	}
 
-	if(action & MJPIR_TSUMO){
-		if(player == 0){
+	if (action & MJPIR_TSUMO){
+		if (player == 0){
 			kyokustate = AI_KYOKUSTS_TSUMO;
-		}else{
+		}
+		else{
 			kyokustate = AI_KYOKUSTS_TEKIAGARI;
 		}
 	}
 	if (action & (MJPIR_SUTEHAI | MJPIR_REACH)){
 		state.anpai[hai][player] = 1;
-		for(int i=0;i<4;i++) if (state.reach_flag[i]) state.anpai[hai][i] = 1;
-		if (player==0) return 0;
-		return koe_req(player,hai);
+		for (int i = 0; i < 4; i++) if (state.reach_flag[i]) state.anpai[hai][i] = 1;
+		if (player == 0) return 0;
+		return koe_req(player, hai);
 	}
 	if (action & MJPIR_RON){
-		if(player == 0){
+		if (player == 0){
 			kyokustate = AI_KYOKUSTS_RON;
-		}else if(taishou == 0){
+		}
+		else if (taishou == 0){
 #ifdef AIDUMP_1
 			fprintf(fp,"<FURIKOMI/>");
 #endif
 			kyokustate = AI_KYOKUSTS_FURIKOMI;
-		}else{
+		}
+		else{
 			kyokustate = AI_KYOKUSTS_TEKIAGARI;
 		}
 	}
-	if ((action & MJPIR_PON) && player==0){
+	if ((action & MJPIR_PON) && player == 0){
 		nakiok_flag = 1;
 		menzen = 0;
 		sendComment(AI_MESSAGE_PON);
 	}
-	if ((action & MJPIR_CHII1) && player==0){
+	if ((action & MJPIR_CHII1) && player == 0){
 		menzen = 0;
 		sendComment(AI_MESSAGE_TII);
 	}
-	if ((action & MJPIR_CHII2) && player==0){
+	if ((action & MJPIR_CHII2) && player == 0){
 		menzen = 0;
 		sendComment(AI_MESSAGE_TII);
 	}
-	if ((action & MJPIR_CHII3) && player==0){
+	if ((action & MJPIR_CHII3) && player == 0){
 		menzen = 0;
 		sendComment(AI_MESSAGE_TII);
 	}
-	if ((action & MJPIR_MINKAN) && player==0){
+	if ((action & MJPIR_MINKAN) && player == 0){
 		menzen = 0;
 		sendComment(AI_MESSAGE_PON);
 	}
@@ -1228,7 +1245,7 @@ UINT MahjongAI::on_start_game(void)
 // 半荘終了時の処理
 // rank : 順位
 // score : 点数
-UINT MahjongAI::on_end_game(int rank,LONG score)
+UINT MahjongAI::on_end_game(int rank, LONG score)
 {
 	/*char str[40];
 	sprintf(str,"%d点、%d位か…",score,rank+1);
@@ -1239,129 +1256,129 @@ UINT MahjongAI::on_end_game(int rank,LONG score)
 // 途中参加時の処理
 // state : そのときの状態
 // option : 状態に関連して送られる情報
-UINT MahjongAI::on_exchange(UINT ex_state,UINT option)
+UINT MahjongAI::on_exchange(UINT ex_state, UINT option)
 {
-	if (ex_state==MJST_INKYOKU){
-		int i,j,k,size;
+	if (ex_state == MJST_INKYOKU){
+		int i, j, k, size;
 		HAIPOINT hp[14];
 		set_Tehai(-1);
-		for(i=0;i<34;i++) {
-			for (j=0;j<4;j++) state.anpai[i][j] = 0;
+		for (i = 0; i < 34; i++) {
+			for (j = 0; j < 4; j++) state.anpai[i][j] = 0;
 		}
-		for(i=0;i<4;i++){
+		for (i = 0; i < 4; i++){
 			state.reach_flag[i] = 0;
 			state.ippatsu_flag[i] = 0;
 		}
 
 		MJIKawahai kawa[30];
-		for(i=0;i<4;i++){
-			k = (*MJSendMessage)(this,MJMI_GETKAWAEX,MAKELPARAM(i,30),(UINT)kawa);
+		for (i = 0; i < 4; i++){
+			k = (*MJSendMessage)(this, MJMI_GETKAWAEX, MAKELPARAM(i, 30), (UINT)kawa);
 			state.reach_flag[i] = 0;
-			for(j=0;j<k;j++){
-				state.anpai[kawa[j].hai&63][i] = 1;
+			for (j = 0; j < k; j++){
+				state.anpai[kawa[j].hai & 63][i] = 1;
 				if (kawa[j].state&MJKS_REACH) state.reach_flag[i] = 1;
 			}
 		}
 
 		state.kyoku = LOWORD(option);
-		state.kaze = state.kyoku/4;
+		state.kaze = state.kyoku / 4;
 		state.cha = HIWORD(option);
-		menzen = state.tehai.minshun_max+state.tehai.minkan_max+state.tehai.minkou_max==0;
+		menzen = state.tehai.minshun_max + state.tehai.minkan_max + state.tehai.minkou_max == 0;
 		nakiok_flag = !menzen;
 		sthai = -1;
-		tehai_score = type1.evalSutehai(state,hp,size);
+		tehai_score = ai.evalSutehai(state, hp, size);
 		set_machi();
 	}
 	return 0;
 }
 
 // インスタンス用のインターフェース関数
-UINT MahjongAI::InterfaceFunc(UINT message,UINT param1,UINT param2)
+UINT MahjongAI::InterfaceFunc(UINT message, UINT param1, UINT param2)
 {
 	UINT ret = MJR_NOTCARED;
 #ifdef AIDUMP
-	fp = fopen(TEXT("./AIDUMP_COMMAND.xml"),TEXT("a"));
+	fp = fopen(TEXT("./AIDUMP_COMMAND.xml"), TEXT("a"));
 #endif
 	MahjongScoreAI::pObj = this;
-	MahjongScoreAI::pMJSendMessage = (UINT (WINAPI *)(void*,UINT,UINT,UINT))MJSendMessage;
+	MahjongScoreAI::pMJSendMessage = (UINT(WINAPI *)(void*, UINT, UINT, UINT))MJSendMessage;
 
-	switch(message){
-//	case MJPI_DEBUG:
-//			return type4.getDebugInt();
-	case MJPI_SUTEHAI :
+	switch (message){
+		//	case MJPI_DEBUG:
+		//			return type4.getDebugInt();
+	case MJPI_SUTEHAI:
 		jun++;
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("SUTEHAI %u\n"),param1);
+		fprintf(fp, TEXT("SUTEHAI %u\n"), param1);
 #endif
 		ret = sutehai_sub(LOWORD(param1));
 		break;
-	case MJPI_ONACTION :
+	case MJPI_ONACTION:
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("ONACTION %u %u\n"),param1,param2);
+		fprintf(fp, TEXT("ONACTION %u %u\n"), param1, param2);
 #endif
-		ret = on_action(LOWORD(param1),HIWORD(param1),param2);
+		ret = on_action(LOWORD(param1), HIWORD(param1), param2);
 		break;
-	case MJPI_STARTKYOKU :
+	case MJPI_STARTKYOKU:
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("STARTKYOKU %u %u\n"),param1,param2);
+		fprintf(fp, TEXT("STARTKYOKU %u %u\n"), param1, param2);
 #endif
-		ret = on_start_kyoku(LOWORD(param1),LOWORD(param2));
+		ret = on_start_kyoku(LOWORD(param1), LOWORD(param2));
 		break;
-	case MJPI_ENDKYOKU :
+	case MJPI_ENDKYOKU:
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("ENDKYOKU %u %u\n"),param1,param2);
+		fprintf(fp, TEXT("ENDKYOKU %u %u\n"), param1, param2);
 #endif
 #ifdef AIDUMP_STACKTRACE
 		remove(TEXT("./stacktrace.txt"));
 #endif
-		ret = on_end_kyoku(param1,(LONG*)param2);
+		ret = on_end_kyoku(param1, (LONG*)param2);
 		break;
-	case MJPI_STARTGAME :
+	case MJPI_STARTGAME:
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("STARTGAME\n"));
+		fprintf(fp, TEXT("STARTGAME\n"));
 #endif
 		ret = on_start_game();
 		break;
-	case MJPI_ENDGAME :
+	case MJPI_ENDGAME:
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("ENDGAME %u %u\n"),param1,param2);
+		fprintf(fp, TEXT("ENDGAME %u %u\n"), param1, param2);
 #endif
-		ret = on_end_game(LOWORD(param1),(LONG)param2);
+		ret = on_end_game(LOWORD(param1), (LONG)param2);
 		printResult(LOWORD(param1));
 		break;
-	case MJPI_ONEXCHANGE :
+	case MJPI_ONEXCHANGE:
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("ONEXCHANGE %u %u\n"),param1,param2);
+		fprintf(fp, TEXT("ONEXCHANGE %u %u\n"), param1, param2);
 #endif
-		ret = on_exchange(LOWORD(param1),param2);
+		ret = on_exchange(LOWORD(param1), param2);
 		break;
-	case MJPI_CREATEINSTANCE :
+	case MJPI_CREATEINSTANCE:
 		ret = sizeof(MahjongAI);
 		break;
-	case MJPI_INITIALIZE :
+	case MJPI_INITIALIZE:
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("INITIALIZE\n"));
+		fprintf(fp, TEXT("INITIALIZE\n"));
 #endif
-		MJSendMessage = (UINT (WINAPI *)(MahjongAI*,UINT,UINT,UINT))param2;
+		MJSendMessage = (UINT(WINAPI *)(MahjongAI*, UINT, UINT, UINT))param2;
 		initParam();
 		ret = 0;
 		break;
-	case MJPI_YOURNAME :
+	case MJPI_YOURNAME:
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("YOUENAME\n"));
+		fprintf(fp, TEXT("YOUENAME\n"));
 #endif
 		ret = (UINT)player_name;
 		break;
-	case MJPI_DESTROY :
+	case MJPI_DESTROY:
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("DESTROY\n"));
+		fprintf(fp, TEXT("DESTROY\n"));
 #endif
 		destroyParam();
 		ret = 0;
 		break;
-	case MJPI_ISEXCHANGEABLE :
+	case MJPI_ISEXCHANGEABLE:
 #ifdef AIDUMP_COMMAND
-		fprintf(fp,TEXT("ISEXCHANGEABLE\n"));
+		fprintf(fp, TEXT("ISEXCHANGEABLE\n"));
 #endif
 		ret = 0; // 途中参加に対応する。対応したくない場合は0以外にする。
 		break;
@@ -1373,25 +1390,23 @@ UINT MahjongAI::InterfaceFunc(UINT message,UINT param1,UINT param2)
 	return ret;
 }
 
-extern "C" {
-	// インターフェース関数
-	UINT WINAPI MJPInterfaceFunc(MahjongAI* inst,UINT message,UINT param1,UINT param2)
-	{
-		if (inst) return inst->InterfaceFunc(message,param1,param2);
-		switch(message){
-		case MJPI_CREATEINSTANCE :
-			return sizeof(MahjongAI);
-		case MJPI_INITIALIZE :
-			MJSendMessage = (UINT (WINAPI *)(MahjongAI*,UINT,UINT,UINT))param2;
-			MahjongScoreAI::pMJSendMessage = (UINT (WINAPI *)(void*,UINT,UINT,UINT))param2;
-			return 0;
-		case MJPI_YOURNAME :
-			return (UINT)player_name;
-		case MJPI_DESTROY :
-			return 0;
-		case MJPI_ISEXCHANGEABLE :
-			return 0; // 途中参加に対応する。対応したくない場合は0以外にする。
-		}
-		return MJR_NOTCARED;
+// インターフェース関数
+extern "C" UINT WINAPI MJPInterfaceFunc(MahjongAI* inst, UINT message, UINT param1, UINT param2)
+{
+	if (inst) return inst->InterfaceFunc(message, param1, param2);
+	switch (message){
+	case MJPI_CREATEINSTANCE:
+		return sizeof(MahjongAI);
+	case MJPI_INITIALIZE:
+		MJSendMessage = (UINT(WINAPI *)(MahjongAI*, UINT, UINT, UINT))param2;
+		MahjongScoreAI::pMJSendMessage = (UINT(WINAPI *)(void*, UINT, UINT, UINT))param2;
+		return 0;
+	case MJPI_YOURNAME:
+		return (UINT)player_name;
+	case MJPI_DESTROY:
+		return 0;
+	case MJPI_ISEXCHANGEABLE:
+		return 0; // 途中参加に対応する。対応したくない場合は0以外にする。
 	}
-};
+	return MJR_NOTCARED;
+}

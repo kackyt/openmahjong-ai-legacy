@@ -1158,9 +1158,11 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
 		sum += tparam[i].ret;
 	}
 
+#ifdef DEBUG
 	sprintf(message,"[%d] %.2lf (%.2lf[%d],%.2lf[%d],%.2lf[%d],%.2lf[%d],%.2lf[%d])\r\n",hai,sum,tparam[0].ret,thread_count[0],tparam[1].ret,thread_count[1],tparam[2].ret,thread_count[2],tparam[3].ret,thread_count[3],tparam[4].ret,thread_count[4]);
 
 	MJSendMessage(MJMI_FUKIDASHI,(UINT)message,0);
+#endif
 
 	return sum;
 	

@@ -6,6 +6,7 @@
 #include "AILib.h"
 #include "MIPIface.h"
 
+#define LOAD_LIBRARY
 
 typedef struct {
 	UINT hai[18];
@@ -276,7 +277,7 @@ int main()
 #ifdef LOAD_LIBRARY
 	HMODULE comp;
 	
-	comp = ::LoadLibrary("MahjongAI.dll");
+	comp = ::LoadLibrary(TEXT("MahjongAI_type1.dll"));
 	if(comp == NULL){
 		printf("Cannot load Library.\n");
 		return -1;
@@ -296,17 +297,18 @@ int main()
 	size = func(NULL,MJPI_CREATEINSTANCE,0,0);
 	if(size > 0){
 		inst = malloc(size);
+		/* 途中参加でエミュレート */
+		func(inst, MJPI_ONEXCHANGE, MJST_INKYOKU, MAKELPARAM(taku.kyoku, taku.zikaze));
+
+		ret = func(inst, MJPI_SUTEHAI, taku.tsumohai, 0);
+
+		printf("ret = %d flag = %04x\n", ret & 0x3F, ret & 0xFF80);
+
+		free(inst);
 	}
 
 
-	/* 途中参加でエミュレート */
-	func(inst,MJPI_ONEXCHANGE,MJST_INKYOKU,MAKELPARAM(taku.kyoku,taku.zikaze));
 
-	ret = func(inst,MJPI_SUTEHAI,taku.tsumohai,0);
-
-	printf("ret = %d flag = %04x\n",ret & 0x3F ,ret & 0xFF80);
-
-	free(inst);
 #ifdef LOAD_LIBRARY
 	::FreeLibrary(comp);
 #endif

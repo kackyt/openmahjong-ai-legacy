@@ -24,12 +24,10 @@
 
 #include "MahjongAI_global.h"
 
-extern "C" {
-
 UINT (*MJSendMessage)(LPVOID,UINT,UINT,UINT);
 
 // インターフェース関数
-UINT MAHJONGAISHARED_EXPORT MJPInterfaceFunc(void* inst,UINT message,UINT param1,UINT param2)
+extern "C" UINT __stdcall MJPInterfaceFunc(void* inst,UINT message,UINT param1,UINT param2)
 {
     switch(message){
     case MJPI_SUTEHAI :
@@ -55,6 +53,4 @@ UINT MAHJONGAISHARED_EXPORT MJPInterfaceFunc(void* inst,UINT message,UINT param1
        return 0;
     }
     return MJR_NOTCARED;
-}
-
 }

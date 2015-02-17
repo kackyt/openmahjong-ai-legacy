@@ -172,7 +172,7 @@ static const TCHAR * num_table[] ={
 
 static void printStackTrace(const char *trace, ...){
 	va_list list;
-	FILE *file;
+	FILE *file = NULL;
 
 	va_start(list,trace);
 	
@@ -386,7 +386,7 @@ void MahjongAI::set_Tehai(int tsumohai)
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START MJ0\n");
 #endif
-	MJ0(&param[0],(int*)dora,doralen,state.nokori,state.kikenhai,mentsu1,mentsu2,mentsu3,tsumohai);
+	MJ0(&param[0],(int*)dora,doralen,state.nokori,state.kikenhai,mentsu1,mentsu2,mentsu3);
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END MJ0\n");
 #endif
@@ -1286,8 +1286,8 @@ UINT MahjongAI::InterfaceFunc(UINT message,UINT param1,UINT param2)
 	MahjongScoreAI::pMJSendMessage = (UINT (WINAPI *)(void*,UINT,UINT,UINT))MJSendMessage;
 
 	switch(message){
-	case MJPI_DEBUG:
-			return type4.getDebugInt();
+//	case MJPI_DEBUG:
+//			return type4.getDebugInt();
 	case MJPI_SUTEHAI :
 		jun++;
 #ifdef AIDUMP_COMMAND

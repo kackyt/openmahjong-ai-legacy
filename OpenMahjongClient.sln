@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2013 for Windows Desktop
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MahjongAI", "MahjongAI\MahjongAI.vcxproj", "{4E90355D-257B-469F-B683-80D1628AA8EF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MahjongAI_type1", "MahjongAI_type1\MahjongAI_type1.vcxproj", "{142641BB-F65C-479D-B721-E5BF246239F9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{957777CB-91E0-4BA5-8541-B27F06DE602F} = {957777CB-91E0-4BA5-8541-B27F06DE602F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AILib", "AILib\AILib.vcxproj", "{957777CB-91E0-4BA5-8541-B27F06DE602F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4E90355D-257B-469F-B683-80D1628AA8EF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4E90355D-257B-469F-B683-80D1628AA8EF}.Debug|Win32.Build.0 = Debug|Win32
+		{4E90355D-257B-469F-B683-80D1628AA8EF}.Release|Win32.ActiveCfg = Release|Win32
+		{4E90355D-257B-469F-B683-80D1628AA8EF}.Release|Win32.Build.0 = Release|Win32
+		{142641BB-F65C-479D-B721-E5BF246239F9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{142641BB-F65C-479D-B721-E5BF246239F9}.Debug|Win32.Build.0 = Debug|Win32
+		{142641BB-F65C-479D-B721-E5BF246239F9}.Release|Win32.ActiveCfg = Release|Win32
+		{142641BB-F65C-479D-B721-E5BF246239F9}.Release|Win32.Build.0 = Release|Win32
+		{957777CB-91E0-4BA5-8541-B27F06DE602F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{957777CB-91E0-4BA5-8541-B27F06DE602F}.Debug|Win32.Build.0 = Debug|Win32
+		{957777CB-91E0-4BA5-8541-B27F06DE602F}.Release|Win32.ActiveCfg = Release|Win32
+		{957777CB-91E0-4BA5-8541-B27F06DE602F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

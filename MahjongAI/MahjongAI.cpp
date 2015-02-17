@@ -21,6 +21,7 @@
 ****************************************************************************************/
 #include <windows.h>
 #include "MIPIface.h"
+
 #include "MahjongAI_global.h"
 
 extern "C" {

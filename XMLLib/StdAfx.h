@@ -2,6 +2,7 @@
 //            または参照回数が多く、かつあまり変更されない
 //            プロジェクト専用のインクルード ファイルを記述します。
 //
+#ifndef WITHQT
 
 #if !defined(AFX_STDAFX_H__25F2E1E9_CAE5_437B_BD1A_C9701C0B03FB__INCLUDED_)
 #define AFX_STDAFX_H__25F2E1E9_CAE5_437B_BD1A_C9701C0B03FB__INCLUDED_
@@ -29,3 +30,5 @@ using namespace MSXML2;
 // Microsoft Visual C++ は前行の直前に追加の宣言を挿入します。
 
 #endif // !defined(AFX_STDAFX_H__25F2E1E9_CAE5_437B_BD1A_C9701C0B03FB__INCLUDED_)
+
+#endif

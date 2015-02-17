@@ -40,7 +40,7 @@ class OMCommand
 public:
         OMRule m_rule;
         void toXML(OMDomDocument,OMDomElement);
-#ifdef _MSC_VER
+#ifndef WITHQT
         OMCommand& operator=(OMCommand&);
 #else
         OMCommand& operator=(const OMCommand&);

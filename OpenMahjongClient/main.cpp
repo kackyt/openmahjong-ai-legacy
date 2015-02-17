@@ -1,4 +1,4 @@
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QTextCodec>
 #include "openmahjongclient.h"
 
@@ -8,8 +8,8 @@ int main(int argc, char *argv[])
     OpenMahjongClient w;
     w.show();
 
-    QTextCodec::setCodecForTr(QTextCodec::codecForLocale());
-    QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
+    //QTextCodec::setCodecForTr(QTextCodec::codecForLocale());
+    //QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 
     return a.exec();
 }

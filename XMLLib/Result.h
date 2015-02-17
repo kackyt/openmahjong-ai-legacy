@@ -37,7 +37,7 @@ class OMResult
 public:
 	int m_iFu;
 	BOOL m_bActive;
-#ifdef _MSC_VER
+#ifndef WITHQT
         OMResult& operator=(OMResult& value);
 #else
         OMResult& operator=(const OMResult& value);

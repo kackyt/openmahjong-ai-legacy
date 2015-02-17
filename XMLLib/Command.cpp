@@ -96,7 +96,7 @@ void OMCommand::parseXML(OMDomNode pElem)
 
 }
 
-#ifdef _MSC_VER
+#ifndef WITHQT
 OMCommand& OMCommand::operator=(OMCommand& value)
 #else
 OMCommand& OMCommand::operator=(const OMCommand& value)

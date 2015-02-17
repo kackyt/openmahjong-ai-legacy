@@ -116,7 +116,7 @@ void OMResult::parseXML(OMDomNode pElem)
 
 }
 
-#ifdef _MSC_VER
+#ifndef WITHQT
 OMResult& OMResult::operator=(OMResult& value)
 #else
 OMResult& OMResult::operator=(const OMResult& value)

@@ -115,7 +115,7 @@
 #define RESPONCE_SESSION (304)
 #define RESPONCE_OTHER (305)
 
-#ifdef _MSC_VER
+#ifdef WM_USER
 enum{
 	WM_REFRESH=(WM_USER+100),
 	WM_SNDCOMMAND,

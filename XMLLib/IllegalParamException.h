@@ -1,4 +1,4 @@
-#ifndef ILLEGALPARAMEXCEPTION_H
+﻿#ifndef ILLEGALPARAMEXCEPTION_H
 #define ILLEGALPARAMEXCEPTION_H
 #include "OMXMLCommon.h"
 #include "Exception.h"

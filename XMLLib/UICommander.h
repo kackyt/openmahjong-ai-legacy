@@ -1,4 +1,4 @@
-#ifndef UICOMMANDER_H
+﻿#ifndef UICOMMANDER_H
 #define UICOMMANDER_H
 
 #include "OMXMLCommon.h"

@@ -1,4 +1,4 @@
-#ifndef CLIENTLISTENER_H
+﻿#ifndef CLIENTLISTENER_H
 #define CLIENTLISTENER_H
 #include "OMXMLCommon.h"
 #include "Command.h"

@@ -1,4 +1,4 @@
-#ifndef ILLEGALSTATEEXCEPTION_H
+﻿#ifndef ILLEGALSTATEEXCEPTION_H
 #define ILLEGALSTATEEXCEPTION_H
 #include "OMXMLCommon.h"
 #include "Exception.h"

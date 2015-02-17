@@ -1,4 +1,4 @@
-#include "TakuListener.h"
+﻿#include "TakuListener.h"
 
 OMTakuListener::OMTakuListener()
 {

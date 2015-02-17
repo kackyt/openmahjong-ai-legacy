@@ -1,4 +1,4 @@
-#include "OMXMLCommon.h"
+﻿#include "OMXMLCommon.h"
 
 
 long OMStrtol(OMString val)

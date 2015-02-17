@@ -1,4 +1,4 @@
-#include "UICommander.h"
+﻿#include "UICommander.h"
 
 OMUICommander::OMUICommander()
     : m_state(OM_COM_STATE_DAHAI)

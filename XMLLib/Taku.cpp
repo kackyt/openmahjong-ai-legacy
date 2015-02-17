@@ -1,25 +1,25 @@
-/****************************************************************************************
+ï»¿/****************************************************************************************
  * Copyright (c) 2010, Takaya Kakizaki(kacky)
  * All rights reserved.
 
-  ƒ\[ƒXƒR[ƒhŒ`®‚©ƒoƒCƒiƒŠŒ`®‚©A•ÏX‚·‚é‚©‚µ‚È‚¢‚©‚ğ–â‚í‚¸AˆÈ‰º‚ÌğŒ‚ğ–‚½‚·ê‡‚ÉŒÀ‚èAÄ”Ğ•z‚¨‚æ‚Ñg—p‚ª‹–‰Â‚³‚ê‚Ü‚·B 
+  ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰å½¢å¼ã‹ãƒã‚¤ãƒŠãƒªå½¢å¼ã‹ã€å¤‰æ›´ã™ã‚‹ã‹ã—ãªã„ã‹ã‚’å•ã‚ãšã€ä»¥ä¸‹ã®æ¡ä»¶ã‚’æº€ãŸã™å ´åˆã«é™ã‚Šã€å†é ’å¸ƒãŠã‚ˆã³ä½¿ç”¨ãŒè¨±å¯ã•ã‚Œã¾ã™ã€‚ 
 
-  Eƒ\[ƒXƒR[ƒh‚ğÄ”Ğ•z‚·‚éê‡Aã‹L‚Ì’˜ìŒ •\¦A–{ğŒˆê——A‚¨‚æ‚Ñ‰º‹L–ÆÓğ€‚ğŠÜ‚ß‚é‚±‚ÆB 
+  ãƒ»ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ã‚’å†é ’å¸ƒã™ã‚‹å ´åˆã€ä¸Šè¨˜ã®è‘—ä½œæ¨©è¡¨ç¤ºã€æœ¬æ¡ä»¶ä¸€è¦§ã€ãŠã‚ˆã³ä¸‹è¨˜å…è²¬æ¡é …ã‚’å«ã‚ã‚‹ã“ã¨ã€‚ 
 
-  EƒoƒCƒiƒŠŒ`®‚ÅÄ”Ğ•z‚·‚éê‡A”Ğ•z•¨‚É•t‘®‚ÌƒhƒLƒ…ƒƒ“ƒg“™‚Ì‘—¿‚ÉAã‹L‚Ì’˜ìŒ •\¦A–{ğŒˆê——A‚¨‚æ‚Ñ‰º‹L–ÆÓğ€‚ğŠÜ‚ß‚é‚±‚ÆB 
+  ãƒ»ãƒã‚¤ãƒŠãƒªå½¢å¼ã§å†é ’å¸ƒã™ã‚‹å ´åˆã€é ’å¸ƒç‰©ã«ä»˜å±ã®ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆç­‰ã®è³‡æ–™ã«ã€ä¸Šè¨˜ã®è‘—ä½œæ¨©è¡¨ç¤ºã€æœ¬æ¡ä»¶ä¸€è¦§ã€ãŠã‚ˆã³ä¸‹è¨˜å…è²¬æ¡é …ã‚’å«ã‚ã‚‹ã“ã¨ã€‚ 
 
-  E‘–Ê‚É‚æ‚é“Á•Ê‚Ì‹–‰Â‚È‚µ‚ÉA–{ƒ\ƒtƒgƒEƒFƒA‚©‚ç”h¶‚µ‚½»•i‚Ìé“`‚Ü‚½‚Í”Ì”„‘£i‚ÉAƒI[ƒvƒ“–ƒ‚Ì–¼‘O‚Ü‚½‚ÍƒRƒ“ƒgƒŠƒrƒ…[ƒ^[‚Ì–¼‘O‚ğg—p‚µ‚Ä‚Í‚È‚ç‚È‚¢B
+  ãƒ»æ›¸é¢ã«ã‚ˆã‚‹ç‰¹åˆ¥ã®è¨±å¯ãªã—ã«ã€æœ¬ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã‹ã‚‰æ´¾ç”Ÿã—ãŸè£½å“ã®å®£ä¼ã¾ãŸã¯è²©å£²ä¿ƒé€²ã«ã€ã‚ªãƒ¼ãƒ—ãƒ³éº»é›€ã®åå‰ã¾ãŸã¯ã‚³ãƒ³ãƒˆãƒªãƒ“ãƒ¥ãƒ¼ã‚¿ãƒ¼ã®åå‰ã‚’ä½¿ç”¨ã—ã¦ã¯ãªã‚‰ãªã„ã€‚
 
 
-  –{ƒ\ƒtƒgƒEƒFƒA‚ÍA’˜ìŒ Ò‚¨‚æ‚ÑƒRƒ“ƒgƒŠƒrƒ…[ƒ^[‚É‚æ‚Á‚ÄuŒ»ó‚Ì‚Ü‚Üv’ñ‹Ÿ‚³‚ê‚Ä‚¨‚èA–¾¦–Ù¦‚ğ–â‚í‚¸A
-  ¤‹Æ“I‚Èg—p‰Â”\«A‚¨‚æ‚Ñ“Á’è‚Ì–Ú“I‚É‘Î‚·‚é“K‡«‚ÉŠÖ‚·‚éˆÃ–Ù‚Ì•ÛØ‚àŠÜ‚ßA‚Ü‚½‚»‚ê‚ÉŒÀ’è‚³‚ê‚È‚¢A‚¢‚©‚È‚é•ÛØ‚à‚ ‚è‚Ü‚¹‚ñB
-  ’˜ìŒ Ò‚àƒRƒ“ƒgƒŠƒrƒ…[ƒ^[‚àA–—R‚Ì‚¢‚©‚ñ‚ğ–â‚í‚¸A ‘¹ŠQ”­¶‚ÌŒ´ˆö‚¢‚©‚ñ‚ğ–â‚í‚¸A‚©‚ÂÓ”C‚Ìª‹’‚ªŒ_–ñ‚Å‚ ‚é‚©ŒµŠiÓ”C‚Å‚ ‚é‚©
-  i‰ß¸‚»‚Ì‘¼‚Ìj•s–@sˆ×‚Å‚ ‚é‚©‚ğ–â‚í‚¸A‰¼‚É‚»‚Ì‚æ‚¤‚È‘¹ŠQ‚ª”­¶‚·‚é‰Â”\«‚ğ’m‚ç‚³‚ê‚Ä‚¢‚½‚Æ‚µ‚Ä‚àA–{ƒ\ƒtƒgƒEƒFƒA‚Ìg—p‚É‚æ‚Á‚Ä”­¶‚µ‚½
-  i‘ã‘Ö•i‚Ü‚½‚Í‘ã—pƒT[ƒrƒX‚Ì’²’BAg—p‚Ì‘r¸Aƒf[ƒ^‚Ì‘r¸A—˜‰v‚Ì‘r¸A‹Æ–±‚Ì’†’f‚àŠÜ‚ßA‚Ü‚½‚»‚ê‚ÉŒÀ’è‚³‚ê‚È‚¢j
-  ’¼Ú‘¹ŠQAŠÔÚ‘¹ŠQA‹ô”­“I‚È‘¹ŠQA“Á•Ê‘¹ŠQA’¦”±“I‘¹ŠQA‚Ü‚½‚ÍŒ‹‰Ê‘¹ŠQ‚É‚Â‚¢‚ÄAˆêØÓ”C‚ğ•‰‚í‚È‚¢‚à‚Ì‚Æ‚µ‚Ü‚·B 
+  æœ¬ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã¯ã€è‘—ä½œæ¨©è€…ãŠã‚ˆã³ã‚³ãƒ³ãƒˆãƒªãƒ“ãƒ¥ãƒ¼ã‚¿ãƒ¼ã«ã‚ˆã£ã¦ã€Œç¾çŠ¶ã®ã¾ã¾ã€æä¾›ã•ã‚Œã¦ãŠã‚Šã€æ˜ç¤ºé»™ç¤ºã‚’å•ã‚ãšã€
+  å•†æ¥­çš„ãªä½¿ç”¨å¯èƒ½æ€§ã€ãŠã‚ˆã³ç‰¹å®šã®ç›®çš„ã«å¯¾ã™ã‚‹é©åˆæ€§ã«é–¢ã™ã‚‹æš—é»™ã®ä¿è¨¼ã‚‚å«ã‚ã€ã¾ãŸãã‚Œã«é™å®šã•ã‚Œãªã„ã€ã„ã‹ãªã‚‹ä¿è¨¼ã‚‚ã‚ã‚Šã¾ã›ã‚“ã€‚
+  è‘—ä½œæ¨©è€…ã‚‚ã‚³ãƒ³ãƒˆãƒªãƒ“ãƒ¥ãƒ¼ã‚¿ãƒ¼ã‚‚ã€äº‹ç”±ã®ã„ã‹ã‚“ã‚’å•ã‚ãšã€ æå®³ç™ºç”Ÿã®åŸå› ã„ã‹ã‚“ã‚’å•ã‚ãšã€ã‹ã¤è²¬ä»»ã®æ ¹æ‹ ãŒå¥‘ç´„ã§ã‚ã‚‹ã‹å³æ ¼è²¬ä»»ã§ã‚ã‚‹ã‹
+  ï¼ˆéå¤±ãã®ä»–ã®ï¼‰ä¸æ³•è¡Œç‚ºã§ã‚ã‚‹ã‹ã‚’å•ã‚ãšã€ä»®ã«ãã®ã‚ˆã†ãªæå®³ãŒç™ºç”Ÿã™ã‚‹å¯èƒ½æ€§ã‚’çŸ¥ã‚‰ã•ã‚Œã¦ã„ãŸã¨ã—ã¦ã‚‚ã€æœ¬ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã®ä½¿ç”¨ã«ã‚ˆã£ã¦ç™ºç”Ÿã—ãŸ
+  ï¼ˆä»£æ›¿å“ã¾ãŸã¯ä»£ç”¨ã‚µãƒ¼ãƒ“ã‚¹ã®èª¿é”ã€ä½¿ç”¨ã®å–ªå¤±ã€ãƒ‡ãƒ¼ã‚¿ã®å–ªå¤±ã€åˆ©ç›Šã®å–ªå¤±ã€æ¥­å‹™ã®ä¸­æ–­ã‚‚å«ã‚ã€ã¾ãŸãã‚Œã«é™å®šã•ã‚Œãªã„ï¼‰
+  ç›´æ¥æå®³ã€é–“æ¥æå®³ã€å¶ç™ºçš„ãªæå®³ã€ç‰¹åˆ¥æå®³ã€æ‡²ç½°çš„æå®³ã€ã¾ãŸã¯çµæœæå®³ã«ã¤ã„ã¦ã€ä¸€åˆ‡è²¬ä»»ã‚’è² ã‚ãªã„ã‚‚ã®ã¨ã—ã¾ã™ã€‚ 
 
 ****************************************************************************************/
-// Taku.cpp: CTaku ƒNƒ‰ƒX‚ÌƒCƒ“ƒvƒŠƒƒ“ƒe[ƒVƒ‡ƒ“
+// Taku.cpp: CTaku ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ãƒ—ãƒªãƒ¡ãƒ³ãƒ†ãƒ¼ã‚·ãƒ§ãƒ³
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -36,7 +36,7 @@ static char THIS_FILE[]=__FILE__;
 #define GLASS_DEBUG (0)
 
 //////////////////////////////////////////////////////////////////////
-// \’z/Á–Å
+// æ§‹ç¯‰/æ¶ˆæ»…
 //////////////////////////////////////////////////////////////////////
 
 OMTaku::OMTaku()
@@ -56,7 +56,7 @@ void OMTaku::parseXML(OMDomNode pElem)
         OMDomNodeList pNodeList;
 	int i;
 
-	/* ƒXƒJƒ‰[ƒf[ƒ^‚ÌŠi”[ */
+	/* ã‚¹ã‚«ãƒ©ãƒ¼ãƒ‡ãƒ¼ã‚¿ã®æ ¼ç´ */
 
         pNode = OMGetElement(pElem,_T(TAG_YAMA "/" TAG_COUNT));
 
@@ -88,7 +88,7 @@ void OMTaku::parseXML(OMDomNode pElem)
 		m_event.parseXML(pNode);
 	}
 
-	/* ƒhƒ‰”v‚ÌŠi”[ */
+	/* ãƒ‰ãƒ©ç‰Œã®æ ¼ç´ */
         m_aDora.clear();
         pNodeList = OMGetElementList(pElem,_T(TAG_DORA "/" TAG_PAI));
 
@@ -146,7 +146,7 @@ void OMTaku::getMJITehai(int index,MJITehai1 *pTehai,OMRule& rule)
 
         memset(pTehai,0,sizeof(MJITehai1));
 
-	/* ¡‚Ì‚Æ‚±‚ëÔƒE[‚Íl—¶‚µ‚È‚¢ */
+	/* ä»Šã®ã¨ã“ã‚èµ¤ã‚¦ãƒ¼ã¯è€ƒæ…®ã—ãªã„ */
 
         if(member.m_aTehai.size() == 0){
 		pTehai->tehai_max = 0;
@@ -223,7 +223,7 @@ void OMTaku::getMJITehai(int index,MJITehai *pTehai)
 
         memset(pTehai,0,sizeof(MJITehai));
 
-	/* ¡‚Ì‚Æ‚±‚ëÔƒE[‚Íl—¶‚µ‚È‚¢ */
+	/* ä»Šã®ã¨ã“ã‚èµ¤ã‚¦ãƒ¼ã¯è€ƒæ…®ã—ãªã„ */
 
         if(member.m_aTehai.size() == 0){
 		pTehai->tehai_max = 0;
@@ -323,11 +323,11 @@ int OMTaku::getVisibleHais(UINT num,int iPlayerIndex)
 
 void OMTaku::printState(int index,OMString& text)
 {
-	const TCHAR *kyokuTable[] = { _T("“Œˆê‹Ç"),_T("“Œ“ñ‹Ç"),_T("“ŒO‹Ç"),_T("“Œl‹Ç"),_T("“ìˆê‹Ç"),_T("“ì“ñ‹Ç"),_T("“ìO‹Ç"),_T("“ìl‹Ç") };
-	const TCHAR *ieTable[] = {_T("“Œ‰Æ"),_T("“ì‰Æ"),_T("¼‰Æ"),_T("–k‰Æ")};
-	const TCHAR *eventTable[] = { _T("‘Å”v"),_T("ƒ`["),_T("ƒ|ƒ“"),_T("ƒJƒ“"),_T("ƒJƒ“"),_T("ƒJƒ“"),_T("ƒƒ“"),
-		_T("ƒcƒ‚"),_T("ƒŠ[ƒ`"),_T("ƒpƒX"),_T("‹ãí‹ã”v“|”v"),_T("l•—q˜A‘Å"),
-		_T("llƒŠ[ƒ`"),_T("r”v"),_T("lƒJƒ“ƒc—¬‚ê"),_T("O‰Æ˜a"),_T("”¼‘‘I—¹"),_T("‹ÇŠJn") };
+	const TCHAR *kyokuTable[] = { _T("æ±ä¸€å±€"),_T("æ±äºŒå±€"),_T("æ±ä¸‰å±€"),_T("æ±å››å±€"),_T("å—ä¸€å±€"),_T("å—äºŒå±€"),_T("å—ä¸‰å±€"),_T("å—å››å±€") };
+	const TCHAR *ieTable[] = {_T("æ±å®¶"),_T("å—å®¶"),_T("è¥¿å®¶"),_T("åŒ—å®¶")};
+	const TCHAR *eventTable[] = { _T("æ‰“ç‰Œ"),_T("ãƒãƒ¼"),_T("ãƒãƒ³"),_T("ã‚«ãƒ³"),_T("ã‚«ãƒ³"),_T("ã‚«ãƒ³"),_T("ãƒ­ãƒ³"),
+		_T("ãƒ„ãƒ¢"),_T("ãƒªãƒ¼ãƒ"),_T("ãƒ‘ã‚¹"),_T("ä¹ç¨®ä¹ç‰Œå€’ç‰Œ"),_T("å››é¢¨å­é€£æ‰“"),
+		_T("å››äººãƒªãƒ¼ãƒ"),_T("è’ç‰Œ"),_T("å››ã‚«ãƒ³ãƒ„æµã‚Œ"),_T("ä¸‰å®¶å’Œ"),_T("åŠè˜çµ‚äº†"),_T("å±€é–‹å§‹") };
         OMString str;
 	int i,j;
 
@@ -344,16 +344,16 @@ void OMTaku::printState(int index,OMString& text)
 
 		text += _T("\r\n");
 
-		str.Format(_T("%d–| %d•„ %d“_\r\n"),m_event.m_result.m_iHan,m_event.m_result.m_iFu,m_event.m_result.m_iScore);
+		str.Format(_T("%dç¿» %dç¬¦ %dç‚¹\r\n"),m_event.m_result.m_iHan,m_event.m_result.m_iFu,m_event.m_result.m_iScore);
 
 		text += str;		
 	}
 
-	str.Format(_T("%s c‚è : %d\r\n"),kyokuTable[m_iKyokuCount],m_iYama);
+	str.Format(_T("%s æ®‹ã‚Š : %d\r\n"),kyokuTable[m_iKyokuCount],m_iYama);
 
 	text += str;
 
-	text += _T("ƒhƒ‰ ");
+	text += _T("ãƒ‰ãƒ© ");
 
         for(i=0;i<m_aDora.size();i++){
                 OMPai pai;
@@ -365,21 +365,21 @@ void OMTaku::printState(int index,OMString& text)
 
 	text += _T("\r\n");
 
-	text += _T("ƒ‰ƒCƒoƒ‹\r\n");
+	text += _T("ãƒ©ã‚¤ãƒãƒ«\r\n");
 	for(i=0;i<4;i++){
 		if(i != index){
 			text += m_members[i].m_player.m_strName;
 			text += _T(" ");
 			text += ieTable[m_members[i].m_gamestate.m_iZikaze - 1];
 			text += _T("\r\n");
-			str.Format(_T("“_” : %d"),m_members[i].m_iPoint);
+			str.Format(_T("ç‚¹æ•° : %d"),m_members[i].m_iPoint);
 			text += str;
 			if(m_members[i].m_gamestate.m_bRiichi){
-				text += _T("** ƒŠ[ƒ` **");
+				text += _T("** ãƒªãƒ¼ãƒ **");
 			}
 			text += _T("\r\n");
 
-			text += _T("‘Å”v ");
+			text += _T("æ‰“ç‰Œ ");
                         for(j=0;j<m_members[i].m_aDahai.size();j++){
 				str.Format(_T("[%d]"),j);
 				text += str;
@@ -392,18 +392,18 @@ void OMTaku::printState(int index,OMString& text)
 		}
 	}
 
-	text += _T("ƒvƒŒ[ƒ„\r\n");
+	text += _T("ãƒ—ãƒ¬ãƒ¼ãƒ¤\r\n");
 	text += m_members[index].m_player.m_strName;
 	text += _T(" ");
 	text += ieTable[m_members[index].m_gamestate.m_iZikaze - 1];
 	text += _T("\r\n");
-	str.Format(_T("“_” : %d"),m_members[index].m_iPoint);
+	str.Format(_T("ç‚¹æ•° : %d"),m_members[index].m_iPoint);
 	text += str;
 	if(m_members[index].m_gamestate.m_bRiichi){
-		text += _T("** ƒŠ[ƒ` **");
+		text += _T("** ãƒªãƒ¼ãƒ **");
 	}
 	text += _T("\r\n");
-	text += _T("‘Å”v ");
+	text += _T("æ‰“ç‰Œ ");
         for(j=0;j<m_members[index].m_aDahai.size();j++){
 		str.Format(_T("[%d]"),j);
 		text += str;
@@ -414,7 +414,7 @@ void OMTaku::printState(int index,OMString& text)
 
 	text += _T("\r\n");
 
-	text += _T("è”v ");
+	text += _T("æ‰‹ç‰Œ ");
         for(j=0;j<m_members[index].m_aTehai.size();j++){
 		str.Format(_T("[%d]"),j);
 		text += str;
@@ -425,28 +425,28 @@ void OMTaku::printState(int index,OMString& text)
 
 	text += _T("\r\n");
 
-	text += _T("ƒRƒ}ƒ“ƒh");
+	text += _T("ã‚³ãƒãƒ³ãƒ‰");
 
         for(i=0;i<m_members[index].m_aCommandList.size();i++){
 		int id = m_members[index].m_aCommandList[i].m_iId;
                 OMPai *pPai;
 		pPai = &m_members[index].m_aCommandList[i].m_pai;
 		if(id >= ID_RIICHI && id <= ID_RIICHI + 13){
-			str.Format(_T("[%d] ƒŠ[ƒ` "),id);
+			str.Format(_T("[%d] ãƒªãƒ¼ãƒ "),id);
 			text += str;
 			pPai->getName(str);
 			text += str;
 		}else if(id == ID_TSUMO){
-			str.Format(_T("[%d] ƒcƒ‚ "),id);
+			str.Format(_T("[%d] ãƒ„ãƒ¢ "),id);
 			text += str;
 		}else if(id == ID_START){
-			str.Format(_T("[%d] Ÿ‚Ì‹Ç‚Ö "),id);
+			str.Format(_T("[%d] æ¬¡ã®å±€ã¸ "),id);
 			text += str;
 		}else if(id == ID_PASS){
-			str.Format(_T("[%d] –Â‚©‚È‚¢ "),id);
+			str.Format(_T("[%d] é³´ã‹ãªã„ "),id);
 			text += str;
 		}else if(id >= ID_TII && id < ID_PON){
-			str.Format(_T("[%d] ƒ`[ "),id);
+			str.Format(_T("[%d] ãƒãƒ¼ "),id);
 			text += str;
                         for(j=0;j<m_members[index].m_aCommandList[i].m_mentsu.m_aPaiList.size();j++){
 				pPai = &m_members[index].m_aCommandList[i].m_mentsu.m_aPaiList[j];
@@ -455,22 +455,22 @@ void OMTaku::printState(int index,OMString& text)
 				text += _T(" ");
 			}
 		}else if(id >= ID_PON && id < ID_DAIMINKAN){
-			str.Format(_T("[%d] ƒ|ƒ“ "),id);
+			str.Format(_T("[%d] ãƒãƒ³ "),id);
 			text += str;
 			pPai->getName(str);
 			text += str;
 		}else if(id == ID_DAIMINKAN){
-			str.Format(_T("[%d] ƒJƒ“ "),id);
+			str.Format(_T("[%d] ã‚«ãƒ³ "),id);
 			text += str;
 			pPai->getName(str);
 			text += str;
 		}else if(id == ID_RON){
-			str.Format(_T("[%d] ƒƒ“ "),id);
+			str.Format(_T("[%d] ãƒ­ãƒ³ "),id);
 			text += str;
 			pPai->getName(str);
 			text += str;
 		}else if(id >= ID_KAN && id < ID_RIICHI){
-			str.Format(_T("[%d] ƒJƒ“ "),id);
+			str.Format(_T("[%d] ã‚«ãƒ³ "),id);
 			text += str;
 			pPai->getName(str);
 			text += str;
@@ -506,7 +506,7 @@ void OMTaku::resortTehai(int memberIndex)
     int i;
     OMPai pai;
     BOOL bInserted;
-    // è”v‚ğ•À‚×’¼‚µ
+    // æ‰‹ç‰Œã‚’ä¸¦ã¹ç›´ã—
     if(m_members[memberIndex].m_aTehai.size() > 0){
         pai = m_members[memberIndex].m_aTehai[m_members[memberIndex].m_aTehai.size()-1];
         if(m_pListener != NULL){
@@ -553,7 +553,7 @@ void OMTaku::update(OMTaku& value)
         }
     }
 
-    // ƒCƒxƒ“ƒg‚ğˆ—‚·‚é
+    // ã‚¤ãƒ™ãƒ³ãƒˆã‚’å‡¦ç†ã™ã‚‹
     if(value.m_event.m_bActive){
         if(m_event.m_iSeq != value.m_event.m_iSeq){
             prevSeq = m_event.m_iSeq;
@@ -755,7 +755,7 @@ void OMTaku::update(OMTaku& value)
             if(m_aUradora.size() < value.m_aUradora.size()){
                 m_aUradora.copy(value.m_aUradora);
             }
-            // ƒcƒ‚”v‚ÍƒRƒ}ƒ“ƒhƒŠƒXƒg‚©‚çæ“¾‚·‚é
+            // ãƒ„ãƒ¢ç‰Œã¯ã‚³ãƒãƒ³ãƒ‰ãƒªã‚¹ãƒˆã‹ã‚‰å–å¾—ã™ã‚‹
             for(i=0;i<4;i++){
                 m_members[i].m_aCommandList.clear();
 

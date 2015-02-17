@@ -1,6 +1,6 @@
-/* �܂������ �ΐ푊��p�}�N�� **
+﻿/* まうじゃん 対戦相手用マクロ **
 **         version 12          **
-**                 �Δ� ����   */
+**                 石畑 恭平   */
 #ifndef __MIPIFACE_H__
 #define __MIPIFACE_H__
 

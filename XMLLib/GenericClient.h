@@ -1,4 +1,4 @@
-#ifndef GENERICCLIENT_H
+ï»¿#ifndef GENERICCLIENT_H
 #define GENERICCLIENT_H
 #include "OMXmlCommon.h"
 #include "Library.h"
@@ -66,7 +66,7 @@ protected:
     OMPlayer *m_pCurPlayer;
     OM_GAME_STATE m_gamestate;
     OMClientListener *m_pListener;
-    /* HTTP‚É‚æ‚èƒT[ƒo[‚É•¶š—ñ‚ğ‘—óM‚·‚éƒƒ\ƒbƒh‚ğƒTƒuƒNƒ‰ƒX‚ÅÀ‘•‚µ‚Ä‚­‚¾‚³‚¢ */
+    /* HTTPã«ã‚ˆã‚Šã‚µãƒ¼ãƒãƒ¼ã«æ–‡å­—åˆ—ã‚’é€å—ä¿¡ã™ã‚‹ãƒ¡ã‚½ãƒƒãƒ‰ã‚’ã‚µãƒ–ã‚¯ãƒ©ã‚¹ã§å®Ÿè£…ã—ã¦ãã ã•ã„ */
     virtual void sendString(OMString& sendMessage,OMString& recvMessage) = 0;
     virtual void createCompInstance(OMPlayer &player) = 0;
 

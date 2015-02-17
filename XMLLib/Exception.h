@@ -1,4 +1,4 @@
-#ifndef EXCEPTION_H
+﻿#ifndef EXCEPTION_H
 #define EXCEPTION_H
 #include "OMXMLCommon.h"
 

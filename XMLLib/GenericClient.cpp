@@ -1,4 +1,4 @@
-#include "AILib.h"
+ï»¿#include "AILib.h"
 #include "GenericClient.h"
 #include "Player.h"
 #include "Message.h"
@@ -13,8 +13,8 @@ static const UINT ieTable[][4] = {
     { 1, 2, 3, 0},
 };
 
-static const TCHAR *ieStrTable[] = {_T("“Œ"),_T("“ì"),_T("¼"),_T("–k")};
-static const TCHAR *posStrTable[] = {_T("©•ª"),_T("‰º‰Æ"),_T("‘Î–Ê"),_T("ã‰Æ")};
+static const TCHAR *ieStrTable[] = {_T("æ±"),_T("å—"),_T("è¥¿"),_T("åŒ—")};
+static const TCHAR *posStrTable[] = {_T("è‡ªåˆ†"),_T("ä¸‹å®¶"),_T("å¯¾é¢"),_T("ä¸Šå®¶")};
 
 OMGenericClient::OMGenericClient()
     : m_gamestate(OM_GAME_STATE_STOPED),
@@ -40,7 +40,7 @@ void OMGenericClient::connect(OM_CONNECTION_TYPE contype,int session)
         do {
             rescom = sendCommand(com,text);
             if(rescom >= 0 && rescom != RESPONCE_OK) {
-                /* Ú‘±¸”s */
+                /* æ¥ç¶šå¤±æ•— */
                 errmessage.arg("error connection responce code = %1",rescom);
                 throw OMConnectionException(errmessage);
             }
@@ -55,7 +55,7 @@ void OMGenericClient::connect(OM_CONNECTION_TYPE contype,int session)
 
         m_pCurTaku = &m_aTakuAll[0];
 
-        /* ƒRƒ“ƒsƒ…[ƒ^‚Ì©“®ƒT[ƒ`(TODO) */
+        /* ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ã‚¿ã®è‡ªå‹•ã‚µãƒ¼ãƒ(TODO) */
         break;
     case OM_CONNECTION_TYPE_CREATE:
     case OM_CONNECTION_TYPE_CONNECT:
@@ -78,7 +78,7 @@ void OMGenericClient::connect(OM_CONNECTION_TYPE contype,int session)
             do {
                 rescom = sendCommand(com,text);
                 if(rescom >= 0 && rescom != RESPONCE_OK) {
-                    /* Ú‘±¸”s */
+                    /* æ¥ç¶šå¤±æ•— */
                     errmessage.arg("error connection responce code = %1",rescom);
                     throw OMConnectionException(errmessage);
                 }
@@ -143,7 +143,7 @@ void OMGenericClient::debugPrint()
                     }
                 }
             }
-            mestext.Format(_T("DebugFŒü’®” %d %s\r\n"),tenpai_list.shanten,tmptext);
+            mestext.Format(_T("Debugï¼šå‘è´æ•° %d %s\r\n"),tenpai_list.shanten,tmptext);
 
             appendMessageText(mestext);
 
@@ -236,11 +236,11 @@ void OMGenericClient::debugPrint()
                 CString str;
                 pai.set(ibest[j]);
                 pai.getName(str);
-                tmptext2.Format(_T("%dˆÊ[%s](%.1f–‡) "),j+1,str,dbest[j]);
+                tmptext2.Format(_T("%dä½[%s](%.1fæš) "),j+1,str,dbest[j]);
                 tmptext += tmptext2;
             }
 
-            mestext.Format(_T("DebugFƒcƒ‚—\‘z %s\r\n"),tmptext);
+            mestext.Format(_T("Debugï¼šãƒ„ãƒ¢äºˆæƒ³ %s\r\n"),tmptext);
 
             appendMessageText(mestext);
 
@@ -250,11 +250,11 @@ void OMGenericClient::debugPrint()
                 CString str;
                 pai.set(iworst[j]);
                 pai.getName(str);
-                tmptext2.Format(_T("%dˆÊ[%s](%.1f%%) "),j+1,str,dworst[j] * 100);
+                tmptext2.Format(_T("%dä½[%s](%.1f%%) "),j+1,str,dworst[j] * 100);
                 tmptext += tmptext2;
             }
 
-            mestext.Format(_T("DebugFŠëŒ¯”v—\‘z %s\r\n"),tmptext);
+            mestext.Format(_T("Debugï¼šå±é™ºç‰Œäºˆæƒ³ %s\r\n"),tmptext);
 
             appendMessageText(mestext);
         }
@@ -298,7 +298,7 @@ OM_SYNC_STATE OMGenericClient::gameSync()
 
         node = OMGetElement(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_ERROR));
 
-        /* ƒGƒ‰[‚ğŠm”F‚µ‚½‚ço—Í‚·‚é [TODO] */
+        /* ã‚¨ãƒ©ãƒ¼ã‚’ç¢ºèªã—ãŸã‚‰å‡ºåŠ›ã™ã‚‹ [TODO] */
         if(!OMIsNull(node)){
             return OM_SYNC_STATE_ERROR;
         }
@@ -329,7 +329,7 @@ OM_SYNC_STATE OMGenericClient::gameSync()
         nodeListTaku = OMGetElementList(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_TAKU));
 
         if(OMIsEmpty(nodeListTaku) || OMListLength(nodeListTaku) < m_iPlayerNum + m_iCompNum) {
-            /* ‚à‚µŒ©‚Â‚©‚ç‚È‚©‚Á‚½‚çƒ^ƒCƒ€ƒAƒEƒg‚à‚µ‚­‚ÍƒT[ƒo[ƒGƒ‰[‚Ì‰Â”\«‚ª‚ ‚é‚Ì‚ÅAƒXƒe[ƒ^ƒX‚Ìæ“¾‚ğ‚â‚è’¼‚· */
+            /* ã‚‚ã—è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸã‚‰ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆã‚‚ã—ãã¯ã‚µãƒ¼ãƒãƒ¼ã‚¨ãƒ©ãƒ¼ã®å¯èƒ½æ€§ãŒã‚ã‚‹ã®ã§ã€ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã®å–å¾—ã‚’ã‚„ã‚Šç›´ã™ */
             return OM_SYNC_STATE_ERROR;
         }
 
@@ -374,7 +374,7 @@ OM_SYNC_STATE OMGenericClient::gameSync()
                 }
 
                 if(m_players[i].m_bIsComp){
-                    /* ƒRƒ“ƒsƒ…[ƒ^‚Ìƒ^[ƒ“ */
+                    /* ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ã‚¿ã®ã‚¿ãƒ¼ãƒ³ */
                     OMPlayerActionParam param;
                     param.m_iIndex1 = m_pCurTaku->getMemberIndex(&m_players[i]);
                     param.m_iKaze1 = m_pCurTaku->m_members[param.m_iIndex1].m_gamestate.m_iZikaze - 1;
@@ -386,7 +386,7 @@ OM_SYNC_STATE OMGenericClient::gameSync()
                         ret = m_players[i].onPlayerAction(m_pCurTaku,param);
                     }
                     if(code == CODE_WAITCOMMAND){
-                        /* ƒRƒ“ƒsƒ…[ƒ^‚Ìs“®‚ğæ“¾ */
+                        /* ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ã‚¿ã®è¡Œå‹•ã‚’å–å¾— */
                         int ind = m_pCurTaku->getMemberIndex(&m_players[i]);
                         command.m_player = m_players[i];
                         if(m_pCurTaku->m_members[ind].m_aCommandList[0].m_iId == ID_START){
@@ -401,17 +401,17 @@ OM_SYNC_STATE OMGenericClient::gameSync()
                                 do{
                                     rescom = sendCommand(command,recvMessage);
                                     if(rescom >= 0 && rescom != RESPONCE_OK){
-                                        /* ˆÙí”­¶I */
+                                        /* ç•°å¸¸ç™ºç”Ÿï¼ */
                                         // AfxDebugBreak();
                                     }
                                 }while(rescom < 0);
                             }
                         }
                     }
-                    /* ƒRƒ“ƒsƒ…[ƒ^‚Ìƒ^[ƒ“(I‚í‚è) */
+                    /* ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ã‚¿ã®ã‚¿ãƒ¼ãƒ³(çµ‚ã‚ã‚Š) */
                 }else{
-                    /* ƒvƒŒ[ƒ„[‚Ìƒ^[ƒ“(I‚í‚è) */
-                    // ©•ªˆ¶‚ÌƒƒbƒZ[ƒW‚ğˆø‚Á’£‚èo‚µ‚Ä‚­‚é
+                    /* ãƒ—ãƒ¬ãƒ¼ãƒ¤ãƒ¼ã®ã‚¿ãƒ¼ãƒ³(çµ‚ã‚ã‚Š) */
+                    // è‡ªåˆ†å®›ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’å¼•ã£å¼µã‚Šå‡ºã—ã¦ãã‚‹
                     nodeTaku = OMListItem(nodeListTaku,i);
 #if 0
                     nodeList = OMGetElementList(nodeTaku,_T(TAG_MESSAGE));
@@ -424,7 +424,7 @@ OM_SYNC_STATE OMGenericClient::gameSync()
 
                         index = m_pCurTaku->getMemberIndex(&mes.m_playerFrom);
 
-                        mestext.Format(_T("%s[%s]F%s\r\n"),mes.m_playerFrom.m_strName,
+                        mestext.Format(_T("%s[%s]ï¼š%s\r\n"),mes.m_playerFrom.m_strName,
                                        ieStrTable[m_pCurTaku->m_members[index].m_gamestate.m_iZikaze - 1],mes.m_strText);
 
                         if(m_pListener != NULL){
@@ -452,7 +452,7 @@ OM_SYNC_STATE OMGenericClient::gameSync()
                         if(code != CODE_WAITSYNC && code != CODE_BUSY && m_pCurTaku->m_event.m_command.m_iType == TYPE_RIICHI
                                 && m_pCurTaku->m_event.m_command.m_player.m_iId != m_players[i].m_iId
                                 && !m_pCurTaku->m_members[m_iPlayerIndex].m_gamestate.m_bRiichi && m_gamestate != OM_GAME_STATE_WAITCOMMAND){
-                            // ƒ‰ƒCƒoƒ‹‚ªƒŠ[ƒ`
+                            // ãƒ©ã‚¤ãƒãƒ«ãŒãƒªãƒ¼ãƒ
                             m_pListener->onRivalRiichi();
                         }
 
@@ -800,7 +800,7 @@ UINT OMGenericClient::MJSendMessage(void *inst, UINT message, UINT param1, UINT 
                 }
 
                 mes.m_playerFrom = *m_pCurPlayer;
-                /* UTF-8‚É•ÏŠ·‚·‚é TODO */
+                /* UTF-8ã«å¤‰æ›ã™ã‚‹ TODO */
                 mes.m_strText = (const char *)param1;
 
                 //queueMessage(mes);
@@ -851,7 +851,7 @@ void OMGenericClient::sendCommand(OMArray<OMCommand>& aCommand, OMString& recvMe
         aCommand[i].toXML(doc,elemRoot);
     }
 
-    /* ƒLƒ…[‚É“ü‚Á‚½ƒƒbƒZ[ƒW‚ğ‘—M */
+    /* ã‚­ãƒ¥ãƒ¼ã«å…¥ã£ãŸãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’é€ä¿¡ */
 
     OMToXML(doc,sendMessage);
 
@@ -886,13 +886,13 @@ int OMGenericClient::sendCommand(OMCommand &command, OMString &recvMessage)
         command.toXML(doc,elemRoot);
     }
 
-    /* ƒLƒ…[‚É“ü‚Á‚½ƒƒbƒZ[ƒW‚ğ‘—M(TODO) */
+    /* ã‚­ãƒ¥ãƒ¼ã«å…¥ã£ãŸãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’é€ä¿¡(TODO) */
 
     OMToXML(doc,sendMessage);
 
     try{
         sendString(sendMessage,recvMessage);
-        /* óMƒƒbƒZ[ƒW‚ğƒp[ƒX */
+        /* å—ä¿¡ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’ãƒ‘ãƒ¼ã‚¹ */
         OMLoadXML(doc,recvMessage);
 
         node = OMGetElement(doc,_T(TAG_OPENMAHJONGSERVER "/" TAG_RESPONCE "/" TAG_CODE));
@@ -923,7 +923,7 @@ void OMGenericClient::setPlayerName(OMArray<OMString> &playernames, OMArray<OMSt
     m_iCompNum = compnames.size();
 
     if(m_iPlayerNum + m_iCompNum > 4){
-        /* ƒpƒ‰ƒ[ƒ^‚ª•s³ */
+        /* ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãŒä¸æ­£ */
         OMString mes("playernum + compnum > 4");
         throw OMIllegalParamException(mes);
     }

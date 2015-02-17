@@ -1,4 +1,4 @@
-#ifndef TAKULISTENER_H
+﻿#ifndef TAKULISTENER_H
 #define TAKULISTENER_H
 #include "Taku.h"
 #include "Member.h"

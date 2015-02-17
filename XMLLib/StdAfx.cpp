@@ -1,6 +1,6 @@
-// stdafx.cpp : •W€ƒCƒ“ƒNƒ‹[ƒhƒtƒ@ƒCƒ‹‚ðŠÜ‚Þƒ\[ƒX ƒtƒ@ƒCƒ‹
-//	commonXML.pch ¶¬‚³‚ê‚éƒvƒŠƒRƒ“ƒpƒCƒ‹Ïƒwƒbƒ_[
-//	stdafx.obj ¶¬‚³‚ê‚éƒvƒŠƒRƒ“ƒpƒCƒ‹Ïƒ^ƒCƒvî•ñ
+ï»¿// stdafx.cpp : æ¨™æº–ã‚¤ãƒ³ã‚¯ãƒ«ãƒ¼ãƒ‰ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å«ã‚€ã‚½ãƒ¼ã‚¹ ãƒ•ã‚¡ã‚¤ãƒ«
+//	commonXML.pch ç”Ÿæˆã•ã‚Œã‚‹ãƒ—ãƒªã‚³ãƒ³ãƒ‘ã‚¤ãƒ«æ¸ˆãƒ˜ãƒƒãƒ€ãƒ¼
+//	stdafx.obj ç”Ÿæˆã•ã‚Œã‚‹ãƒ—ãƒªã‚³ãƒ³ãƒ‘ã‚¤ãƒ«æ¸ˆã‚¿ã‚¤ãƒ—æƒ…å ±
 
 #include "stdafx.h"
 

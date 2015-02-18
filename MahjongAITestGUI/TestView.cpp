@@ -16,27 +16,27 @@ static char THIS_FILE[] = __FILE__;
 
 CTestView::CTestView()
 {
-	m_haigaList.loadImages(_T("haiga/man"),RGB(0,255,255),_T("gif"),1);
-	m_haigaList.loadImages(_T("haiga/pin"),RGB(0,255,255),_T("gif"),1);
-	m_haigaList.loadImages(_T("haiga/sou"),RGB(0,255,255),_T("gif"),1);
-	m_haigaList.loadImages(_T("haiga/ton"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/nan"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/sha"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/pei"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/haku"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/hatu"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/tyun"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/ura"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/manred"),RGB(0,255,255),_T("gif"),1);
-	m_haigaList.loadImages(_T("haiga/pinred"),RGB(0,255,255),_T("gif"),1);
-	m_haigaList.loadImages(_T("haiga/soured"),RGB(0,255,255),_T("gif"),1);
-	m_haigaList.loadImages(_T("haiga/tonred"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/nanred"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/shared"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/peired"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/hakured"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/hatured"),RGB(0,255,255),_T("gif"),-1);
-	m_haigaList.loadImages(_T("haiga/tyun"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/man"),RGB(0,255,255),_T("gif"),1);
+	m_haigaList.loadImages(_T("../res/haiga/pin"),RGB(0,255,255),_T("gif"),1);
+	m_haigaList.loadImages(_T("../res/haiga/sou"),RGB(0,255,255),_T("gif"),1);
+	m_haigaList.loadImages(_T("../res/haiga/ton"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/nan"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/sha"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/pei"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/haku"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/hatu"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/tyun"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/ura"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/manred"),RGB(0,255,255),_T("gif"),1);
+	m_haigaList.loadImages(_T("../res/haiga/pinred"),RGB(0,255,255),_T("gif"),1);
+	m_haigaList.loadImages(_T("../res/haiga/soured"),RGB(0,255,255),_T("gif"),1);
+	m_haigaList.loadImages(_T("../res/haiga/tonred"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/nanred"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/shared"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/peired"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/hakured"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/hatured"),RGB(0,255,255),_T("gif"),-1);
+	m_haigaList.loadImages(_T("../res/haiga/tyun"),RGB(0,255,255),_T("gif"),-1);
 
 	reset();
 }

@@ -28,7 +28,7 @@
 #include "AILib.h"
 #include "MahjongScoreAI.h"
 
-#define AIDUMP
+//#define AIDUMP
 #ifdef AIDUMP
 //#define AIDUMP_1
 //#define AIDUMP_2

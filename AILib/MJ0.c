@@ -27,6 +27,7 @@
 
 ****************************************************************************************/
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -110,7 +111,7 @@ int MJ0(/* inputs */
 	int aRiichi[3];
 	int aMentsu[3][5];
 	int aMachi[34];
-	
+
 	iniMentsu[0] = 0;
 	iniMentsu[1] = 0;
 	iniMentsu[2] = 0;
@@ -343,6 +344,7 @@ int MJ0(/* inputs */
 			mindex = rand() % ((4 - iniMentsu[j]) * 3 + 2); // どの牌を当たり牌にするか
 			if(mindex >= (4 - iniMentsu[j]) * 3){
 				/* 単騎待ち */
+				assert(aMentsu[j][4] >= 0 && aMentsu[j][4] < 34);
 				aMachi[aMentsu[j][4]] = 1;
           
 
@@ -351,10 +353,12 @@ int MJ0(/* inputs */
 					for(k=0;k<4;k++){
 						if((aMentsu[j][k] % 7) != 6 && 
 							(aMentsu[j][k] / 7)*9 + (aMentsu[j][k] % 7) + 3 == aMentsu[j][4]){
+							assert(aMentsu[j][4] >= 3);
 							aMachi[aMentsu[j][4] - 3] = 1;
 						}
 						if((aMentsu[j][k] % 7) != 0 && 
 							(aMentsu[j][k] / 7)*9 + (aMentsu[j][k] % 7) - 1 == aMentsu[j][4]){
+							assert(aMentsu[j][4] + 3 < 34);
 							aMachi[aMentsu[j][4] + 3] = 1;
 						}
 					}
@@ -366,15 +370,20 @@ int MJ0(/* inputs */
 				if(aMentsu[j][index] < 21){
 					/* 順子 */
 					pai = (aMentsu[j][index] / 7) * 9 + (aMentsu[j][index] % 7);
+					assert(pai >= 0 && pai < 34);
 					if((mindex % 3) == 1){
 						/* カンチャン */
-						aMachi[pai] = 1;
+						aMachi[pai+1] = 1;
 
 						/* 暗刻カブリ */
-						if(aMentsu[j][4] == pai + 1){
-							aMachi[pai-1] = 1;
+						if(aMentsu[j][4] == pai + 2){
+							if (pai < 0) {
+								assert(pai >= 0);
+							}
+							aMachi[pai] = 1;
 						}else if(aMentsu[j][4] == pai - 1){
-							aMachi[pai+1] = 1;
+							assert(pai + 2 < 34);
+							aMachi[pai + 2] = 1;
 						}
 
 					}else if((mindex % 3) == 0 && (pai % 9) == 6){
@@ -382,9 +391,11 @@ int MJ0(/* inputs */
 						aMachi[pai] = 1;
 						/* 暗刻カブリ */
 						if(aMentsu[j][4] == pai + 1){
-							aMachi[pai+2] = 1;
+							assert(pai + 2 < 34);
+							aMachi[pai + 2] = 1;
 						}else if(aMentsu[j][4] == pai + 2){
-							aMachi[pai+1] = 1;
+							assert(pai + 1 < 34);
+							aMachi[pai + 1] = 1;
 						}
 
 					}else if((mindex % 3) == 2 && (pai % 9) == 0){
@@ -392,13 +403,15 @@ int MJ0(/* inputs */
 						aMachi[pai+2] = 1;
 						/* 暗刻カブリ */
 						if(aMentsu[j][4] == pai){
-							aMachi[pai+1] = 1;
+							assert(pai + 1 < 34);
+							aMachi[pai + 1] = 1;
 						}else if(aMentsu[j][4] == pai + 1){
 							aMachi[pai] = 1;
 						}
 					}else{
 						/* 両面 */
 						if((mindex % 3) == 0){
+							assert(pai + 3 < 34);
 							aMachi[pai] = 1;
 							aMachi[pai+3] = 1;
 							/* 暗刻カブリ */
@@ -409,7 +422,9 @@ int MJ0(/* inputs */
 							}
 
 						}else{
-							aMachi[pai+2] = 1;
+							assert(pai + 2 < 34);
+							assert(pai >= 1);
+							aMachi[pai + 2] = 1;
 							aMachi[pai-1] = 1;
 							/* 暗刻カブリ */
 							if(aMentsu[j][4] == pai){
@@ -422,6 +437,7 @@ int MJ0(/* inputs */
 					}
 				}else{
 					/* 刻子はシャンポン待ち */
+					assert(aMentsu[j][4] >= 0 && aMentsu[j][4] < 34);
 					aMachi[aMentsu[j][index] - 21] = 1;
 					aMachi[aMentsu[j][4]] = 1;
 				}

@@ -19,6 +19,7 @@
   ’¼Ú‘¹ŠQAŠÔÚ‘¹ŠQA‹ô”­“I‚È‘¹ŠQA“Á•Ê‘¹ŠQA’¦”±“I‘¹ŠQA‚Ü‚½‚ÍŒ‹‰Ê‘¹ŠQ‚É‚Â‚¢‚ÄAˆêØÓ”C‚ğ•‰‚í‚È‚¢‚à‚Ì‚Æ‚µ‚Ü‚·B 
 
 ****************************************************************************************/
+#include <assert.h>
 #include <string.h>
 #include "AILib.h"
 #ifdef __cplusplus
@@ -703,7 +704,7 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,v
     int count_stack[16];
     int mentsu[AI_TEHAI_LIMIT + 20];
     int stackpos;
-    int i, j, initresult, flag;
+    int i, j, flag;
 	int paicount_size;
 	int paicount;
 	AGARI_LIST agari_list;
@@ -778,10 +779,8 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,v
 		memset(mentsu_stack[0],0,sizeof(int)*(AI_TEHAI_LIMIT + 20));
 		
         /* ’Tõ‚ğŠJn‚·‚é–Êq‚Ì‰Šúó‘Ô‚ğİ’è */
-        initresult = setstartmentsu(paiarray, mentsu_stack[0],atamapos);
-        if (initresult != 0){
-            return 0;
-		}
+		mentsu_stack[0][atamapos] = AI_ATAMA;
+		mentsu_stack[0][atamapos+1] = AI_ATAMA;
 
 		memcpy(paicountlist[0],paicountlisttmp,sizeof(paicountlisttmp));
 		for(j=0;j<paicount_size;j++){
@@ -828,6 +827,7 @@ int search_agari(int *paiarray,int paiSize,AGARI_LIST *pList,int actualPaiSize,v
 					paicount = 0;
 					for(j=0;j<paiSize;j++){
 						if(mentsu_stack[stackpos][j] != AI_UKIHAI){
+							assert(paicount < 14);
 							agari_list.tehai[paicount++] = paiarray[j];
 						}
 					}

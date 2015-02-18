@@ -20,22 +20,27 @@
 
 ****************************************************************************************/
 #include <math.h>
+#include <stdlib.h>
 #include "MahjongScoreAI.h"
 #include "AILib.h"
 
 /* ”v‹——£–ˆ‚ÌŠú‘Ò’l‚Ì•â³ŒW” */
 static double dist_coef[] = {
     0.1,
-    1.0,
+    0.5,
+    0.9,
     0.8,
-    0.6,
     0.2,
-    0.4,
-    0.3,
-    0.3,
-    0.3,
-    0.3
+    0.6,
+    0.5,
+    0.5,
+    0.5,
+    0.5
 };
+
+static int compare_hai(const void *a, const void *b){
+	return (*(int*)a & 0xFF) - (*(int*)b & 0xFF);
+}
 
 
 #if 0
@@ -87,7 +92,6 @@ double MahjongAIType1::evalSutehaiSub(MahjongAIState &param,int hai)
 	int paicount;
 	double nokorihais;
 	double nokoribuf[34];
-	int tmp_tecnt[34];
 
 	memcpy(&resulthai,&param.tehai,sizeof(resulthai));
 
@@ -97,11 +101,11 @@ double MahjongAIType1::evalSutehaiSub(MahjongAIState &param,int hai)
 		paicount = 1;
 	}else{
 		/* 10–‡ˆÈã‚Íƒcƒ‚‚ç‚È‚¢ */
-		paicount = remain/4 > 10 ? 10 : remain/4;
+		paicount = remain/4 > 8 ? 8 : remain/4;
 	}
 
 	//if(paicount < 5){
-		paicount = 5;
+	//	paicount = 5;
 	//}
 
 	for(i=0;i<SIMULATECOUNT;i++){
@@ -111,7 +115,7 @@ double MahjongAIType1::evalSutehaiSub(MahjongAIState &param,int hai)
 		}
 		nokorihais = tmp;
 		memcpy(nokoribuf,param.nokori,sizeof(nokoribuf));
-		memcpy(tmp_tecnt,param.te_cnt,sizeof(tmp_tecnt));
+		memcpy(simtehai, param.tehai.tehai, sizeof(param.tehai.tehai));
 		
 		for(j=0;j<paicount;j++){
 			index = (nokorihais + 1.0) * (double)rand() / (double)(1.0 + RAND_MAX);
@@ -119,7 +123,7 @@ double MahjongAIType1::evalSutehaiSub(MahjongAIState &param,int hai)
 			for(k=0;k<34;k++){
 				tmp+=nokoribuf[k];
 				if(index < tmp){
-					tmp_tecnt[k]++;
+					simtehai[param.tehai.tehai_max + j] = 0x100 + k;
 					tmp2 = nokoribuf[k] > 1.0 ? 1.0 : nokoribuf[k];
 					nokoribuf[k]-=tmp2;
 					nokorihais -= tmp2;
@@ -128,20 +132,10 @@ double MahjongAIType1::evalSutehaiSub(MahjongAIState &param,int hai)
 			}
 		}
 
-		/* –Ê“|‚¾‚¯‚ÇA‚Ü‚½è”v‚Ì”z—ñ‚É–ß‚· (b’è) */
-		painum = 0;
-		for(j=0;j<34;j++){
-			for(k=0;k<tmp_tecnt[j];k++){
-				simtehai[painum++] = (j << 8);
-			}
-		}
-
-		for(k=0;k<param.tehai.tehai_max+paicount;k++){
-			simtehai[k] = (simtehai[k] >> 8) | ((simtehai[k] & 0xFF) << 8);
-		}
+		qsort(simtehai, param.tehai.tehai_max + paicount, sizeof(int), compare_hai);
 
 		maxpts = search_agari(simtehai,param.tehai.tehai_max+paicount,&list,param.tehai.tehai_max+1,&param,getPoint);
-		value += (double)maxpts/SIMULATECOUNT;
+		value += (double)maxpts * 100 /SIMULATECOUNT;
 		if(maxpts > 0){
 			if(list.tehai[0] == 0 && list.tehai[1] == 1 && list.tehai[2] == 2){
 				debug++;

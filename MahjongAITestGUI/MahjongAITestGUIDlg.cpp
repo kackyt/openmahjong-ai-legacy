@@ -13,6 +13,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#pragma setlocale("Japanese")
+
 #define WM_REFRESH (WM_USER + 0)
 
 /////////////////////////////////////////////////////////////////////////////
@@ -194,6 +196,7 @@ UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 			memset(&gs,0,sizeof(gs));
 			gs.gamestate.zikaze = 0;
 			gs.gamestate.bakaze = 0;
+			gs.gamestate.tsumo = 1;
 
 			for(i=0;i<pTehai->ankan_max;i++){
 				gs.gamestate.nakilist[gs.gamestate.naki].category = AI_ANKAN;
@@ -304,10 +307,12 @@ UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 		
 		break;
 	case MJMI_FUKIDASHI:
-		pObj->m_ctrlMessage.appendMessage(CString((const char*)param1));
-		//pObj->m_message += (const char*)param1;
-		printf((const char*)param1);
-		printf("\n");
+	{
+		CString str = CString((const char*)param1);
+		str += TEXT("\r\n");
+		pObj->m_ctrlMessage.appendMessage(str);
+		TRACE(str);
+	}
 		break;
 	case MJMI_GETSCORE:
 		ret = 25000;
@@ -347,22 +352,22 @@ BOOL CMahjongAITestGUIDlg::OnInitDialog()
 	// ウィンドウがダイアログでない時は自動的に設定しません。
 	SetIcon(m_hIcon, TRUE);			// 大きいアイコンを設定
 	SetIcon(m_hIcon, FALSE);		// 小さいアイコンを設定
-	
+
 	// TODO: 特別な初期化を行う時はこの場所に追加してください。
 	mysrand((unsigned int)time(NULL));
 	m_inst = NULL;
 	m_comp = NULL;
 #ifdef LOAD_LIBRARY
-	m_comp = ::LoadLibrary("MahjongAI.dll");
+	m_comp = ::LoadLibrary(TEXT("MahjongAI_type1.dll"));
 	if(m_comp == NULL){
-		printf("Cannot load Library.\n");
+		TRACE(TEXT("Cannot load Library.\n"));
 		return -1;
 	}
 
 	m_func = (MJPIFunc)::GetProcAddress(m_comp,"MJPInterfaceFunc");
 
 	if(m_func == NULL){
-		printf("Cannot load Function.\n");
+		TRACE(TEXT("Cannot load Function.\n"));
 		exit(1);
 	}
 #else
@@ -530,7 +535,7 @@ void CMahjongAITestGUIDlg::newKyoku(bool reset)
 		
 		/* シャッフル */
 		shuffle(m_aPai,136);
-		if((fp = fopen("paidata","ab")) != NULL){
+		if((fp = _tfopen(TEXT("paidata"),TEXT("ab"))) != NULL){
 			fwrite(m_aPai,136,1,fp);
 			fclose(fp);
 		}
@@ -625,12 +630,14 @@ void CMahjongAITestGUIDlg::OnDestroy()
 
 void CMahjongAITestGUIDlg::OnTimer(UINT nIDEvent) 
 {
+#if 0
 	// TODO: この位置にメッセージ ハンドラ用のコードを追加するかまたはデフォルトの処理を呼び出してください
 	UINT dbg;
 
 	dbg = m_func(m_inst,MJPI_DEBUG,0,0);
 
 	m_strDebug.Format("%u",dbg);
+#endif
 
 	UpdateData(FALSE);
 	
@@ -647,14 +654,14 @@ LRESULT CMahjongAITestGUIDlg::OnRefresh(WPARAM wParam,LPARAM lParam)
 		m_btnNext.EnableWindow(TRUE);
 	}
 
-	m_strKyoku.Format("%d",m_iKyoku);
-	m_strHoura.Format("%d",m_iHoura);
-	m_strTenpai.Format("%d",m_iTenpai);
-	m_strHoura2.Format("%d",m_iHoura2);
+	m_strKyoku.Format(TEXT("%d"),m_iKyoku);
+	m_strHoura.Format(TEXT("%d"), m_iHoura);
+	m_strTenpai.Format(TEXT("%d"), m_iTenpai);
+	m_strHoura2.Format(TEXT("%d"), m_iHoura2);
 	if(m_iKyoku > 0){
-		m_strTenpaiR.Format("(%02.1f%%)",(m_iTenpai + m_iHoura)* 100.0 / (double)m_iKyoku);
-		m_strHouraR.Format("(%02.1f%%)",m_iHoura * 100.0 / (double)m_iKyoku);
-		m_strHouraR2.Format("(%02.1f%%)",m_iHoura2 * 100.0 / (double)m_iKyoku);
+		m_strTenpaiR.Format(TEXT("(%02.1f%%)"),(m_iTenpai + m_iHoura)* 100.0 / (double)m_iKyoku);
+		m_strHouraR.Format(TEXT("(%02.1f%%)"), m_iHoura * 100.0 / (double)m_iKyoku);
+		m_strHouraR2.Format(TEXT("(%02.1f%%)"), m_iHoura2 * 100.0 / (double)m_iKyoku);
 	}
 
 
@@ -668,7 +675,7 @@ LRESULT CMahjongAITestGUIDlg::OnRefresh(WPARAM wParam,LPARAM lParam)
 void CMahjongAITestGUIDlg::OnBtnwait() 
 {
 	UpdateData(TRUE);
-	m_iWait = strtol((LPCTSTR)m_strWait,NULL,0);
+	m_iWait = _tcstol((LPCTSTR)m_strWait,NULL,0);
 
 	UpdateData(FALSE);	
 }
@@ -678,9 +685,9 @@ void CMahjongAITestGUIDlg::OnAi()
 	CString sPathName;
 	CFileDialog dlg(TRUE,
 		NULL,
-		"*.dll",
+		TEXT("*.dll"),
 		OFN_FILEMUSTEXIST,
-		"AI DLL | *.dll | 全てのﾌｧｲﾙ(*.*) | *.*||",
+		TEXT("AI DLL | *.dll | 全てのﾌｧｲﾙ(*.*) | *.*||"),
 		this);
 
 	if(dlg.DoModal() != IDOK){
@@ -695,14 +702,14 @@ void CMahjongAITestGUIDlg::OnAi()
 
 	m_comp = ::LoadLibrary(sPathName);
 	if(m_comp == NULL){
-		AfxMessageBox("Cannot load Library.");
+		AfxMessageBox(TEXT("Cannot load Library."));
 		return;
 	}
 
 	m_func = (MJPIFunc)::GetProcAddress(m_comp,"MJPInterfaceFunc");
 
 	if(m_func == NULL){
-		AfxMessageBox("Cannot load Library.");
+		AfxMessageBox(TEXT("Cannot load Library."));
 		return;
 	}
 
@@ -715,12 +722,12 @@ void CMahjongAITestGUIDlg::OnBtnseek()
 {
 	UpdateData(TRUE);
 
-	int seek = (int)strtol((LPCTSTR)m_strSeek,NULL,0);
+	int seek = (int)_tcstol((LPCTSTR)m_strSeek,NULL,0);
 
 	FILE *fp;
 	bool failed = true;
 
-	if((fp = fopen((LPCTSTR)m_strDumpFile,"rb")) != NULL){
+	if((fp = _tfopen((LPCTSTR)m_strDumpFile,TEXT("rb"))) != NULL){
 		if(fseek(fp,136*seek,SEEK_SET) == 0){
 			if(fread(&m_aPai,136,1,fp) > 0){
 				failed = false;
@@ -730,7 +737,7 @@ void CMahjongAITestGUIDlg::OnBtnseek()
 	}
 
 	if(failed){
-		AfxMessageBox("ファイル読み込みに失敗しました");
+		AfxMessageBox(TEXT("ファイル読み込みに失敗しました"));
 	}
 	
 }
@@ -740,9 +747,9 @@ void CMahjongAITestGUIDlg::OnBtnrddump()
 	CString sPathName;
 	CFileDialog dlg(TRUE,
 		NULL,
-		"*.*",
+		TEXT("*.*"),
 		OFN_FILEMUSTEXIST,
-		"全てのﾌｧｲﾙ(*.*) | *.*||",
+		TEXT("全てのﾌｧｲﾙ(*.*) | *.*||"),
 		this);
 
 	if(dlg.DoModal() != IDOK){

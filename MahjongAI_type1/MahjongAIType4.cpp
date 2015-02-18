@@ -27,6 +27,21 @@
 #include "MahjongScoreAI.h"
 #include "AILib.h"
 
+/* îvãóó£ñàÇÃä˙ë“ílÇÃï‚ê≥åWêî */
+static double dist_coef[] = {
+    0.1,
+    1.0,
+    0.8,
+    0.6,
+    0.2,
+    0.4,
+    0.3,
+    0.3,
+    0.3,
+    0.3
+};
+
+
 double probability(MahjongAIState &param,unsigned long count,double nokorisum)
 {
 	int cnt[34];
@@ -198,27 +213,38 @@ static DWORD WINAPI threadfunc(LPVOID pParam)
 									for(m=0;m<34;m++){
 
 										if(i != m && j != m && k != m && l != m && prm->pState->nokori[m] > 1 - prm->pState->te_cnt[m]){
+                                            int dist;
 											probability = 1.0;
 											rest = nokorisum;
+                                            dist = paidistance(prm->pState->tehai.tehai, i);
 											for(count = 0;count < 3 - prm->pState->te_cnt[i];count++){
 												probability *= (double)(prm->pState->nokori[i] - count) / (double) rest;
+                                                probability *= dist_coef[dist + 1];
 												rest -= 1.0;
 											}
-											for(count = 0;count < 3 - prm->pState->te_cnt[j];count++){
+                                            dist = paidistance(prm->pState->tehai.tehai, j);
+                                            for (count = 0; count < 3 - prm->pState->te_cnt[j]; count++){
 												probability *= (double)(prm->pState->nokori[j] - count) / (double) rest;
-												rest -= 1.0;
+                                                probability *= dist_coef[dist + 1];
+                                                rest -= 1.0;
 											}
-											for(count = 0;count < 3 - prm->pState->te_cnt[k];count++){
+                                            dist = paidistance(prm->pState->tehai.tehai, k);
+                                            for (count = 0; count < 3 - prm->pState->te_cnt[k]; count++){
 												probability *= (double)(prm->pState->nokori[k] - count) / (double) rest;
-												rest -= 1.0;
+                                                probability *= dist_coef[dist + 1];
+                                                rest -= 1.0;
 											}
-											for(count = 0;count < 3 - prm->pState->te_cnt[l];count++){
+                                            dist = paidistance(prm->pState->tehai.tehai, l);
+                                            for (count = 0; count < 3 - prm->pState->te_cnt[l]; count++){
 												probability *= (double)(prm->pState->nokori[l] - count) / (double) rest;
-												rest -= 1.0;
+                                                probability *= dist_coef[dist + 1];
+                                                rest -= 1.0;
 											}
-											for(count = 0;count < 2 - prm->pState->te_cnt[m];count++){
+                                            dist = paidistance(prm->pState->tehai.tehai, m);
+                                            for (count = 0; count < 2 - prm->pState->te_cnt[m]; count++){
 												probability *= (double)(prm->pState->nokori[m] - count) / (double) rest;
-												rest -= 1.0;
+                                                probability *= dist_coef[dist + 1];
+                                                rest -= 1.0;
 											}
 
 											/* élà√çèÇÕññû */
@@ -378,11 +404,15 @@ static DWORD WINAPI threadfunc2(LPVOID pParam)
 											if(cnt[n]){
 												c = cnt[n] - prm->pState->te_cnt[n];
 												assert(prm->pState->nokori[n] - c + 1 >= 0);
+                                                int dist = paidistance(prm->pState->tehai.tehai, n);
 
 												for(o=0;o<c;o++){
 													probability *= (double)(prm->pState->nokori[n] - o) / (double) rest;
+                                                    probability *= dist_coef[dist + 1];
+
 													if(prm->pState->nokori[n] - o < 0){
-														rest = rest;
+                                                        probability = 0;
+                                                        break;
 													}
 													rest-=1.0;
 												}
@@ -590,11 +620,14 @@ static DWORD WINAPI threadfunc3(LPVOID pParam)
 										if(cnt[n]){
 											c = cnt[n] - prm->pState->te_cnt[n];
 											assert(prm->pState->nokori[n] - c + 1 >= 0);
+                                            int dist = paidistance(prm->pState->tehai.tehai, n);
 
 											for(o=0;o<c;o++){
 												probability *= (double)(prm->pState->nokori[n] - o) / (double) rest;
+                                                probability *= dist_coef[dist + 1];
 												if(prm->pState->nokori[n] - o < 0){
-													rest = rest;
+                                                    probability = 0;
+                                                    break;
 												}
 												rest-=1.0;
 											}
@@ -818,11 +851,14 @@ static DWORD WINAPI threadfunc4(LPVOID pParam)
 									if(cnt[n]){
 										c = cnt[n] - prm->pState->te_cnt[n];
 										assert(prm->pState->nokori[n] - c + 1 >= 0);
+                                        int dist = paidistance(prm->pState->tehai.tehai, n);
 
 										for(o=0;o<c;o++){
 											probability *= (double)(prm->pState->nokori[n] - o) / (double) rest;
+                                            probability *= dist_coef[dist + 1];
 											if(prm->pState->nokori[n] - o < 0){
-												rest = rest;
+                                                probability = 0;
+                                                break;
 											}
 											rest-=1.0;
 										}
@@ -1064,11 +1100,14 @@ static DWORD WINAPI threadfunc5(LPVOID pParam)
 								if(cnt[n]){
 									c = cnt[n] - prm->pState->te_cnt[n];
 									assert(prm->pState->nokori[n] - c + 1 >= 0);
+                                    int dist = paidistance(prm->pState->tehai.tehai, n);
 
 									for(o=0;o<c;o++){
 										probability *= (double)(prm->pState->nokori[n] - o) / (double) rest;
+                                        probability *= dist_coef[dist + 1];
 										if(prm->pState->nokori[n] - o < 0){
-											rest = rest;
+                                            probability = 0;
+                                            break;
 										}
 										rest-=1.0;
 									}
@@ -1158,7 +1197,7 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
 		sum += tparam[i].ret;
 	}
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	sprintf(message,"[%d] %.2lf (%.2lf[%d],%.2lf[%d],%.2lf[%d],%.2lf[%d],%.2lf[%d])\r\n",hai,sum,tparam[0].ret,thread_count[0],tparam[1].ret,thread_count[1],tparam[2].ret,thread_count[2],tparam[3].ret,thread_count[3],tparam[4].ret,thread_count[4]);
 
 	MJSendMessage(MJMI_FUKIDASHI,(UINT)message,0);

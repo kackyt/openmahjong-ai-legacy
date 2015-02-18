@@ -23,6 +23,21 @@
 #include "MahjongScoreAI.h"
 #include "AILib.h"
 
+/* ”v‹——£–ˆ‚ÌŠú‘Ò’l‚Ì•â³ŒW” */
+static double dist_coef[] = {
+    0.1,
+    1.0,
+    0.8,
+    0.6,
+    0.2,
+    0.4,
+    0.3,
+    0.3,
+    0.3,
+    0.3
+};
+
+
 #if 0
 static int getPoint(AGARI_LIST *pList,void *ptr)
 {
@@ -35,14 +50,17 @@ static int getPoint(AGARI_LIST *pList,void *ptr)
 	int val,i,j;
 	int isChiitoi = 1;
 	MahjongAIState *obj=(MahjongAIState*)ptr;
-	double coef = 4.0;
+	double coef = 1.0;
 	int remain = MahjongScoreAI::MJSendMessage(MJMI_GETHAIREMAIN,0,0)/4;
 
 	memcpy(&resulthai,&obj->tehai,sizeof(resulthai));
 	
 	for(i=0;i<pList->tehai_max;i++){
 		//if(remain < pList->tehai[i] >> 8) return 0;
-		if(pList->tehai[i] >> 8) coef *= 0.8;
+        if (pList->tehai[i] >> 8){
+            int dist = paidistance(obj->tehai.tehai, pList->tehai[i]);
+            coef *= dist_coef[dist + 1];
+        }
 		//for(j=0;j<(pList->tehai[i] >> 8);j++) coef *= 0.95635;
 		pList->tehai[i] = pList->tehai[i] & 0xFF;
 	}
@@ -51,33 +69,8 @@ static int getPoint(AGARI_LIST *pList,void *ptr)
 	//qsort(&resulthai.tehai,pList->tehai_max,sizeof(int),(int (*)(const void*, const void*))compare_int);
 	val = MahjongScoreAI::MJSendMessage(MJMI_GETAGARITEN,(UINT)&resulthai,(UINT)resulthai.tehai[pList->tehai_max-1]);
 
-	/* Žµ‘ÎŽq•â³ */
-	if(pList->tehai_max == 14){
-		for(i=0;i<7;i++){
-			if(resulthai.tehai[2*i] != resulthai.tehai[2*i+1]){
-				isChiitoi = 0;
-				break;
-			}
-		}
-	}else{
-		isChiitoi = 0;
-	}
+    return val * coef;
 
-
-
-#if 1
-	if(isChiitoi){
-		return 180 * log(val * coef);
-	}else{
-		return 3000 * log(val * coef);
-	}
-#else
-	if(isChiitoi){
-		return val * coef / 16;
-	}else{
-		return val * coef;
-	}
-#endif
 }
 
 #endif

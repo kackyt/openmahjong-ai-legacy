@@ -565,7 +565,7 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 			}
 		}
 
-#ifdef DEBUG
+#ifdef _DEBUG
 		sprintf(comment,"mpoint %d,mcount %d,hais %d",mpoint,mcount,hais);
 
 		MJSendMessage(this,MJMI_FUKIDASHI,(UINT)comment,0);
@@ -701,7 +701,7 @@ int MahjongAI::calc_sutehai(void)
 
 	qsort(hp, size1, sizeof(HAIPOINT), (int(*)(const void*, const void*))compare_hp);
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	{
 		int max1=-1,max2=-1,max3=-1;
 		double maxd1=0,maxd2=0,maxd3=0;
@@ -817,7 +817,7 @@ int MahjongAI::nakability(int hai, int chii_flag)
 		}
 
 		if (furiten){
-#ifdef DEBUG
+#ifdef _DEBUG
 			(*MJSendMessage)(this,MJMI_FUKIDASHI,(UINT)TEXT("ƒtƒŠƒeƒ“"),0);
 #endif
 		}

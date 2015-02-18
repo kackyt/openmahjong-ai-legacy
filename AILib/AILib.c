@@ -1315,6 +1315,140 @@ int search_score(int *paiarray,int paiSize,void *inf,int (*callback)(int*paiarra
 	
 }
 
+/* θ”v‚Μ·•ª‚π•Τ‚·(“ό—Ν’lAo—Ν’l‚Ν”v‚Μν—ή•Κ‚ΜƒJƒEƒ“ƒg’l) */
+void tehai_diff_fromcount(const unsigned *tecount_now, unsigned *tecount_future, int n) {
+    int i;
+    for (i = 0; i < n; i++){
+        if (tecount_now[i] > tecount_future[i]) {
+            tecount_future[i] = tecount_now[i] - tecount_future[i];
+        }
+        else{
+            tecount_future[i] = 0;
+        }
+    }
+}
+
+/* θ”v‚Μ·•ª‚π•Τ‚·(“ό—Ν’l‚Νθ”v‚π—ρ‹“‚µ‚½”z—ρAo—Ν’l‚Νν—ή•Κ‚ΜƒJƒEƒ“ƒg’l) */
+void tehai_diff(const unsigned *tehai_now, const unsigned *tehai_future, unsigned *result) {
+    unsigned tecount_now[34] = { 0 };
+    int i;
+    memset(result, 0, sizeof(unsigned)* 34);
+
+    /* ν—ή•Κ‚ΜƒJƒEƒ“ƒg’l‚πvZ‚·‚ι */
+    for (i = 0; i < 14; i++){
+        tecount_now[tehai_now[i]]++;
+        result[tehai_future[i]]++;
+    }
+
+    tehai_diff_fromcount(tecount_now, result, 34);
+}
+
+/* θ”v‚Ζ“Α’θ‚Μ”v‚Ζ‚Μ‹——£‚π•Τ‚·
+”z—ρ‚Νω‚Ιƒ\[ƒg‚³‚κ‚Δ‚Ά‚ι‚Ζ‰Ό’θ‚·‚ι
+”z—ρ‚©‚η“Α’θ‚Μ”v‚π”²‚«o‚·‘€μ‚π‚·‚ικ‡A‚»‚Μκ‚Ι‚Ν0x3F(34‚ζ‚θ‘ε‚«‚―‚κ‚Ξ‚ζ‚Ά)‚π“ό‚κ‚ιB
+
+θ”v‚Ζ‚Μ‹——£‚Ζ‚Ν
+1)””v‚Μκ‡
+θ”v‚Μ’†‚Ε‚»‚Μθ”v‚Ι‹ί‚Ά””v‚Μ”‚Ζ‚Μ·‚Μβ‘Ξ’l
+—α‚¦‚Ξκδέ‚π‚Α‚Δ‚Ά‚½‚Ζ‚µ‚Δ
+
+θ”v‚Ικδέ‚ª‚ ‚κ‚Ξ0
+“ρδέ‚ª‚ ‚κ‚Ξ1
+Oδέ‚Θ‚η2
+‚Ζ‚Θ‚ι
+θ”v‚Ιδέq‚ª‚Θ‚―‚κ‚Ξ-1(–³ΐ‘ε)‚Ζ‚Θ‚ι
+
+2)”v‚Μκ‡
+θ”v‚Ι“―‚¶‚ΰ‚Μ‚π‚Α‚Δ‚Ά‚κ‚Ξ0A‚Θ‚―‚κ‚Ξ-1(–³ΐ‘ε)
+
+*/
+int paidistance(const unsigned *tehai, unsigned pai) {
+    int i;
+    unsigned prev = 0,n=0;
+    unsigned distp, distn;
+    pai &= 0x3F;
+
+
+    for (i = 0; i < 14; i++){
+        n = tehai[i] & 0x3F;
+        /* ‘¶έ‚µ‚Θ‚Ά”v‚Ν”ς‚Ξ‚·(θ”v‚π”²‚«o‚·κ‡‚Ι•Φ—) */
+        if (n>33) continue;
+
+        if (n >= pai) {
+            if (pai  >= 27) {
+                /* ”v */
+                return (n == pai) ? 0 : -1;
+            }
+            else if ((pai % 9) == 0) {
+                /* κδέAκυAκ“› */
+                return (n - pai < 9) ? (n - pai) : -1;
+            }
+            else if ((pai % 9) == 8) {
+                /* ‹γδέA‹γυA‹γ“› */
+                return (pai - prev < 9) ? (pai - prev) : -1;
+            }
+            else{
+                /* ‚»‚Μ‘Ό‚Μ”v */
+
+                /* γ‚λ‚Μ”v‚Ζ‚Μ‹——£(ν—ή‚ªα‚¤κ‡‚Ν99) */
+                if (n / 9 == pai / 9){
+                    distn = n - pai;
+                }
+                else{
+                    distn = 99;
+                }
+
+                /* ‘O‚Μ”v‚Ζ‚Μ‹——£(ν—ή‚ªα‚¤κ‡‚Ν99) */
+                if (prev / 9 == pai / 9){
+                    distp = pai - prev;
+                }
+                else {
+                    distp = 99;
+                }
+
+                /* ¬‚³‚Ά•ϋ‚π•Τ‚· */
+                if (distn > distp){
+                    return (distp < 9) ? distp : -1;
+                }
+                else{
+                    return (distn < 9) ? distn : -1;
+                }
+            }
+
+        }
+        prev = n;
+
+    }
+
+    /* ©‚Β‚©‚η‚Θ‚Ά(‚Β‚ά‚θ©•ª‚ªκ”Τγ‚λ) */
+    if (pai >= 27) {
+        /* ”v */
+        return -1;
+    }
+    else if ((pai % 9) == 0) {
+        /* κδέAκυAκ“› */
+        return -1;
+    }
+    else if ((pai % 9) == 8) {
+        /* ‹γδέA‹γυA‹γ“› */
+        return (pai - prev < 9) ? (pai - prev) : -1;
+    }
+    else{
+        /* ‚»‚Μ‘Ό‚Μ”v */
+
+        /* ‘O‚Μ”v‚Ζ‚Μ‹——£(ν—ή‚ªα‚¤κ‡‚Ν99) */
+        if (prev / 9 == pai / 9){
+            distp = pai - prev;
+        }
+        else {
+            distp = 99;
+        }
+
+        return (distp < 9) ? distp : -1;
+    }
+
+}
+
 
 double probabilityFunction(double base,int n){
 	double d = 1.0 - base;

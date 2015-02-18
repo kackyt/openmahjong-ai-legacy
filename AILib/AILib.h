@@ -118,6 +118,10 @@ extern int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pLis
 extern int search_score(int *paiarray,int paiSize,void *inf,int (*callback)(int*paiarray,int*mentsu,int length,int machi,void *inf));
 extern void make_resultitem(int *paiarray, int *mentsu, int length,RESULT_ITEM *item,GAMESTATE *gamestate,int agarihai,int machi);
 extern void make_resultitem_bh(RESULT_ITEM *item,GAMESTATE *gamestate);
+extern void tehai_diff_fromcount(const unsigned *tecount_now, unsigned *tecount_future, int n);
+extern void tehai_diff(const unsigned *tehai_now, const unsigned *tehai_future, unsigned *result);
+extern int paidistance(const unsigned *tehai, unsigned pai);
+
 extern double probabilityFunction(double,int);
 extern int permutation(int m,int n);
 extern int factorial(int n);

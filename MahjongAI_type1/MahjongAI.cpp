@@ -62,8 +62,8 @@ typedef enum {
 #define PLAYERNAME( method ) "KING" #method
 
 
-#define MAHJONGAITYPE MAHJONGAI(Type4)
-#define AINAME PLAYERNAME(Type4)
+#define MAHJONGAITYPE MAHJONGAI(Type1)
+#define AINAME PLAYERNAME(Type1)
 
 MAHJONGAITYPE ai;
 MahjongAIKikenhai kikenhai;

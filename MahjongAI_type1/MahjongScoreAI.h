@@ -25,7 +25,7 @@
 #include <float.h>
 #include "MIPIface.h"
 
-#define SIMULATECOUNT      (20000)
+#define SIMULATECOUNT      (5000)
 
 #define SCORE_KOUKEI_BIAS        (1.0)
 #define SCORE_MENTSU_BIAS        (1.0)

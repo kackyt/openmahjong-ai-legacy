@@ -29,20 +29,57 @@
 
 /* îvãóó£ñàÇÃä˙ë“ílÇÃï‚ê≥åWêî */
 static double dist_coef[] = {
-	0.1,
-	0.5,
-	0.9,
-	0.8,
-	0.2,
-	0.6,
-	0.5,
-	0.5,
-	0.5,
-	0.5
+	0.88,
+	0.90,
+	0.99,
+	0.98,
+	0.94,
+	0.97,
+	0.93,
+	0.93,
+	0.93,
+	0.93
 };
 
+/* îvÇÃéÌóﬁÇ≤Ç∆ÇÃä˙ë“ílÇÃï‚ê≥åWêî */
+static double kind_coef[] = {
+    0.97,
+    0.98,
+    0.99,
+    0.96,
+    0.95
+};
 
-double probability(MahjongAIState &param,unsigned long count,double nokorisum)
+static double getKindCoef(MahjongAIState *state,unsigned num){
+    num &= 0x3F;
+
+    if (num >= 31){
+        return kind_coef[3];
+    }
+    else if (num >= 27){
+        if (state->cha == num - 27 || state->kaze == num - 27){
+            return kind_coef[3];
+        }
+        else{
+            return kind_coef[4];
+        }
+    }
+    else{
+        switch (num % 9) {
+        case 0:
+        case 8:
+            return kind_coef[0];
+        case 1:
+        case 7:
+            return kind_coef[1];
+        default:
+            return kind_coef[2];
+        }
+    }
+}
+
+
+static double probability(MahjongAIState &param,unsigned long count,double nokorisum)
 {
 	int cnt[34];
 	int i,j;
@@ -108,7 +145,7 @@ double probability(MahjongAIState &param,unsigned long count,double nokorisum)
 
 }
 
-double score(MahjongAIState &param,unsigned long count)
+static double score(MahjongAIState &param,unsigned long count)
 {
 	int i;
 	RESULT_ITEM item;
@@ -174,9 +211,6 @@ typedef struct {
 	double ret;
 } THREAD_PARAM;
 
-static UINT thread_count[5];
-static UINT threadorder;
-
 
 /* 4Ç¬ÇÃçèéq+ì™ */
 static DWORD WINAPI threadfunc(LPVOID pParam)
@@ -220,36 +254,40 @@ static DWORD WINAPI threadfunc(LPVOID pParam)
 											for(count = 0;count < 3 - prm->pState->te_cnt[i];count++){
 												probability *= (double)(prm->pState->nokori[i] - count) / (double) rest;
                                                 probability *= dist_coef[dist + 1];
+                                                probability *= getKindCoef(prm->pState, i);
 												rest -= 1.0;
 											}
                                             dist = paidistance(prm->pState->tehai.tehai, j);
                                             for (count = 0; count < 3 - prm->pState->te_cnt[j]; count++){
 												probability *= (double)(prm->pState->nokori[j] - count) / (double) rest;
                                                 probability *= dist_coef[dist + 1];
+                                                probability *= getKindCoef(prm->pState, j);
                                                 rest -= 1.0;
 											}
                                             dist = paidistance(prm->pState->tehai.tehai, k);
                                             for (count = 0; count < 3 - prm->pState->te_cnt[k]; count++){
 												probability *= (double)(prm->pState->nokori[k] - count) / (double) rest;
                                                 probability *= dist_coef[dist + 1];
+                                                probability *= getKindCoef(prm->pState, k);
                                                 rest -= 1.0;
 											}
                                             dist = paidistance(prm->pState->tehai.tehai, l);
                                             for (count = 0; count < 3 - prm->pState->te_cnt[l]; count++){
 												probability *= (double)(prm->pState->nokori[l] - count) / (double) rest;
                                                 probability *= dist_coef[dist + 1];
+                                                probability *= getKindCoef(prm->pState, l);
                                                 rest -= 1.0;
 											}
                                             dist = paidistance(prm->pState->tehai.tehai, m);
                                             for (count = 0; count < 2 - prm->pState->te_cnt[m]; count++){
 												probability *= (double)(prm->pState->nokori[m] - count) / (double) rest;
                                                 probability *= dist_coef[dist + 1];
+                                                probability *= getKindCoef(prm->pState, l);
                                                 rest -= 1.0;
 											}
 
 											/* élà√çèÇÕññû */
 											sum += probability * 32000;
-											//thread_count[0]++;
 
 											if(m < 9){
 												m = 9;
@@ -270,8 +308,6 @@ static DWORD WINAPI threadfunc(LPVOID pParam)
 			}
 		}
 	}
-
-	thread_count[0] = threadorder++;
 
 	prm->ret = sum;
 
@@ -409,6 +445,7 @@ static DWORD WINAPI threadfunc2(LPVOID pParam)
 												for(o=0;o<c;o++){
 													probability *= (double)(prm->pState->nokori[n] - o) / (double) rest;
                                                     probability *= dist_coef[dist + 1];
+                                                    probability *= getKindCoef(prm->pState, n);
 
 													if(prm->pState->nokori[n] - o < 0){
                                                         probability = 0;
@@ -453,7 +490,6 @@ static DWORD WINAPI threadfunc2(LPVOID pParam)
 										assert(probability >= 0 && item.score >= 0);
 
 										sum += probability * item.score;
-										//thread_count[1]++;
 									}
 
 								}
@@ -465,7 +501,6 @@ static DWORD WINAPI threadfunc2(LPVOID pParam)
 		}
 	}
 
-	thread_count[1] = threadorder++;
 	prm->ret = sum;
 
 	return 0;
@@ -625,7 +660,8 @@ static DWORD WINAPI threadfunc3(LPVOID pParam)
 											for(o=0;o<c;o++){
 												probability *= (double)(prm->pState->nokori[n] - o) / (double) rest;
                                                 probability *= dist_coef[dist + 1];
-												if(prm->pState->nokori[n] - o < 0){
+                                                probability *= getKindCoef(prm->pState, n);
+                                                if (prm->pState->nokori[n] - o < 0){
                                                     probability = 0;
                                                     break;
 												}
@@ -679,7 +715,6 @@ static DWORD WINAPI threadfunc3(LPVOID pParam)
 		}
 	}
 
-	thread_count[2] = threadorder++;
 	prm->ret = sum;
 
 	return 0;
@@ -856,7 +891,8 @@ static DWORD WINAPI threadfunc4(LPVOID pParam)
 										for(o=0;o<c;o++){
 											probability *= (double)(prm->pState->nokori[n] - o) / (double) rest;
                                             probability *= dist_coef[dist + 1];
-											if(prm->pState->nokori[n] - o < 0){
+                                            probability *= getKindCoef(prm->pState, n);
+                                            if (prm->pState->nokori[n] - o < 0){
                                                 probability = 0;
                                                 break;
 											}
@@ -901,7 +937,6 @@ static DWORD WINAPI threadfunc4(LPVOID pParam)
 
 								sum += probability * item.score;
 
-								//thread_count[3]++;
 							}
 						}
 
@@ -910,7 +945,6 @@ static DWORD WINAPI threadfunc4(LPVOID pParam)
 			}
 		}
 	}
-	thread_count[3] = threadorder++;
 
 	prm->ret = sum;
 
@@ -1105,7 +1139,8 @@ static DWORD WINAPI threadfunc5(LPVOID pParam)
 									for(o=0;o<c;o++){
 										probability *= (double)(prm->pState->nokori[n] - o) / (double) rest;
                                         probability *= dist_coef[dist + 1];
-										if(prm->pState->nokori[n] - o < 0){
+                                        probability *= getKindCoef(prm->pState, n);
+                                        if (prm->pState->nokori[n] - o < 0){
                                             probability = 0;
                                             break;
 										}
@@ -1148,7 +1183,6 @@ static DWORD WINAPI threadfunc5(LPVOID pParam)
 							assert(probability >= 0 && item.score >= 0);
 
 							sum += probability * item.score;
-							//thread_count[4]++;
 						}
 					}
 				}
@@ -1156,7 +1190,6 @@ static DWORD WINAPI threadfunc5(LPVOID pParam)
 			}
 		}
 	}
-	thread_count[4] = threadorder++;
 
 	prm->ret = sum;
 
@@ -1181,9 +1214,7 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
 		tparam[i].ret = 0.0;
 	}
 
-	memset(thread_count,0,sizeof(thread_count));
 	memset(hThread,0,sizeof(hThread));
-	threadorder = 0;
 
 	hThread[0] = (HANDLE)CreateThread(NULL,0,threadfunc,&tparam[0],0,&dwID);
 	hThread[1] = (HANDLE)CreateThread(NULL,0,threadfunc2,&tparam[1],0,&dwID);
@@ -1198,7 +1229,7 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
 	}
 
 #ifdef _DEBUG
-	sprintf(message,"[%d] %.2lf (%.2lf[%d],%.2lf[%d],%.2lf[%d],%.2lf[%d],%.2lf[%d])\r\n",hai,sum,tparam[0].ret,thread_count[0],tparam[1].ret,thread_count[1],tparam[2].ret,thread_count[2],tparam[3].ret,thread_count[3],tparam[4].ret,thread_count[4]);
+	sprintf(message,"[%d] %.2lf (%.2lf,%.2lf,%.2lf,%.2lf,%.2lf)\r\n",hai,sum,tparam[0].ret,tparam[1].ret,tparam[2].ret,tparam[3].ret,tparam[4].ret);
 
 	MJSendMessage(MJMI_FUKIDASHI,(UINT)message,0);
 #endif

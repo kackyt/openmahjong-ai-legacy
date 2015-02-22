@@ -27,28 +27,54 @@
 #include "MahjongScoreAI.h"
 #include "AILib.h"
 
+#if 0
 /* ”v‹——£–ˆ‚ÌŠú‘Ò’l‚Ì•â³ŒW” */
 static double dist_coef[] = {
-	0.88,
-	0.90,
-	0.99,
-	0.98,
-	0.94,
-	0.97,
-	0.93,
-	0.93,
-	0.93,
-	0.93
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1
 };
 
 /* ”v‚Ìí—Ş‚²‚Æ‚ÌŠú‘Ò’l‚Ì•â³ŒW” */
 static double kind_coef[] = {
-    0.97,
-    0.98,
-    0.99,
-    0.96,
-    0.95
+	1,
+	1,
+	1,
+	1,
+	1
 };
+
+#else
+/* ”v‹——£–ˆ‚ÌŠú‘Ò’l‚Ì•â³ŒW” */
+static double dist_coef[] = {
+	0.988,
+	0.990,
+	0.999,
+	0.998,
+	0.994,
+	0.997,
+	0.993,
+	0.993,
+	0.993,
+	0.993
+};
+
+/* ”v‚Ìí—Ş‚²‚Æ‚ÌŠú‘Ò’l‚Ì•â³ŒW” */
+static double kind_coef[] = {
+    0.997,
+    0.998,
+    0.999,
+    0.996,
+    0.995
+};
+#endif
 
 static double getKindCoef(MahjongAIState *state,unsigned num){
     num &= 0x3F;
@@ -1197,7 +1223,107 @@ static DWORD WINAPI threadfunc5(LPVOID pParam)
 }
 
 
-#define THREADNUM (5)
+
+double chiitoipoint(THREAD_PARAM *prm, int cnt,unsigned long long tehaibitmap,unsigned long long bitmap,int pos){
+	double rest = 0.0;
+	double probability = 1.0;
+	RESULT_ITEM item;
+	GAMESTATE state;
+	int i,num;
+	double sum = 0.0;
+	int dist;
+
+	if (cnt == 7){
+		for (i = 0; i<34; i++){
+			rest += prm->pState->nokori[i];
+		}
+		memset(&state, 0, sizeof(state));
+		memset(&item, 0, sizeof(item));
+
+		state.tsumo = 1;
+		state.bakaze = prm->pState->kyoku / 4;
+		state.zikaze = prm->pState->cha;
+		state.count = 1;
+
+
+		for (i = 0,num = 0; i < 34; i++){
+			if (tehaibitmap & (1ULL << i)) {
+				item.mentsulist[num].category = AI_TOITSU;
+				item.mentsulist[num].pailist[0] = i;
+				item.mentsulist[num].pailist[1] = i;
+				num++;
+			}
+			else if (bitmap & (1ULL << i)) {
+				dist = paidistance(prm->pState->tehai.tehai, i);
+				for (int c = 0; c < 2 - prm->pState->te_cnt[i]; c++){
+					probability *= (double)(prm->pState->nokori[i] - c) / (double)rest;
+					probability *= dist_coef[dist + 1];
+					probability *= getKindCoef(prm->pState, i);
+					rest -= 1.0;
+				}
+				item.mentsulist[num].category = AI_TOITSU;
+				item.mentsulist[num].pailist[0] = i;
+				item.mentsulist[num].pailist[1] = i;
+				num++;
+			}
+		}
+
+		item.han = 0;
+		item.fu = 0;
+		item.mentsusize = 5;
+		item.menzen = 1;
+		item.machipos = 0;
+
+		item.machi = AI_MACHI_TANKI;
+		item.machihai = item.mentsulist[0].pailist[0];
+		item.machipos = 0;
+		make_resultitem_bh(&item, &state);
+
+		if (probability >= 0) {
+			return probability * item.score * 0.005;
+		}
+		else{
+			return 0;
+		}
+	}
+	else{
+		for (i = pos; i < 34; i++){
+			if (prm->pState->nokori[i] > 1 - prm->pState->te_cnt[i] && ((tehaibitmap & (1ULL << i)) == 0) ){
+				sum += chiitoipoint(prm, cnt + 1, tehaibitmap,bitmap | (1ULL << i) ,i+1);
+			}
+		}
+
+		return sum;
+	}
+}
+
+
+/* µ‘Îq */
+static DWORD WINAPI threadfunc6(LPVOID pParam)
+{
+	int count;
+	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
+	int toitsunum = 0;
+	unsigned long long bitmap = 0;
+
+	if (prm->pState->tehai.ankan_max > 0 || prm->pState->tehai.minkan_max > 0 || prm->pState->tehai.minkou_max > 0 || prm->pState->tehai.minshun_max > 0) return 0;
+
+	for (count = 0; count<34; count++){
+		if (prm->pState->te_cnt[count] >= 2) {
+			bitmap |= 1ULL << count;
+			toitsunum++;
+		}
+	}
+
+	if (toitsunum >= 3) {
+		prm->ret =  chiitoipoint(prm, toitsunum, bitmap,0,0) * 1000;
+	}
+
+	return 0;
+}
+
+
+#define THREADNUM (6)
 
 double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
 {
@@ -1221,6 +1347,7 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
 	hThread[2] = (HANDLE)CreateThread(NULL,0,threadfunc3,&tparam[2],0,&dwID);
 	hThread[3] = (HANDLE)CreateThread(NULL,0,threadfunc4,&tparam[3],0,&dwID);
 	hThread[4] = (HANDLE)CreateThread(NULL,0,threadfunc5,&tparam[4],0,&dwID);
+	hThread[5] = (HANDLE)CreateThread(NULL, 0, threadfunc6, &tparam[5], 0, &dwID);
 
 	WaitForMultipleObjects(THREADNUM,hThread,TRUE,INFINITE);
 
@@ -1229,7 +1356,7 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
 	}
 
 #ifdef _DEBUG
-	sprintf(message,"[%d] %.2lf (%.2lf,%.2lf,%.2lf,%.2lf,%.2lf)\r\n",hai,sum,tparam[0].ret,tparam[1].ret,tparam[2].ret,tparam[3].ret,tparam[4].ret);
+	sprintf(message, "[%d] %.2lf (%.2lf,%.2lf,%.2lf,%.2lf,%.2lf,%.2lf)\r\n", hai, sum, tparam[0].ret, tparam[1].ret, tparam[2].ret, tparam[3].ret, tparam[4].ret,tparam[5].ret);
 
 	MJSendMessage(MJMI_FUKIDASHI,(UINT)message,0);
 #endif

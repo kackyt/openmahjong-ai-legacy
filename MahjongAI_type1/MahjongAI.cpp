@@ -62,8 +62,8 @@ typedef enum {
 #define PLAYERNAME( method ) "KING" #method
 
 
-#define MAHJONGAITYPE MAHJONGAI(Type1)
-#define AINAME PLAYERNAME(Type1)
+#define MAHJONGAITYPE MAHJONGAI(Type4)
+#define AINAME PLAYERNAME(Type4)
 
 MAHJONGAITYPE ai;
 MahjongAIKikenhai kikenhai;
@@ -556,11 +556,11 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 			}
 		}
 		else{
-			if (((mpoint > 1300 && mhai >= 27 && mhai <= 30 && mhai != 27 + state.kaze && mhai != 27 + state.kyoku / 4) || hais > getParam(0))){
+			if (((mhai >= 27 && mhai <= 30 && mhai != 27 + state.kaze && mhai != 27 + state.kyoku / 4) || hais > getParam(0))){
 				rchk = MJPIR_REACH;
 			}
 
-			if ((mpoint > 2000 || doranum >= 2) && hais > 2){
+			if (hais >= 2){
 				rchk = MJPIR_REACH;
 			}
 		}

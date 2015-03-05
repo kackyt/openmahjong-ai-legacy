@@ -351,12 +351,12 @@ int MJ0(/* inputs */
 				if(aMentsu[j][4] < 27){
 					/* ‰„‚×’P‹R */
 					for(k=0;k<4;k++){
-						if((aMentsu[j][k] % 7) != 6 && 
+						if(aMentsu[j][k] >= 0 && (aMentsu[j][k] % 7) != 6 && 
 							(aMentsu[j][k] / 7)*9 + (aMentsu[j][k] % 7) + 3 == aMentsu[j][4]){
 							assert(aMentsu[j][4] >= 3);
 							aMachi[aMentsu[j][4] - 3] = 1;
 						}
-						if((aMentsu[j][k] % 7) != 0 && 
+						if (aMentsu[j][k] >= 0 && (aMentsu[j][k] % 7) != 0 &&
 							(aMentsu[j][k] / 7)*9 + (aMentsu[j][k] % 7) - 1 == aMentsu[j][4]){
 							assert(aMentsu[j][4] + 3 < 34);
 							aMachi[aMentsu[j][4] + 3] = 1;

@@ -913,7 +913,7 @@ int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int l
 			tenpai_list.shanten = 6 - atamaque_count;
 		}
 		memcpy(&tenpai_list.mentsuflag,mentsu,AI_TEHAI_LIMIT*sizeof(int));
-		if(pList != NULL && tenpai_list.shanten < maxshanten){
+		if(pList != NULL && tenpai_list.shanten <= maxshanten){
 			if(resultcount == listSize){
 				maxval = 0;
 				maxind = 0;

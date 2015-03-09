@@ -353,6 +353,8 @@ BOOL CMahjongAITestGUIDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 大きいアイコンを設定
 	SetIcon(m_hIcon, FALSE);		// 小さいアイコンを設定
 
+	m_pDump = NULL;
+
 	// TODO: 特別な初期化を行う時はこの場所に追加してください。
 	mysrand((unsigned int)time(NULL));
 	m_inst = NULL;
@@ -529,16 +531,28 @@ void CMahjongAITestGUIDlg::newKyoku(bool reset)
 			}
 		}
 
-		for(i=0;i<136;i++){
-			m_aPai[i] = i/4;
+		if (m_pDump != NULL){
+			if (fread(m_aPai, 136, 1, m_pDump) == 0){
+				m_command = MJCOM_NONE;
+				AfxMessageBox(TEXT("牌譜読み込み終了"));
+				fclose(m_pDump);
+				m_pDump = NULL;
+				return;
+			}
 		}
-		
-		/* シャッフル */
-		shuffle(m_aPai,136);
-		if((fp = _tfopen(TEXT("paidata"),TEXT("ab"))) != NULL){
-			fwrite(m_aPai,136,1,fp);
-			fclose(fp);
+		else{
+			for (i = 0; i<136; i++){
+				m_aPai[i] = i / 4;
+			}
+
+			/* シャッフル */
+			shuffle(m_aPai, 136);
+			if ((fp = _tfopen(TEXT("paidata"), TEXT("ab"))) != NULL){
+				fwrite(m_aPai, 136, 1, fp);
+				fclose(fp);
+			}
 		}
+
 	}
 
 	/* 配牌 */
@@ -637,10 +651,10 @@ void CMahjongAITestGUIDlg::OnTimer(UINT nIDEvent)
 	dbg = m_func(m_inst,MJPI_DEBUG,0,0);
 
 	m_strDebug.Format("%u",dbg);
-#endif
 
 	UpdateData(FALSE);
-	
+#endif
+
 	CDialog::OnTimer(nIDEvent);
 }
 
@@ -724,15 +738,11 @@ void CMahjongAITestGUIDlg::OnBtnseek()
 
 	int seek = (int)_tcstol((LPCTSTR)m_strSeek,NULL,0);
 
-	FILE *fp;
 	bool failed = true;
 
-	if((fp = _tfopen((LPCTSTR)m_strDumpFile,TEXT("rb"))) != NULL){
-		if(fseek(fp,136*seek,SEEK_SET) == 0){
-			if(fread(&m_aPai,136,1,fp) > 0){
-				failed = false;
-				newKyoku(false);
-			}
+	if (m_pDump != NULL){
+		if (fseek(m_pDump, 136 * seek, SEEK_SET) == 0){
+			failed = false;
 		}
 	}
 
@@ -757,5 +767,7 @@ void CMahjongAITestGUIDlg::OnBtnrddump()
 	}
 
 	m_strDumpFile = dlg.GetPathName();
+
+	m_pDump = _tfopen((LPCTSTR)m_strDumpFile, TEXT("rb"));
 	
 }

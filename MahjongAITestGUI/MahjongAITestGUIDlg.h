@@ -39,6 +39,7 @@ public:
 	void prevPai();
 	void newKyoku(bool reset = true);
 	void aiInit();
+	FILE *m_pDump;
 
 // ダイアログ データ
 	//{{AFX_DATA(CMahjongAITestGUIDlg)

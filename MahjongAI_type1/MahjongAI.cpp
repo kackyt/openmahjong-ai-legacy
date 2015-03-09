@@ -635,7 +635,7 @@ int MahjongAI::select_Score(double scc_max)
 	}
 
 
-	if (rnum > 0 && rnum + shanten > 2){
+	if (rnum > 0 && rnum + shanten > 2 && scc_max < 50.0){
 		decision = AI_DECISION_ORI;
 	}
 	else{

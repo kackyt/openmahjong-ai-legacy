@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 日本語 resources
+// 日本語 (日本) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
-#ifdef _WIN32
 LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
 #pragma code_page(932)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -27,18 +25,18 @@ LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE 
 BEGIN
     "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
     "#define _AFX_NO_OLE_RESOURCES\r\n"
@@ -66,7 +64,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\MahjongAITestGUI.ico"
+IDR_MAINFRAME           ICON                    "res\\MahjongAITestGUI.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -74,44 +72,45 @@ IDR_MAINFRAME           ICON    DISCARDABLE     "res\\MahjongAITestGUI.ico"
 //
 
 IDD_MAHJONAITESTGUI_DIALOG DIALOGEX 0, 0, 363, 239
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "MahjongAITestGUI"
-FONT 9, "ＭＳ Ｐゴシック"
+FONT 9, "ＭＳ Ｐゴシック", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,306,7,50,14
     PUSHBUTTON      "ｷｬﾝｾﾙ",IDCANCEL,306,23,50,14
-    PUSHBUTTON      "<< 前へ",IDC_BTNPREV,21,173,50,14
-    PUSHBUTTON      ">> 次へ",IDC_BTNNEXT,92,174,50,14
-    EDITTEXT        IDC_MESSAGE,233,146,123,86,ES_MULTILINE | ES_WANTRETURN | 
-                    WS_VSCROLL
+    PUSHBUTTON      "<< 前へ",IDC_BTNPREV,21,187,50,14
+    PUSHBUTTON      ">> 次へ",IDC_BTNNEXT,92,187,50,14
+    EDITTEXT        IDC_MESSAGE,233,146,123,86,ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL
     LTEXT           "Message",IDC_STATIC,235,130,27,8
-    PUSHBUTTON      "オート実行",IDC_BTNAUTO,92,204,50,14
+    PUSHBUTTON      "オート実行",IDC_BTNAUTO,92,209,50,14
     LTEXT           "統計情報",IDC_STATIC,21,95,28,8
     LTEXT           "局数",IDC_STATIC,21,111,15,8
     LTEXT           "0",IDC_KYOKU,51,111,29,8
     LTEXT           "和了数",IDC_STATIC,21,130,22,8
-    LTEXT           "聴牌数",IDC_STATIC,21,151,22,8
+    LTEXT           "聴牌数",IDC_STATIC,21,164,22,8
     PUSHBUTTON      "Button5",IDC_BTNMJ,21,7,277,64
     EDITTEXT        IDC_EDITWAIT,182,175,40,14,ES_AUTOHSCROLL
     LTEXT           "ウエイト",IDC_STATIC,153,177,24,8
     PUSHBUTTON      "ウエイト更新",IDC_BTNWAIT,172,195,50,14
     LTEXT           "0",IDC_HOURA,51,130,29,8
-    LTEXT           "0",IDC_TENPAI,51,151,29,8
+    LTEXT           "0",IDC_TENPAI,51,164,29,8
     LTEXT           "0",IDC_HOURA2,113,130,29,8
     LTEXT           "(00.0%)",IDC_HOURAR,80,130,26,8
-    LTEXT           "(00.0%)",IDC_TENPAIR,80,152,25,8
+    LTEXT           "(00.0%)",IDC_TENPAIR,80,165,25,8
     LTEXT           "(00.0%)",IDC_HOURAR2,149,130,24,8
-    PUSHBUTTON      "AI変更",IDC_AI,190,79,50,14
+    PUSHBUTTON      "AI変更",IDC_AI,156,79,50,14
     EDITTEXT        IDC_EDTSEEK,249,102,40,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "読込ファイル",IDC_BTNRDDUMP,191,101,50,14
+    PUSHBUTTON      "牌譜読み込み",IDC_BTNRDDUMP,191,101,50,14
     PUSHBUTTON      "読込実行",IDC_BTNSEEK,298,101,45,14
-    LTEXT           "0",IDC_DEBUGP,21,214,46,8
-    LTEXT           "debug",IDC_STATIC,21,197,18,8
+    LTEXT           "0",IDC_SCORE,51,147,29,8
+    LTEXT           "和了点",IDC_STATIC,21,147,22,8
+    EDITTEXT        IDC_EDTHAIPAI,225,79,67,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "配牌指定",IDC_BTNHAIPAI,299,79,45,14
+    PUSHBUTTON      "reset",IDC_BTNRESET,55,93,25,14
 END
 
 
-#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -134,15 +133,13 @@ BEGIN
     BEGIN
         BLOCK "041104B0"
         BEGIN
-            VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "MahjongAITestGUI MFC ｱﾌﾟﾘｹｰｼｮﾝ\0"
-            VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "MahjongAITestGUI\0"
-            VALUE "LegalCopyright", "Copyright (C) 2012\0"
-            VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "MahjongAITestGUI.EXE\0"
-            VALUE "ProductName", "MahjongAITestGUI ｱﾌﾟﾘｹｰｼｮﾝ\0"
-            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "FileDescription", "MahjongAITestGUI MFC ｱﾌﾟﾘｹｰｼｮﾝ"
+            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "InternalName", "MahjongAITestGUI"
+            VALUE "LegalCopyright", "Copyright (C) 2012"
+            VALUE "OriginalFilename", "MahjongAITestGUI.EXE"
+            VALUE "ProductName", "MahjongAITestGUI ｱﾌﾟﾘｹｰｼｮﾝ"
+            VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
     BLOCK "VarFileInfo"
@@ -151,8 +148,6 @@ BEGIN
     END
 END
 
-#endif    // !_MAC
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -160,7 +155,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_MAHJONAITESTGUI_DIALOG, DIALOG
     BEGIN
@@ -176,7 +171,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // 日本語 resources
+#endif    // 日本語 (日本) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

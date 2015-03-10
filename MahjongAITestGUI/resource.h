@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
-// Used by MahjongAITestGUI.rc
+// Microsoft Visual C++ で生成されたインクルード ファイル。
+// MahjongAITestGUI.rc で使用
 //
 #define IDD_MAHJONAITESTGUI_DIALOG      102
 #define IDR_MAINFRAME                   128
@@ -24,6 +24,10 @@
 #define IDC_BTNRDDUMP                   1017
 #define IDC_BTNSEEK                     1018
 #define IDC_DEBUGP                      1019
+#define IDC_SCORE                       1020
+#define IDC_EDTHAIPAI                   1021
+#define IDC_BTNHAIPAI                   1022
+#define IDC_BTNRESET                    1023
 
 // Next default values for new objects
 // 
@@ -31,7 +35,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        129
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1020
+#define _APS_NEXT_CONTROL_VALUE         1024
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

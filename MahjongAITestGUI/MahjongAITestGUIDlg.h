@@ -76,6 +76,7 @@ protected:
 	int m_iTenpai;
 	int m_iHoura;
 	int m_iHoura2;
+	double m_score;
 	LRESULT OnRefresh(WPARAM,LPARAM);
 	HMODULE m_comp;
 	CString m_strDumpFile;
@@ -98,6 +99,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CMessageEdit m_ctrlMessage;
+	CString m_strScore;
+	CString m_strHaipai;
+	afx_msg void OnBnClickedBtnhaipai();
+	afx_msg void OnBnClickedBtnreset();
 };
 
 //{{AFX_INSERT_LOCATION}}

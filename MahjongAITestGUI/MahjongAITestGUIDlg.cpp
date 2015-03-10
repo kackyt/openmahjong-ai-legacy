@@ -22,6 +22,7 @@ static char THIS_FILE[] = __FILE__;
 
 CMahjongAITestGUIDlg::CMahjongAITestGUIDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CMahjongAITestGUIDlg::IDD, pParent)
+	, m_strHaipai(_T(""))
 {
 	//{{AFX_DATA_INIT(CMahjongAITestGUIDlg)
 	m_strKyoku = _T("0");
@@ -34,6 +35,7 @@ CMahjongAITestGUIDlg::CMahjongAITestGUIDlg(CWnd* pParent /*=NULL*/)
 	m_strTenpaiR = _T("(0.0)");
 	m_strSeek = _T("");
 	m_strDebug = _T("0");
+	m_strScore = _T("0");
 	//}}AFX_DATA_INIT
 	// メモ: LoadIcon は Win32 の DestroyIcon のサブシーケンスを要求しません。
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -46,6 +48,8 @@ void CMahjongAITestGUIDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BTNNEXT, m_btnNext);
 	DDX_Control(pDX, IDC_BTNPREV, m_btnPrev);
 	DDX_Control(pDX, IDC_BTNMJ, m_view);
+	DDX_Control(pDX, IDC_MESSAGE, m_ctrlMessage);
+	DDX_Text(pDX, IDC_SCORE, m_strScore);
 	DDX_Text(pDX, IDC_KYOKU, m_strKyoku);
 	DDX_Text(pDX, IDC_EDITWAIT, m_strWait);
 	DDX_Text(pDX, IDC_HOURA2, m_strHoura2);
@@ -55,9 +59,8 @@ void CMahjongAITestGUIDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_HOURAR2, m_strHouraR2);
 	DDX_Text(pDX, IDC_TENPAIR, m_strTenpaiR);
 	DDX_Text(pDX, IDC_EDTSEEK, m_strSeek);
-	DDX_Text(pDX, IDC_DEBUGP, m_strDebug);
 	//}}AFX_DATA_MAP
-	DDX_Control(pDX, IDC_MESSAGE, m_ctrlMessage);
+	DDX_Text(pDX, IDC_EDTHAIPAI, m_strHaipai);
 }
 
 BEGIN_MESSAGE_MAP(CMahjongAITestGUIDlg, CDialog)
@@ -75,6 +78,8 @@ BEGIN_MESSAGE_MAP(CMahjongAITestGUIDlg, CDialog)
 	ON_BN_CLICKED(IDC_BTNSEEK, OnBtnseek)
 	ON_BN_CLICKED(IDC_BTNRDDUMP, OnBtnrddump)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_BTNHAIPAI, &CMahjongAITestGUIDlg::OnBnClickedBtnhaipai)
+	ON_BN_CLICKED(IDC_BTNRESET, &CMahjongAITestGUIDlg::OnBnClickedBtnreset)
 END_MESSAGE_MAP()
 
 static unsigned int gSeed;
@@ -412,6 +417,7 @@ void CMahjongAITestGUIDlg::aiInit()
 	m_iHoura = 0;
 	m_iHoura2 = 0;
 	m_iTenpai = 0;
+	m_score = 0;
 }
 
 // もしダイアログボックスに最小化ボタンを追加するならば、アイコンを描画する
@@ -522,7 +528,7 @@ void CMahjongAITestGUIDlg::newKyoku(bool reset)
 			m_iKyoku++;
 			/* 前の局は上がれたかを判定 */
 			for(i=0;i<13+18;i++){
-				aSim[i] = m_aPai[i+1];
+				aSim[i] = m_aPai[i];
 			}
 			qsort(aSim,13+18,sizeof(int),(int (*)(const void*, const void*))compare_int);
 			
@@ -556,12 +562,12 @@ void CMahjongAITestGUIDlg::newKyoku(bool reset)
 	}
 
 	/* 配牌 */
-	m_view.m_iDora = m_aPai[0];
+	m_view.m_iDora = m_aPai[135];
 	for(i=0;i<13;i++){
-		m_view.m_aTehai[i] = m_aPai[i+1];
+		m_view.m_aTehai[i] = m_aPai[i];
 	}
 	m_view.m_iTehaiSize = 13;
-	m_view.m_iTsumohai = m_aPai[14];
+	m_view.m_iTsumohai = m_aPai[13];
 	m_view.m_iSutehaiSize = 0;
 	m_iIndex = 15;
 
@@ -584,9 +590,17 @@ void CMahjongAITestGUIDlg::nextPai()
 	if(m_state != MJSTATE_AGARI){
 		ret = m_func(m_inst,MJPI_SUTEHAI,m_view.m_iTsumohai,0);
 		if(ret == MJPIR_TSUMO){
+			MJITehai tehai;
+
+			memset(&tehai, 0, sizeof(tehai));
+
+			memcpy(&tehai.tehai, m_view.m_aTehai, m_view.m_iTehaiSize*sizeof(int));
+			tehai.tehai_max = m_view.m_iTehaiSize;
+
 			//AfxDebugBreak();
 			m_state = MJSTATE_AGARI;
 			m_iHoura++;
+			m_score += MJSendMessage(NULL, MJMI_GETAGARITEN, (UINT)&tehai, (UINT)m_view.m_iTsumohai);
 		}else{
 			if((ret & 63) == 13){
 				m_view.m_aSutehai[m_view.m_iSutehaiSize++] = m_view.m_iTsumohai;
@@ -676,6 +690,10 @@ LRESULT CMahjongAITestGUIDlg::OnRefresh(WPARAM wParam,LPARAM lParam)
 		m_strTenpaiR.Format(TEXT("(%02.1f%%)"),(m_iTenpai + m_iHoura)* 100.0 / (double)m_iKyoku);
 		m_strHouraR.Format(TEXT("(%02.1f%%)"), m_iHoura * 100.0 / (double)m_iKyoku);
 		m_strHouraR2.Format(TEXT("(%02.1f%%)"), m_iHoura2 * 100.0 / (double)m_iKyoku);
+	}
+
+	if (m_iHoura > 0) {
+		m_strScore.Format(TEXT("%05.1f"), m_score / (double)m_iHoura);
 	}
 
 
@@ -770,4 +788,62 @@ void CMahjongAITestGUIDlg::OnBtnrddump()
 
 	m_pDump = _tfopen((LPCTSTR)m_strDumpFile, TEXT("rb"));
 	
+}
+
+
+void CMahjongAITestGUIDlg::OnBnClickedBtnhaipai()
+{
+	int cnt[34];
+	int i,j;
+	int now = 0, prev = 0;
+	long pai;
+	int num = 0,num2;
+
+	UpdateData(TRUE);
+
+	for (i = 0; i < 34; i++){
+		cnt[i] = 4;
+	}
+
+	/* コンマ区切りで分けて、配牌に設定 */
+	while (now >= 0){
+		now = m_strHaipai.Find(TEXT(","), prev);
+		if (now < 0) {
+			pai = _tcstol((LPCTSTR)m_strHaipai.Mid(prev), NULL, 0);
+		}
+		else{
+			pai = _tcstol((LPCTSTR)m_strHaipai.Mid(prev,now-prev), NULL, 0);
+		}
+
+		m_aPai[num++] = pai;
+		cnt[pai]--;
+
+		prev = now + 1;
+	}
+
+	num2 = num;
+
+	/* 残りの配牌を設定 */
+	for (i = 0; i < 34; i++){
+		for (j = 0; j < cnt[i]; j++){
+			m_aPai[num++] = i;
+		}
+	}
+
+	shuffle(&m_aPai[num2], 136 - num2);
+
+	newKyoku(false);
+}
+
+
+void CMahjongAITestGUIDlg::OnBnClickedBtnreset()
+{
+	/* 統計データをリセット */
+	m_iKyoku = 0;
+	m_iHoura = 0;
+	m_iHoura2 = 0;
+	m_iTenpai = 0;
+	m_score = 0;
+
+	UpdateData(FALSE);
 }

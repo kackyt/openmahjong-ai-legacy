@@ -119,13 +119,13 @@ static int search_siisan(PAICOUNT *paicountlist)
 }
 
 /* 探索を開始する面子の初期状態を設定 */
-static int setstartmentsu(int *paiarray, int *mentsu,int atamapos)
+static int setstartmentsu(int *paiarray, int paiSize,int *mentsu,int atamapos)
 {
     int i, paicountlistcount, pos, koutsuflag, syuntsuflag;
     PAICOUNT paicountlist[AI_TEHAI_LIMIT + 1];
 
     /* 最初の面子に頭を設定 */
-    for (i = 0; i < AI_TEHAI_LIMIT; i++)
+	for (i = 0; i < paiSize; i++)
         mentsu[i] = AI_UKIHAI;
     mentsu[atamapos] = AI_ATAMA;
     mentsu[atamapos+1] = AI_ATAMA;
@@ -135,7 +135,7 @@ static int setstartmentsu(int *paiarray, int *mentsu,int atamapos)
     pos = 0;
 
     paicountlist[pos].pai = AI_NIL_PAI;
-    for (i = 0; i < AI_TEHAI_LIMIT; i++) {
+	for (i = 0; i < paiSize; i++) {
         /* 頭は集計に入れない */
         if ((i == atamapos) || (i == atamapos + 1))
             continue;
@@ -949,7 +949,7 @@ int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int l
         atamapos = atamaque[i];
 		
         /* 探索を開始する面子の初期状態を設定 */
-        initresult = setstartmentsu(paiarray, mentsu_stack[0],atamapos);
+        initresult = setstartmentsu(paiarray, paiSize,mentsu_stack[0],atamapos);
         if (initresult != 0)
             return initresult;
         	
@@ -1207,7 +1207,7 @@ int search_score(int *paiarray,int paiSize,void *inf,int (*callback)(int*paiarra
         atamapos = atamaque[i];
 		
         /* 探索を開始する面子の初期状態を設定 */
-        initresult = setstartmentsu(paiarray, mentsu_stack[0],atamapos);
+        initresult = setstartmentsu(paiarray, paiSize,mentsu_stack[0],atamapos);
         if (initresult != 0)
             return 0;
         	

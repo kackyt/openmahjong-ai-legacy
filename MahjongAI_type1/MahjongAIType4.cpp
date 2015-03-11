@@ -768,7 +768,7 @@ double chiitoipoint(THREAD_PARAM *prm, int cnt,unsigned long long tehaibitmap,un
 		make_resultitem_bh(&item, &state);
 
 		if (probability >= 0) {
-			return 2.0 * (0.8 * probability * probability * item.score + 0.2 * probability * item.score);
+			return 1.0 * (0.8 * probability * probability * item.score + 0.2 * probability * item.score);
 		}
 		else{
 			return 0;

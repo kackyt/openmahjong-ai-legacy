@@ -60,33 +60,81 @@ void CTestView::OnPaint()
 	int i;
 	CPaintDC dc(this); // 描画用のデバイス コンテキスト
 	CRect rect;
+	int count = 0;
 	
 	GetClientRect(&rect);
 	
 	dc.FillSolidRect(&rect,RGB(0,127,0));
 	dc.SetBkMode(TRANSPARENT);
+
+	for (i = 0; i < m_tehai.tehai_max; i++){
+		m_haigaList.setState(m_tehai.tehai[i]);
+		m_haigaList.drawCurrentImage(dc, i * 25 + 20, 50);
+	}
 	
 	// TODO: この位置にメッセージ ハンドラ用のコードを追加してください
+#if 0
 	for(i=0;i<m_iTehaiSize;i++){
 		m_haigaList.setState(m_aTehai[i]);
 		m_haigaList.drawCurrentImage(dc,i*25+20,50);
 	}
+#endif
 	
 	for(i=0;i<m_iSutehaiSize;i++){
 		m_haigaList.setState(m_aSutehai[i]);
 		m_haigaList.drawCurrentImage(dc,i*25+20,10);
 	}
 
-	if(m_iTsumohai >= 0){
+	for (i = 0; i < m_tehai.ankan_max; i++){
+		m_haigaList.setState(34);
+		m_haigaList.drawCurrentImage(dc, 375 - count * 75 - 50, 50);
+		m_haigaList.setState(m_tehai.ankan[i]);
+		m_haigaList.drawCurrentImage(dc, 375 - count * 75 - 25, 50);
+		m_haigaList.setState(34);
+		m_haigaList.drawCurrentImage(dc, 375 - count * 75, 50);
+		count++;
+	}
+
+	for (i = 0; i < m_tehai.minkan_max; i++){
+		m_haigaList.setState(34);
+		m_haigaList.drawCurrentImage(dc, 375 - count * 75 - 50, 50);
+		m_haigaList.setState(m_tehai.minkan[i]);
+		m_haigaList.drawCurrentImage(dc, 375 - count * 75 - 25, 50);
+		m_haigaList.setState(m_tehai.minkan[i]);
+		m_haigaList.drawCurrentImage(dc, 375 - count * 75, 50);
+		count++;
+	}
+
+	for (i = 0; i < m_tehai.minkou_max; i++){
+		m_haigaList.setState(m_tehai.minkou[i]);
+		m_haigaList.drawCurrentImage(dc, 375 - count * 75 - 50, 50);
+		m_haigaList.setState(m_tehai.minkou[i]);
+		m_haigaList.drawCurrentImage(dc, 375 - count * 75 - 25, 50);
+		m_haigaList.setState(m_tehai.minkou[i]);
+		m_haigaList.drawCurrentImage(dc, 375 - count * 75, 50);
+		count++;
+	}
+
+	for (i = 0; i < m_tehai.minshun_max; i++){
+		m_haigaList.setState(m_tehai.minshun[i]);
+		m_haigaList.drawCurrentImage(dc, 375 - count * 75 - 50, 50);
+		m_haigaList.setState(m_tehai.minshun[i]+1);
+		m_haigaList.drawCurrentImage(dc, 375 - count * 75 - 25, 50);
+		m_haigaList.setState(m_tehai.minshun[i]+2);
+		m_haigaList.drawCurrentImage(dc, 375 - count * 75, 50);
+		count++;
+	}
+
+	if (m_iTsumohai >= 0){
 		m_haigaList.setState(m_iTsumohai);
-		m_haigaList.drawCurrentImage(dc,375,50);
+		m_haigaList.drawCurrentImage(dc, m_tehai.tehai_max * 25 + 30, 50);
 	}
 	// 描画用メッセージとして CButton::OnPaint() を呼び出してはいけません
 }
 
 void CTestView::reset()
 {
-	m_iTehaiSize = 0;
+	memset(&m_tehai, 0, sizeof(m_tehai));
 	m_iTsumohai = -1;
 	m_iSutehaiSize = 0;
 }

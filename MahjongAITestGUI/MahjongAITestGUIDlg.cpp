@@ -171,8 +171,7 @@ UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 		pTehai = (MJITehai*)param2;
 		memset(pTehai,0,sizeof(MJITehai));
 		if(param1 == 0){
-			memcpy(pTehai->tehai,pView->m_aTehai,pView->m_iTehaiSize*sizeof(UINT));
-			pTehai->tehai_max = pView->m_iTehaiSize;
+			memcpy(pTehai,&pView->m_tehai,sizeof(MJITehai));
 		}
 		ret = 1;
 		break;
@@ -186,65 +185,68 @@ UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 			pTehai = (MJITehai*)param1;
 		}else{
 			memset(&tehai,0x0,sizeof(tehai));
-			tehai.tehai_max = 13;
-			memcpy(tehai.tehai,pView->m_aTehai,sizeof(int)*tehai.tehai_max);
+			tehai.tehai_max = pView->m_tehai.tehai_max;
+			memcpy(tehai.tehai,pView->m_tehai.tehai,sizeof(int)*tehai.tehai_max);
 			pTehai = &tehai;
 		}
 		num = search_tenpai((int *)pTehai->tehai,pTehai->tehai_max,(int *)p,&tlist,1,0);
 		ret = num > 0 ? 1 : 0;
 		break;
 	case MJMI_GETAGARITEN:
-		if(param1 != 0){
-			MJ_GAMESTATE gs;
+		MJ_GAMESTATE gs;
+		if (param1 != 0){
 			pTehai = (MJITehai*)param1;
-
-			memset(&gs,0,sizeof(gs));
-			gs.gamestate.zikaze = 0;
-			gs.gamestate.bakaze = 0;
-			gs.gamestate.tsumo = 1;
-
-			for(i=0;i<pTehai->ankan_max;i++){
-				gs.gamestate.nakilist[gs.gamestate.naki].category = AI_ANKAN;
-				gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->ankan[0];
-				gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->ankan[1];
-				gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->ankan[2];
-				gs.gamestate.naki++;
-			}
-
-			for(i=0;i<pTehai->minkan_max;i++){
-				gs.gamestate.nakilist[gs.gamestate.naki].category = AI_MINKAN;
-				gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->minkan[i];
-				gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->minkan[i];
-				gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->minkan[i];
-				gs.gamestate.naki++;
-			}
-
-			for(i=0;i<pTehai->minkou_max;i++){
-				gs.gamestate.nakilist[gs.gamestate.naki].category = AI_KOUTSU;
-				gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->minkou[i];
-				gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->minkou[i];
-				gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->minkou[i];
-				gs.gamestate.naki++;
-			}
-
-			for(i=0;i<pTehai->minshun_max;i++){
-				gs.gamestate.nakilist[gs.gamestate.naki].category = AI_SYUNTSU;
-				gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->minshun[i];
-				gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->minshun[i]+1;
-				gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->minshun[i]+2;
-				gs.gamestate.naki++;
-			}
-
-			gs.gamestate.dorapai[0] = pView->m_iDora;
-
-
-			gs.gamestate.dorasize = 1;
-			gs.gamestate.count = 2;
-
-			gs.agarihai = (int)param2;
-
-			ret = search_score((int *)pTehai->tehai,pTehai->tehai_max,&gs,scoreCallback);
 		}
+		else{
+			pTehai = &pView->m_tehai;
+		}
+
+		memset(&gs, 0, sizeof(gs));
+		gs.gamestate.zikaze = 0;
+		gs.gamestate.bakaze = 0;
+		gs.gamestate.tsumo = 1;
+
+		for (i = 0; i < pTehai->ankan_max; i++){
+			gs.gamestate.nakilist[gs.gamestate.naki].category = AI_ANKAN;
+			gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->ankan[0];
+			gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->ankan[1];
+			gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->ankan[2];
+			gs.gamestate.naki++;
+		}
+
+		for (i = 0; i < pTehai->minkan_max; i++){
+			gs.gamestate.nakilist[gs.gamestate.naki].category = AI_MINKAN;
+			gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->minkan[i];
+			gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->minkan[i];
+			gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->minkan[i];
+			gs.gamestate.naki++;
+		}
+
+		for (i = 0; i < pTehai->minkou_max; i++){
+			gs.gamestate.nakilist[gs.gamestate.naki].category = AI_KOUTSU;
+			gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->minkou[i];
+			gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->minkou[i];
+			gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->minkou[i];
+			gs.gamestate.naki++;
+		}
+
+		for (i = 0; i < pTehai->minshun_max; i++){
+			gs.gamestate.nakilist[gs.gamestate.naki].category = AI_SYUNTSU;
+			gs.gamestate.nakilist[gs.gamestate.naki].pailist[0] = pTehai->minshun[i];
+			gs.gamestate.nakilist[gs.gamestate.naki].pailist[1] = pTehai->minshun[i] + 1;
+			gs.gamestate.nakilist[gs.gamestate.naki].pailist[2] = pTehai->minshun[i] + 2;
+			gs.gamestate.naki++;
+		}
+
+		gs.gamestate.dorapai[0] = pView->m_iDora;
+
+
+		gs.gamestate.dorasize = 1;
+		gs.gamestate.count = 2;
+
+		gs.agarihai = (int)param2;
+
+		ret = search_score((int *)pTehai->tehai, pTehai->tehai_max, &gs, scoreCallback);
 		break;
 	case MJMI_GETKAWA:
 		idx = LOWORD(param1);
@@ -546,6 +548,9 @@ void CMahjongAITestGUIDlg::newKyoku(bool reset)
 				return;
 			}
 		}
+		else if (m_strHaipai != _T("")){
+			customHaipai();
+		}
 		else{
 			for (i = 0; i<136; i++){
 				m_aPai[i] = i / 4;
@@ -562,16 +567,16 @@ void CMahjongAITestGUIDlg::newKyoku(bool reset)
 	}
 
 	/* 配牌 */
-	m_view.m_iDora = m_aPai[135];
-	for(i=0;i<13;i++){
-		m_view.m_aTehai[i] = m_aPai[i];
+	m_view.m_iDora = m_aPai[135 - (m_view.m_tehai.ankan_max*4 + m_view.m_tehai.minkan_max*4 + m_view.m_tehai.minkou_max*3 + m_view.m_tehai.minshun_max*3)];
+	m_view.m_tehai.tehai_max = 13 - (m_view.m_tehai.ankan_max + m_view.m_tehai.minkan_max + m_view.m_tehai.minkou_max + m_view.m_tehai.minshun_max)*3;
+	for (i = 0; i<m_view.m_tehai.tehai_max; i++){
+		m_view.m_tehai.tehai[i] = m_aPai[i];
 	}
-	m_view.m_iTehaiSize = 13;
-	m_view.m_iTsumohai = m_aPai[13];
+	m_view.m_iTsumohai = m_aPai[m_view.m_tehai.tehai_max];
 	m_view.m_iSutehaiSize = 0;
 	m_iIndex = 15;
 
-	qsort(m_view.m_aTehai,13,sizeof(int),(int (*)(const void*, const void*))compare_int);
+	qsort(m_view.m_tehai.tehai, m_view.m_tehai.tehai_max, sizeof(int), (int(*)(const void*, const void*))compare_int);
 
 
 	m_state = MJSTATE_KYOKU;
@@ -590,29 +595,22 @@ void CMahjongAITestGUIDlg::nextPai()
 	if(m_state != MJSTATE_AGARI){
 		ret = m_func(m_inst,MJPI_SUTEHAI,m_view.m_iTsumohai,0);
 		if(ret == MJPIR_TSUMO){
-			MJITehai tehai;
-
-			memset(&tehai, 0, sizeof(tehai));
-
-			memcpy(&tehai.tehai, m_view.m_aTehai, m_view.m_iTehaiSize*sizeof(int));
-			tehai.tehai_max = m_view.m_iTehaiSize;
-
 			//AfxDebugBreak();
 			m_state = MJSTATE_AGARI;
 			m_iHoura++;
-			m_score += MJSendMessage(NULL, MJMI_GETAGARITEN, (UINT)&tehai, (UINT)m_view.m_iTsumohai);
+			m_score += MJSendMessage(NULL, MJMI_GETAGARITEN, (UINT)&m_view.m_tehai, (UINT)m_view.m_iTsumohai);
 		}else{
 			if((ret & 63) == 13){
 				m_view.m_aSutehai[m_view.m_iSutehaiSize++] = m_view.m_iTsumohai;
 			}else{
-				m_view.m_aSutehai[m_view.m_iSutehaiSize++] = m_view.m_aTehai[ret & 63];
-				m_view.m_aTehai[ret & 63] = m_view.m_iTsumohai;
+				m_view.m_aSutehai[m_view.m_iSutehaiSize++] = m_view.m_tehai.tehai[ret & 63];
+				m_view.m_tehai.tehai[ret & 63] = m_view.m_iTsumohai;
 			}
-			qsort(m_view.m_aTehai,13,sizeof(int),(int (*)(const void*, const void*))compare_int);
+			qsort(m_view.m_tehai.tehai, m_view.m_tehai.tehai_max, sizeof(int), (int(*)(const void*, const void*))compare_int);
 			if(m_view.m_iSutehaiSize == 18){
 				m_state = MJSTATE_AGARI;
 				m_view.m_iTsumohai = -1;
-				num = search_tenpai((int *)m_view.m_aTehai,13,(int *)p,&tlist,1,0);
+				num = search_tenpai((int *)m_view.m_tehai.tehai,m_view.m_tehai.tehai_max,(int *)p,&tlist,1,0);
 				if(num > 0){
 					m_iTenpai++;
 				}
@@ -635,12 +633,12 @@ void CMahjongAITestGUIDlg::prevPai()
 		m_view.m_iTsumohai = m_aPai[m_iIndex-1];
 
 		for(i=0;i<13;i++){
-			if(m_view.m_aTehai[i] == m_view.m_iTsumohai){
-				m_view.m_aTehai[i] = m_view.m_aSutehai[m_view.m_iSutehaiSize];
+			if(m_view.m_tehai.tehai[i] == m_view.m_iTsumohai){
+				m_view.m_tehai.tehai[i] = m_view.m_aSutehai[m_view.m_iSutehaiSize];
 				break;
 			}
 		}
-		qsort(m_view.m_aTehai,13,sizeof(int),(int (*)(const void*, const void*))compare_int);
+		qsort(m_view.m_tehai.tehai,13,sizeof(int),(int (*)(const void*, const void*))compare_int);
 	}
 
 }
@@ -793,46 +791,8 @@ void CMahjongAITestGUIDlg::OnBtnrddump()
 
 void CMahjongAITestGUIDlg::OnBnClickedBtnhaipai()
 {
-	int cnt[34];
-	int i,j;
-	int now = 0, prev = 0;
-	long pai;
-	int num = 0,num2;
-
 	UpdateData(TRUE);
-
-	for (i = 0; i < 34; i++){
-		cnt[i] = 4;
-	}
-
-	/* コンマ区切りで分けて、配牌に設定 */
-	while (now >= 0){
-		now = m_strHaipai.Find(TEXT(","), prev);
-		if (now < 0) {
-			pai = _tcstol((LPCTSTR)m_strHaipai.Mid(prev), NULL, 0);
-		}
-		else{
-			pai = _tcstol((LPCTSTR)m_strHaipai.Mid(prev,now-prev), NULL, 0);
-		}
-
-		m_aPai[num++] = pai;
-		cnt[pai]--;
-
-		prev = now + 1;
-	}
-
-	num2 = num;
-
-	/* 残りの配牌を設定 */
-	for (i = 0; i < 34; i++){
-		for (j = 0; j < cnt[i]; j++){
-			m_aPai[num++] = i;
-		}
-	}
-
-	shuffle(&m_aPai[num2], 136 - num2);
-
-	newKyoku(false);
+	customHaipai();
 }
 
 
@@ -846,4 +806,74 @@ void CMahjongAITestGUIDlg::OnBnClickedBtnreset()
 	m_score = 0;
 
 	UpdateData(FALSE);
+}
+
+
+void CMahjongAITestGUIDlg::customHaipai()
+{
+	int cnt[34];
+	int i, j;
+	int now = 0, prev = 0;
+	long pai;
+	int num = 0, num2;
+
+	m_view.reset();
+
+	for (i = 0; i < 34; i++){
+		cnt[i] = 4;
+	}
+
+	/* コンマ区切りで分けて、配牌に設定 */
+	while (now >= 0){
+		now = m_strHaipai.Find(TEXT(","), prev);
+		if (now < 0) {
+			pai = _tcstol((LPCTSTR)m_strHaipai.Mid(prev), NULL, 0);
+		}
+		else{
+			pai = _tcstol((LPCTSTR)m_strHaipai.Mid(prev, now - prev), NULL, 0);
+		}
+
+		if (pai >= 400){
+			/* 暗カン */
+			m_view.m_tehai.ankan[m_view.m_tehai.ankan_max++] = pai % 100;
+			cnt[pai % 100] = 0;
+		}
+		else if (pai >= 300){
+			/* 明カン */
+			m_view.m_tehai.minkan[m_view.m_tehai.minkan_max++] = pai % 100;
+			cnt[pai % 100] = 0;
+		}
+		else if (pai >= 200){
+			/* 明刻 */
+			m_view.m_tehai.minkou[m_view.m_tehai.minkou_max++] = pai % 100;
+			cnt[pai % 100] -= 3;
+		}
+		else if (pai >= 100){
+			/* 明順 */
+			m_view.m_tehai.minshun[m_view.m_tehai.minshun_max++] = pai % 100;
+			cnt[pai % 100] -= 1;
+			cnt[(pai % 100) + 1] -= 1;
+			cnt[(pai % 100) + 2] -= 1;
+		}
+		else{
+			m_aPai[num++] = pai;
+			cnt[pai]--;
+		}
+
+
+		prev = now + 1;
+	}
+
+	num2 = num;
+
+	/* 残りの配牌を設定 */
+	for (i = 0; i < 34; i++){
+		for (j = 0; j < cnt[i]; j++){
+			m_aPai[num++] = i;
+		}
+	}
+
+	shuffle(&m_aPai[num2], num - num2);
+
+	newKyoku(false);
 }

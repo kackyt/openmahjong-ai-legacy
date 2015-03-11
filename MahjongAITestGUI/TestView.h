@@ -7,6 +7,7 @@
 // TestView.h : ヘッダー ファイル
 //
 #include "Komae.h"
+#include "MIPIface.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTestView ウィンドウ
@@ -32,8 +33,7 @@ public:
 public:
 	virtual ~CTestView();
 	CKomae m_haigaList;
-	int m_aTehai[13];
-	int m_iTehaiSize;
+	MJITehai m_tehai;
 	int m_iTsumohai;
 	int m_aSutehai[18];
 	int m_iSutehaiSize;

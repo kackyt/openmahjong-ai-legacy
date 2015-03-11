@@ -103,6 +103,7 @@ public:
 	CString m_strHaipai;
 	afx_msg void OnBnClickedBtnhaipai();
 	afx_msg void OnBnClickedBtnreset();
+	void customHaipai();
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -104,7 +104,7 @@ protected:
 	int select_Score(double scc_max);
 	UINT sutehai_sub(int tsumohai);
 	int calc_sutehai(void);
-	int calc_sutehai_easy(void);
+	int calc_sutehai_easy(double*);
 	int nakability(int hai, int chii_flag);
 	UINT koe_req(int no, int hai);
 	UINT on_start_kyoku(int k, int c);
@@ -251,6 +251,7 @@ void MahjongAI::initParam(void)
 	memset(resultBuf, 0x00, siz*sizeof(int));
 	current_p = 0;
 	size_p = siz;
+	tehai_score = DBL_MAX;
 }
 
 void MahjongAI::destroyParam(void)
@@ -470,7 +471,15 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 	set_machi();
 
 	// ツモった場合は「ツモ」る
-	if (tsumohai >= 0 && tsumohai < 34) if (machi[tsumohai]) return MJPIR_TSUMO;
+	if (tsumohai >= 0 && tsumohai < 34 && machi[tsumohai]){
+		tmp = (*MJSendMessage)(this, MJMI_GETAGARITEN, 0, tsumohai);
+#ifdef AIDUMP_COMMAND
+		fprintf(fp, TEXT("GETAGARITEN %u\n"), tmp);
+#endif
+		if (tmp > 0) {
+			return MJPIR_TSUMO;
+		}
+	}
 
 	// リーチをかけている場合は「ツモ切り」
 	if (state.reach_flag[0]) return MJPIR_SUTEHAI | 13;
@@ -634,13 +643,14 @@ int MahjongAI::select_Score(double scc_max)
 		if (state.reach_flag[i]) rnum++;
 	}
 
-
+#if 0
 	if (rnum > 0 && rnum + shanten > 2 && scc_max < 50.0){
 		decision = AI_DECISION_ORI;
 	}
 	else{
 		decision = AI_DECISION_AGARI1;
 	}
+#endif
 
 
 
@@ -750,7 +760,7 @@ int MahjongAI::calc_sutehai(void)
 
 #endif	
 
-	tehai_score = hp[0].sc;
+	tehai_score = scc_max;
 	ret = search(hp[0].no, 0, 0);
 #ifdef AIDUMP_1
 	fprintf(fp,"</CALC>");
@@ -765,18 +775,21 @@ int MahjongAI::calc_sutehai(void)
 }
 
 // 捨てる牌を決める
-int MahjongAI::calc_sutehai_easy(void)
+int MahjongAI::calc_sutehai_easy(double *pMax)
 {
 	int i, sh;
 	HAIPOINT hp[14];
 	int size;
+	double score_max;
 
 	memset(hp, 0, sizeof(hp));
 	// 捨てる牌を一つ一つ試してみて、もっとも評価値の高いものをとる
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START calc_sutehai_easy\n");
 #endif
-	ai.evalSutehai(state, hp, size);
+	score_max = ai.evalSutehai(state, hp, size);
+
+	if(pMax != NULL) *pMax=score_max;
 
 	qsort(hp, size, sizeof(HAIPOINT), (int(*)(const void*, const void*))compare_hp);
 #ifdef AIDUMP_STACKTRACE
@@ -897,6 +910,7 @@ UINT MahjongAI::koe_req(int no, int hai)
 	int nextshanten;
 	TENPAI_LIST list;
 	int sthai;
+	double score_max;
 
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START koe_req\n");
@@ -919,142 +933,49 @@ UINT MahjongAI::koe_req(int no, int hai)
 
 	/* テンパイまたはオリているばあいは鳴かない */
 	if (tenpai_flag == 1 || decision == AI_DECISION_ORI) return 0;
-	sthai = -1;
-
-	hanpai = 0;
-	for (i = 27; i < 34; i++){
-		if ((state.te_cnt[i] >= 3) && (i >= 31 || i - 27 == state.cha || i - 27 == state.kaze)){
-			hanpai++;
-		}
-	}
-
-	tehaisize = tehai2Array(tmptehai);
-	/* シャンテン数を数える */
-	prevshanten = search_tenpai(tmptehai, tehaisize, NULL, &list, 1, 6);
-
-	if (prevshanten != 0){
-		prevshanten = list.shanten;
-	}
-	else{
-		prevshanten = 6;
-	}
 
 	if (naki_ok & 1){
-		if (menzen == 0){
-			if (state.te_cnt[hai] == 2){
-				state.te_cnt[hai] -= 2;
-				sthai = calc_sutehai_easy();
-				state.te_cnt[sthai]--;
-				tehaisize = tehai2Array(tmptehai);
-				state.te_cnt[sthai]++;
-				state.te_cnt[hai] += 2;
-				/* シャンテン数を数える */
-				nextshanten = search_tenpai(tmptehai, tehaisize, NULL, &list, 1, 6);
+		state.te_cnt[hai] -= 2;
+		state.tehai.minkou[state.tehai.minkou_max++] = hai;
+		calc_sutehai_easy(&score_max);
+		state.tehai.minkou_max--;
+		state.te_cnt[hai] += 2;
 
-				if (nextshanten != 0){
-					nextshanten = list.shanten;
-				}
-				else{
-					nextshanten = 6;
-				}
-
-				if (nextshanten < prevshanten) return MJPIR_PON;
-			}
-
-		}
-		if (hai >= 27){
-
-			if (state.te_cnt[hai] == 2){
-				if ((doranum >= 2) && (hai >= 31 || hai - 27 == state.cha || hai - 27 == state.kaze)){
-					return MJPIR_PON;
-				}
-			}
-		}
-		else {
-			doraflag = 0;
-
-			for (i = 0; i < doralen; i++){
-				if (dora[i] == hai){
-					doraflag = 1;
-					break;
-				}
-			}
-
-			if (hanpai > 0 && doraflag >= 0){
-				return MJPIR_PON;
-			}
-
-		}
+		if (score_max > tehai_score) return MJPIR_PON;
 	}
 
 	if (naki_ok & 4){
 		state.te_cnt[hai + 1]--;
 		state.te_cnt[hai + 2]--;
-		sthai = calc_sutehai_easy();
-		state.te_cnt[sthai]--;
-		tehaisize = tehai2Array(tmptehai);
-		state.te_cnt[sthai]++;
+		state.tehai.minshun[state.tehai.minshun_max++] = hai;
+		calc_sutehai_easy(&score_max);
+		state.tehai.minshun_max--;
 		state.te_cnt[hai + 1]++;
 		state.te_cnt[hai + 2]++;
-		/* シャンテン数を数える */
-		nextshanten = search_tenpai(tmptehai, tehaisize, NULL, &list, 1, 6);
 
-		if (nextshanten != 0){
-			nextshanten = list.shanten;
-		}
-		else{
-			nextshanten = 6;
-		}
-
-		if (nextshanten < prevshanten && (menzen == 0 || hanpai)) return MJPIR_CHII1;
+		if (score_max > tehai_score) return MJPIR_CHII1;
 	}
 	if (naki_ok & 8){
 		state.te_cnt[hai - 1]--;
 		state.te_cnt[hai - 2]--;
-		sthai = calc_sutehai_easy();
-		state.te_cnt[sthai]--;
-		tehaisize = tehai2Array(tmptehai);
-		state.te_cnt[sthai]++;
+		state.tehai.minshun[state.tehai.minshun_max++] = hai - 2;
+		calc_sutehai_easy(&score_max);
+		state.tehai.minshun_max--;
 		state.te_cnt[hai - 1]++;
 		state.te_cnt[hai - 2]++;
-		/* シャンテン数を数える */
-		nextshanten = search_tenpai(tmptehai, tehaisize, NULL, &list, 1, 6);
 
-		if (nextshanten != 0){
-			nextshanten = list.shanten;
-		}
-		else{
-			nextshanten = 6;
-		}
-
-		if (nextshanten < prevshanten && (menzen == 0 || hanpai)) return MJPIR_CHII2;
+		if (score_max > tehai_score) return MJPIR_CHII2;
 	}
 	if (naki_ok & 16){
 		state.te_cnt[hai + 1]--;
 		state.te_cnt[hai - 1]--;
-		sthai = calc_sutehai_easy();
-		state.te_cnt[sthai]--;
-		tehaisize = tehai2Array(tmptehai);
-		state.te_cnt[sthai]++;
+		state.tehai.minshun[state.tehai.minshun_max++] = hai - 1;
+		calc_sutehai_easy(&score_max);
+		state.tehai.minshun_max--;
 		state.te_cnt[hai + 1]++;
 		state.te_cnt[hai - 1]++;
-		/* シャンテン数を数える */
-#ifdef AIDUMP_STACKTRACE
-		printStackTrace("START search_tenpai\n");
-#endif
-		nextshanten = search_tenpai(tmptehai, tehaisize, NULL, &list, 1, 6);
-#ifdef AIDUMP_STACKTRACE
-		printStackTrace("END search_tenpai\n");
-#endif
 
-		if (nextshanten != 0){
-			nextshanten = list.shanten;
-		}
-		else{
-			nextshanten = 6;
-		}
-
-		if (nextshanten < prevshanten && (menzen == 0 || hanpai)) return MJPIR_CHII3;
+		if (score_max > tehai_score) return MJPIR_CHII3;
 	}
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END koe_req\n");
@@ -1091,6 +1012,7 @@ UINT MahjongAI::on_start_kyoku(int k, int c)
 	}
 	//tehai_score = eval_Tehai(0);
 	//set_machi();
+	tehai_score = DBL_MAX;
 
 	mysc = (*MJSendMessage)(this, MJMI_GETSCORE, 0, 0);
 

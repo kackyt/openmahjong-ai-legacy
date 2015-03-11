@@ -941,7 +941,9 @@ UINT MahjongAI::koe_req(int no, int hai)
 		state.tehai.minkou_max--;
 		state.te_cnt[hai] += 2;
 
-		if (score_max > tehai_score) return MJPIR_PON;
+		if (score_max > 0.01 && score_max > tehai_score){
+			return MJPIR_PON;
+		}
 	}
 
 	if (naki_ok & 4){
@@ -953,7 +955,9 @@ UINT MahjongAI::koe_req(int no, int hai)
 		state.te_cnt[hai + 1]++;
 		state.te_cnt[hai + 2]++;
 
-		if (score_max > tehai_score) return MJPIR_CHII1;
+		if (score_max > 0.01 && score_max > tehai_score){
+			return MJPIR_CHII1;
+		}
 	}
 	if (naki_ok & 8){
 		state.te_cnt[hai - 1]--;
@@ -964,7 +968,9 @@ UINT MahjongAI::koe_req(int no, int hai)
 		state.te_cnt[hai - 1]++;
 		state.te_cnt[hai - 2]++;
 
-		if (score_max > tehai_score) return MJPIR_CHII2;
+		if (score_max > 0.01 && score_max > tehai_score){
+			return MJPIR_CHII2;
+		}
 	}
 	if (naki_ok & 16){
 		state.te_cnt[hai + 1]--;
@@ -975,7 +981,9 @@ UINT MahjongAI::koe_req(int no, int hai)
 		state.te_cnt[hai + 1]++;
 		state.te_cnt[hai - 1]++;
 
-		if (score_max > tehai_score) return MJPIR_CHII3;
+		if (score_max > 0.01 && score_max > tehai_score){
+			return MJPIR_CHII3;
+		}
 	}
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END koe_req\n");

@@ -45,7 +45,7 @@ static int isDaburii(GAMESTATE *gamestate, RESULT_ITEM *item);
 /* ƒcƒ‚ */
 static int isTsumo(GAMESTATE *gamestate, RESULT_ITEM *item)
 {
-    if (gamestate->tsumo)
+	if (gamestate->tsumo && isMenzen(gamestate, item))
         return 1;
     return 0;
 }

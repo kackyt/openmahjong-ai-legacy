@@ -38,7 +38,7 @@ typedef struct {
 	char debug[255];
 } THREAD_PARAM;
 
-
+//#define SINGLETHREAD
 
 
 #if 0
@@ -263,7 +263,7 @@ static void bestagari(THREAD_PARAM *prm, RESULT_ITEM *ret, int *cnt, int *koutsu
 
 
 
-static double calcscore(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shuntsucnt){
+static double calcscore(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shuntsucnt,int diff){
 	RESULT_ITEM item;
 	int i, j, count = 0, pai;
 	int maxc, m, c,n,o;
@@ -273,6 +273,10 @@ static double calcscore(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shunts
 
 	memset(&state, 0, sizeof(state));
 	memset(&item, 0, sizeof(item));
+
+	for (i = 0; i < 4; i++){
+		toitsu[i] = -1;
+	}
 
 	state.tsumo = 1;
 	state.bakaze = prm->pState->kyoku / 4;
@@ -397,6 +401,7 @@ static double calcscore(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shunts
 		int shuntsucnt2[21];
 		int cnt2[34];
 		RESULT_ITEM best;
+		value = 0.0;
 
 		if (toitsu[m] < 0) continue;
 		probability = 1.0;
@@ -461,21 +466,105 @@ static double calcscore(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shunts
 				}
 			}
 		}
-		cnt[toitsu[m]] -= 2;
 
 		item.mentsulist[count].category = AI_TOITSU;
 		item.mentsulist[count].pailist[0] = toitsu[m];
 		item.mentsulist[count].pailist[1] = toitsu[m];
+		count++;
 
-		item.machi = item.mentsulist[0].category == AI_SYUNTSU ? AI_MACHI_RYANMEN : AI_MACHI_SHANPON;
-		item.machihai = item.mentsulist[0].pailist[0];
-		item.machipos = 0;
+		item.mentsusize = count;
+		assert(probability >= 0);
 
-		make_resultitem_bh(&item, &state);
-		assert(probability >= 0 && item.score >= 0);
+		/* 待ち形を全部探索する */
+		for (o = 0; o < item.mentsusize; o++) {
+			int pai;
+			if (item.mentsulist[o].category == AI_KOUTSU){
+				pai = item.mentsulist[o].pailist[0];
+				if (cnt[pai] > prm->pState->te_cnt[pai]) {
+					item.machi = AI_MACHI_SHANPON;
+					item.machihai = pai;
+					item.machipos = o;
+					make_resultitem_bh(&item, &state);
 
-		//value = 1.0 * probability * probability * item.score + 0.0 * probability * item.score;
-		value = 0.8 * probability * probability * item.score + 0.2 * probability * item.score;
+					value += (0.8 * probability * probability * item.score + 0.2 * probability * item.score)  / (double)diff;
+				}
+
+			}
+			else if (item.mentsulist[o].category == AI_SYUNTSU){
+				pai = item.mentsulist[o].pailist[0];
+
+				if (cnt[pai] > prm->pState->te_cnt[pai]){
+
+					if ((pai % 9) == 7) {
+						item.machi = AI_MACHI_PENCHAN;
+					}
+					else{
+						item.machi = AI_MACHI_RYANMEN;
+					}
+
+					item.machihai = pai;
+					item.machipos = o;
+					make_resultitem_bh(&item, &state);
+
+					/* 両面待ちは得点を倍付けする */
+					if ((pai % 9) == 7) {
+						value += (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
+					}
+					else{
+						value += 2.0 * (0.8 * probability * probability * item.score + 0.2 * probability * item.score)  / (double)diff;
+					}
+
+				}
+
+				if (cnt[pai + 1] > prm->pState->te_cnt[pai + 1]){
+					item.machi = AI_MACHI_KANCHAN;
+
+					item.machihai = pai + 1;
+					item.machipos = o;
+					make_resultitem_bh(&item, &state);
+
+					value += (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
+				}
+
+				if (cnt[pai + 2] > prm->pState->te_cnt[pai + 2]){
+
+					if ((pai % 9) == 0) {
+						item.machi = AI_MACHI_PENCHAN;
+					}
+					else{
+						item.machi = AI_MACHI_RYANMEN;
+					}
+
+					item.machihai = pai;
+					item.machipos = o;
+					make_resultitem_bh(&item, &state);
+
+					/* 両面待ちは得点を倍付けする */
+					if ((pai % 9) == 0) {
+						value += (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
+					}
+					else{
+						value += 2.0 * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
+					}
+
+				}
+
+			}
+			else if(item.mentsulist[o].category == AI_TOITSU){
+				pai = item.mentsulist[o].pailist[0];
+				if (cnt[pai] > prm->pState->te_cnt[pai]) {
+					item.machi = AI_MACHI_TANKI;
+					item.machihai = pai;
+					item.machipos = o;
+					make_resultitem_bh(&item, &state);
+
+					value += (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
+				}
+			}
+		}
+
+
+		cnt[toitsu[m]] -= 2;
 
 		if (prm->val < probability){
 			prm->val = probability;
@@ -511,7 +600,7 @@ static double shuntsupoint(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shu
 	if (diff > prm->shanten + 2 || diff >= 5 ) return ret;
 
 	if (shuntsunum <= 0) {
-		return calcscore(prm, cnt, koutsucnt, shuntsucnt);
+		return calcscore(prm, cnt, koutsucnt, shuntsucnt,diff);
 	}
 	else{
 
@@ -592,7 +681,7 @@ static double koutsupoint(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shun
 }
 
 /* 4つの刻子+頭 */
-static DWORD WINAPI threadfunc(LPVOID pParam)
+static unsigned __stdcall threadfunc(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
 	int koutsucnt[34];
@@ -610,13 +699,16 @@ static DWORD WINAPI threadfunc(LPVOID pParam)
 		prm->ret = koutsupoint(prm, cnt, koutsucnt, shuntsucnt, 4, 0, 0, 0);
 	}
 
+#ifndef SINGLETHREAD
+	_endthreadex(0);
+#endif
 	return 0;
 }
 
 
 
 /* 3つの刻子+1つの順子+頭 */
-static DWORD WINAPI threadfunc2(LPVOID pParam)
+static unsigned __stdcall threadfunc2(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
 	int koutsucnt[34];
@@ -634,12 +726,15 @@ static DWORD WINAPI threadfunc2(LPVOID pParam)
 		prm->ret = koutsupoint(prm, cnt, koutsucnt, shuntsucnt, 3, 1 - nakisum, 0, 0);
 	}
 
+#ifndef SINGLETHREAD
+	_endthreadex(0);
+#endif
 	return 0;
 }
 
 
 /* 2つの刻子+2つの順子+頭 */
-static DWORD WINAPI threadfunc3(LPVOID pParam)
+static unsigned __stdcall threadfunc3(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
 	int koutsucnt[34];
@@ -657,11 +752,14 @@ static DWORD WINAPI threadfunc3(LPVOID pParam)
 		prm->ret = koutsupoint(prm, cnt, koutsucnt, shuntsucnt, 2, 2 - nakisum, 0, 0);
 	}
 
+#ifndef SINGLETHREAD
+	_endthreadex(0);
+#endif
 	return 0;
 }
 
 /* 1つの刻子+3つの順子+頭 */
-static DWORD WINAPI threadfunc4(LPVOID pParam)
+static unsigned __stdcall threadfunc4(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
 	int koutsucnt[34];
@@ -679,11 +777,14 @@ static DWORD WINAPI threadfunc4(LPVOID pParam)
 		prm->ret = koutsupoint(prm, cnt, koutsucnt, shuntsucnt, 1, 3 - nakisum, 0, 0);
 	}
 
+#ifndef SINGLETHREAD
+	_endthreadex(0);
+#endif
 	return 0;
 }
 
 /* 4つの順子+頭 */
-static DWORD WINAPI threadfunc5(LPVOID pParam)
+static unsigned __stdcall threadfunc5(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
 	int koutsucnt[34];
@@ -698,11 +799,14 @@ static DWORD WINAPI threadfunc5(LPVOID pParam)
 	nakisum = prm->pState->tehai.ankan_max + prm->pState->tehai.minkan_max + prm->pState->tehai.minkou_max + prm->pState->tehai.minshun_max;
 
 	if (nakisum >= 4) {
-		prm->ret = calcscore(prm, cnt, koutsucnt, shuntsucnt);
+		prm->ret = calcscore(prm, cnt, koutsucnt, shuntsucnt,2);
 	} else{
 		prm->ret = shuntsupoint(prm, cnt, koutsucnt, shuntsucnt, 0, 4 - nakisum, 0, 0);
 	}
 
+#ifndef SINGLETHREAD
+	_endthreadex(0);
+#endif
 	return 0;
 }
 
@@ -783,7 +887,7 @@ double chiitoipoint(THREAD_PARAM *prm, int cnt,unsigned long long tehaibitmap,un
 
 
 /* 七対子 */
-static DWORD WINAPI threadfunc6(LPVOID pParam)
+static unsigned __stdcall threadfunc6(void *pParam)
 {
 	int count;
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
@@ -803,16 +907,17 @@ static DWORD WINAPI threadfunc6(LPVOID pParam)
 		prm->ret =  chiitoipoint(prm, toitsunum, bitmap,0,0);
 	}
 
+#ifndef SINGLETHREAD
+	_endthreadex(0);
+#endif
 	return 0;
 }
 
-//#define SINGLETHREAD
 #define THREADNUM (6)
 
 double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
 {
 	double sum = 0.0;
-	DWORD dwID;
 	THREAD_PARAM tparam[THREADNUM];
 	HANDLE hThread[THREADNUM];
 	int i,j;
@@ -856,18 +961,19 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
 #else
 	memset(hThread,0,sizeof(hThread));
 
-	hThread[0] = (HANDLE)CreateThread(NULL,0,threadfunc,&tparam[0],0,&dwID);
-	hThread[1] = (HANDLE)CreateThread(NULL,0,threadfunc2,&tparam[1],0,&dwID);
-	hThread[2] = (HANDLE)CreateThread(NULL,0,threadfunc3,&tparam[2],0,&dwID);
-	hThread[3] = (HANDLE)CreateThread(NULL,0,threadfunc4,&tparam[3],0,&dwID);
-	hThread[4] = (HANDLE)CreateThread(NULL,0,threadfunc5,&tparam[4],0,&dwID);
-	hThread[5] = (HANDLE)CreateThread(NULL, 0, threadfunc6, &tparam[5], 0, &dwID);
+	hThread[0] = (HANDLE)_beginthreadex(NULL, 0, threadfunc, &tparam[0], 0, NULL);
+	hThread[1] = (HANDLE)_beginthreadex(NULL, 0, threadfunc2, &tparam[1], 0, NULL);
+	hThread[2] = (HANDLE)_beginthreadex(NULL, 0, threadfunc3, &tparam[2], 0, NULL);
+	hThread[3] = (HANDLE)_beginthreadex(NULL, 0, threadfunc4, &tparam[3], 0, NULL);
+	hThread[4] = (HANDLE)_beginthreadex(NULL, 0, threadfunc5, &tparam[4], 0, NULL);
+	hThread[5] = (HANDLE)_beginthreadex(NULL, 0, threadfunc6, &tparam[5], 0, NULL);
 
 	WaitForMultipleObjects(THREADNUM, hThread, TRUE, INFINITE);
 #endif
 
 	for(i=0;i<THREADNUM;i++){
 		sum += tparam[i].ret;
+		CloseHandle(hThread[i]);
 	}
 
 #ifdef _DEBUG

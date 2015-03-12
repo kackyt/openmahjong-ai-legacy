@@ -21,6 +21,7 @@
 ****************************************************************************************/
 #include <math.h>
 #include <stdlib.h>
+#include <process.h>
 #include "MahjongScoreAI.h"
 #include "AILib.h"
 
@@ -129,7 +130,7 @@ typedef struct {
 
 
 // Žè”v‚ð•]‰¿‚µ‚Ä•]‰¿’l‚ð•Ô‚·
-static DWORD WINAPI evalSutehaiSubSub(LPVOID param)
+static unsigned __stdcall evalSutehaiSubSub(void * param)
 {
     THREAD_PARAM *prm = (THREAD_PARAM *)param;
     int simtehai[34];
@@ -199,6 +200,7 @@ static DWORD WINAPI evalSutehaiSubSub(LPVOID param)
 
     prm->ret = value;
     //fprintf(fp,"%d",debug);
+	_endthreadex(0);
 
     return 0;
 }
@@ -210,7 +212,6 @@ static DWORD WINAPI evalSutehaiSubSub(LPVOID param)
 double MahjongAIType1::evalSutehaiSub(MahjongAIState &param, int hai)
 {
     double sum = 0.0;
-    DWORD dwID;
     THREAD_PARAM tparam[THREADNUM];
     HANDLE hThread[THREADNUM];
     int i;
@@ -222,7 +223,7 @@ double MahjongAIType1::evalSutehaiSub(MahjongAIState &param, int hai)
         tparam[i].hai = hai;
         tparam[i].ret = 0.0;
         tparam[i].remain = remain;
-        hThread[i] = (HANDLE)CreateThread(NULL, 0, evalSutehaiSubSub, &tparam[i], 0, &dwID);
+        hThread[i] = (HANDLE)_beginthreadex(NULL, 0, evalSutehaiSubSub, &tparam[i], 0, NULL);
     }
 
     WaitForMultipleObjects(THREADNUM, hThread, TRUE, INFINITE);

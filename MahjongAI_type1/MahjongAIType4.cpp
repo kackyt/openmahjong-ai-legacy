@@ -510,46 +510,45 @@ static double shuntsupoint(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shu
 
 	if (diff > prm->shanten + 2 || diff >= 5 ) return ret;
 
-	for (i = shuntsupos; i < 21; i++){
-		pai = (i / 7) * 9 + i % 7;
-		
+	if (shuntsunum <= 0) {
+		return calcscore(prm, cnt, koutsucnt, shuntsucnt);
+	}
+	else{
+
+		for (i = shuntsupos; i < 21; i++){
+			pai = (i / 7) * 9 + i % 7;
+
 #if 1
-		/* Ž©•ª‚ÌŽè”v‚É—‚Ü‚È‚¢Žè‚Íœ‹Ž */
-		if (prm->pState->te_cnt[pai] == 0 && prm->pState->te_cnt[pai + 1] == 0 && prm->pState->te_cnt[pai + 2] == 0) continue;
+			/* Ž©•ª‚ÌŽè”v‚É—‚Ü‚È‚¢Žè‚Íœ‹Ž */
+			if (prm->pState->te_cnt[pai] == 0 && prm->pState->te_cnt[pai + 1] == 0 && prm->pState->te_cnt[pai + 2] == 0) continue;
 #endif
 
-		if (prm->pState->nokori[pai] > cnt[pai] - prm->pState->te_cnt[pai]
-			&& prm->pState->nokori[pai + 1] > cnt[pai + 1] - prm->pState->te_cnt[pai + 1]
-			&& prm->pState->nokori[pai + 2] > cnt[pai + 2] - prm->pState->te_cnt[pai + 2]) {
+			if (prm->pState->nokori[pai] > cnt[pai] - prm->pState->te_cnt[pai]
+				&& prm->pState->nokori[pai + 1] > cnt[pai + 1] - prm->pState->te_cnt[pai + 1]
+				&& prm->pState->nokori[pai + 2] > cnt[pai + 2] - prm->pState->te_cnt[pai + 2]) {
 
 #if 0
-			if (prm->pState->te_cnt[pai + 1] == 0 && prm->pState->te_cnt[pai] > 0 && prm->pState->te_cnt[pai + 2] > 0){
-				/* ƒJƒ“ƒ`ƒƒƒ“‘Ò‚¿‚©‚Â—¼–Ê‚Æ‚©‚Ô‚Á‚Ä‚éê‡‚ÍŠm—¦‚ðŒvŽZ‚µ‚È‚¢ */
+				if (prm->pState->te_cnt[pai + 1] == 0 && prm->pState->te_cnt[pai] > 0 && prm->pState->te_cnt[pai + 2] > 0){
+					/* ƒJƒ“ƒ`ƒƒƒ“‘Ò‚¿‚©‚Â—¼–Ê‚Æ‚©‚Ô‚Á‚Ä‚éê‡‚ÍŠm—¦‚ðŒvŽZ‚µ‚È‚¢ */
 
-				if ((pai % 9) > 0 && prm->pState->te_cnt[pai - 1] > 0) continue; // —¼–Ê‚Æ‚©‚Ô‚Á‚Ä‚é
-				if ((pai % 9) < 7 && prm->pState->te_cnt[pai + 3] > 0) continue;
-			}
+					if ((pai % 9) > 0 && prm->pState->te_cnt[pai - 1] > 0) continue; // —¼–Ê‚Æ‚©‚Ô‚Á‚Ä‚é
+					if ((pai % 9) < 7 && prm->pState->te_cnt[pai + 3] > 0) continue;
+				}
 #endif
-			cnt[pai]++;
-			cnt[pai + 1]++;
-			cnt[pai + 2]++;
-			shuntsucnt[i]++;
+				cnt[pai]++;
+				cnt[pai + 1]++;
+				cnt[pai + 2]++;
+				shuntsucnt[i]++;
 
-			
-			if (shuntsunum - 1 > 0) {
+
 				ret += shuntsupoint(prm, cnt, koutsucnt, shuntsucnt, koutsunum, shuntsunum - 1, koutsupos, i);
-			}else if (koutsunum > 0) {
-				ret += koutsupoint(prm, cnt, koutsucnt, shuntsucnt, koutsunum, shuntsunum - 1, koutsupos, i);
-			}
-			else{
-				ret += calcscore(prm, cnt, koutsucnt, shuntsucnt);
-			}
 
-			cnt[pai]--;
-			cnt[pai + 1]--;
-			cnt[pai + 2]--;
-			shuntsucnt[i]--;
+				cnt[pai]--;
+				cnt[pai + 1]--;
+				cnt[pai + 2]--;
+				shuntsucnt[i]--;
 
+			}
 		}
 	}
 
@@ -579,11 +578,8 @@ static double koutsupoint(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shun
 			if (koutsunum - 1 > 0) {
 				ret += koutsupoint(prm, cnt, koutsucnt, shuntsucnt, koutsunum - 1, shuntsunum, i + 1, shuntsupos);
 			}
-			else if (shuntsunum > 0) {
-				ret += shuntsupoint(prm, cnt, koutsucnt, shuntsucnt, koutsunum - 1, shuntsunum, i + 1, shuntsupos);
-			}
 			else{
-				ret += calcscore(prm, cnt, koutsucnt, shuntsucnt);
+				ret += shuntsupoint(prm, cnt, koutsucnt, shuntsucnt, koutsunum - 1, shuntsunum, i + 1, shuntsupos);
 			}
 
 			cnt[i] -= 3;

@@ -198,7 +198,26 @@ int MJ0(/* inputs */
 	}
 
 	for(i=0;i<dlength;i++){
-		aNokorihai[pDora[i] & 63]--;
+		int dora = pDora[i] & 63;
+		/* ƒhƒ‰•\Ž¦”v‚ðŽæ“¾ */
+		if (dora < 27){
+			if ((dora % 9) == 0) {
+				dora += 8;
+			}
+			else{
+				dora--;
+			}
+		}
+		else if (dora == 27){
+			dora = 30;
+		}
+		else if (dora == 31){
+			dora = 33;
+		}
+		else{
+			dora--;
+		}
+		aNokorihai[dora]--;
 	}
 
 

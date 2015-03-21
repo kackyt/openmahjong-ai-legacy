@@ -265,7 +265,7 @@ UINT WINAPI MJSendMessage(LPVOID inst,UINT message,UINT param1,UINT param2)
 				pKawahai[i].hai = pView->m_aSutehai[i];
 				pKawahai[i].state = 0;
 			}
-			pView->m_iSutehaiSize;
+			ret = pView->m_iSutehaiSize;
 		}else{
 			ret = 0;
 		}

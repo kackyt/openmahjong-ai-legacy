@@ -59,7 +59,7 @@ typedef enum {
 } AI_DECISION;
 
 #define MAHJONGAI( method ) MahjongAI##method
-#define PLAYERNAME( method ) "KING" #method
+#define PLAYERNAME( method ) "tKING" #method
 
 
 #define MAHJONGAITYPE MAHJONGAI(Type4)
@@ -413,8 +413,12 @@ void MahjongAI::set_Tehai(int tsumohai)
 #ifdef AIDUMP_COMMAND
 	fprintf(fp, TEXT("GET TEHAI\n"));
 #endif
-	for (i = 0; i < 34; i++) state.te_cnt[i] = 0;
+	for (i = 0; i < 34; i++){
+		state.te_cnt[i] = 0;
+		state.sute_cnt[i] = 0;
+	}
 	for (i = 0; i < (int)state.tehai.tehai_max; i++) state.te_cnt[state.tehai.tehai[i]]++;
+	for (i = 0; i < param[0].kawalength; i++) state.sute_cnt[param[0].pKawahai[i].hai & 63]++;
 
 	doranum = 0;
 	for (i = 0; i < doralen; i++){

@@ -64,6 +64,7 @@ typedef struct {
 	char reach_flag[4];
 	char ippatsu_flag[4];
 	int te_cnt[34];
+	int sute_cnt[34];
 	int kyoku;
 	int cha;
 	int kaze;

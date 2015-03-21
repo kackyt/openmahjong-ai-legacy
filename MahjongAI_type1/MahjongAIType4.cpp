@@ -260,7 +260,52 @@ static void bestagari(THREAD_PARAM *prm, RESULT_ITEM *ret, int *cnt, int *koutsu
 }
 
 
+/* ‘Ò‚¿Œ`‚ğ•]‰¿‚·‚éŒW”‚ğŒvZ‚·‚é */
+static double calcMachiCoef(THREAD_PARAM *prm, int *cnt,int machihai){
+	int machi[34];
+	int i,j;
+	int tehai[14];
+	int tehaisize = 0;
+	int furiten = FALSE;
+	double num = 0.0;
+	double ret;
 
+	memset(machi, 0, sizeof(machi));
+
+	/* ‘Ò‚¿”v‚ğœ‚­è”v‚ğì¬‚·‚é */
+	cnt[machihai]--;
+	for (i = 0; i < 34; i++){
+		for (j = 0; j < cnt[i]; j++){
+			tehai[tehaisize++] = i;
+		}
+	}
+	cnt[machihai]++;
+
+	/* ƒeƒ“ƒpƒC‚Ì‘Ò‚¿‚ğŒvZ‚·‚é */
+	search_tenpai(tehai, tehaisize, machi, NULL, 0, 0);
+
+	for (i = 0; i < 34; i++){
+		if (machi[i]){
+			if (prm->pState->sute_cnt[i]){
+				furiten = TRUE;
+			}
+
+			if (i != machihai){
+				num += prm->pState->nokori[i] - cnt[i];
+			}
+
+		}
+	}
+
+	ret = 1.0 + num / 10.0;
+
+	/* ƒtƒŠƒeƒ“‚Íƒƒ“˜a—¹‚è‚Å‚«‚È‚¢‚Ì‚Å3•ª‚Ì1‚É‚³‚¹‚é */
+	if (furiten){
+		ret *= 0.33;
+	}
+
+	return ret;
+}
 
 
 static double calcscore(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shuntsucnt,int diff){
@@ -486,7 +531,7 @@ static double calcscore(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shunts
 					item.machipos = o;
 					make_resultitem_bh(&item, &state);
 
-					value += (0.8 * probability * probability * item.score + 0.2 * probability * item.score)  / (double)diff;
+					value += calcMachiCoef(prm,cnt,pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score)  / (double)diff;
 				}
 
 			}
@@ -506,13 +551,7 @@ static double calcscore(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shunts
 					item.machipos = o;
 					make_resultitem_bh(&item, &state);
 
-					/* —¼–Ê‘Ò‚¿‚Í“¾“_‚ğ”{•t‚¯‚·‚é */
-					if ((pai % 9) == 7) {
-						value += (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
-					}
-					else{
-						value += 2.0 * (0.8 * probability * probability * item.score + 0.2 * probability * item.score)  / (double)diff;
-					}
+					value += calcMachiCoef(prm, cnt, pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
 
 				}
 
@@ -523,7 +562,7 @@ static double calcscore(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shunts
 					item.machipos = o;
 					make_resultitem_bh(&item, &state);
 
-					value += (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
+					value += calcMachiCoef(prm, cnt, pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
 				}
 
 				if (cnt[pai + 2] > prm->pState->te_cnt[pai + 2]){
@@ -539,13 +578,7 @@ static double calcscore(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shunts
 					item.machipos = o;
 					make_resultitem_bh(&item, &state);
 
-					/* —¼–Ê‘Ò‚¿‚Í“¾“_‚ğ”{•t‚¯‚·‚é */
-					if ((pai % 9) == 0) {
-						value += (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
-					}
-					else{
-						value += 2.0 * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
-					}
+					value += calcMachiCoef(prm, cnt, pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
 
 				}
 
@@ -558,7 +591,7 @@ static double calcscore(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shunts
 					item.machipos = o;
 					make_resultitem_bh(&item, &state);
 
-					value += (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
+					value += calcMachiCoef(prm, cnt, pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
 				}
 			}
 		}

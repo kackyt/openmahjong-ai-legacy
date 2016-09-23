@@ -48,7 +48,7 @@ static double eval_Tehai_sub(MahjongAIState &param,int sthai,int atama_flag)
 #ifdef AIDUMP_COMMAND
 		fprintf(fp,TEXT("GETVISIBLEHAIS %u\n"),tmp);
 #endif
-		sc = eval_Tehai_sub(param,sthai,1)+6*(!param.anpai[p][0] || !atama_flag)+!atama_flag*12-tmp;
+		sc = eval_Tehai_sub(param,sthai,1)+6*(!param.myself._anpai[p] || !atama_flag)+!atama_flag*12-tmp;
 		if (sc>sc_max) sc_max = sc;
 		param.te_cnt[p]+=2;
 	}
@@ -61,14 +61,14 @@ static double eval_Tehai_sub(MahjongAIState &param,int sthai,int atama_flag)
 				param.te_cnt[p]--; param.te_cnt[p+2]--;
 
 				// ƒJƒ“ƒ`ƒƒƒ“‚Ì•]‰¿
-				if (!param.anpai[p+1][0] && sthai!=p+1){
+				if (!param.myself._anpai[p+1] && sthai!=p+1){
 					tmp = MahjongScoreAI::MJSendMessage(MJMI_GETVISIBLEHAIS,p+1,0);
 #ifdef AIDUMP_COMMAND
 					fprintf(fp,TEXT("GETVISIBLEHAIS %u\n"),tmp);
 #endif
 					sc = eval_Tehai_sub(param,sthai,atama_flag)+8-tmp;
 					if (sc>sc_max) sc_max = sc;
-					if (kazu<5) if (param.te_cnt[p+4]) if (!param.anpai[p+3][0] && sthai!=p+3){
+					if (kazu<5) if (param.te_cnt[p+4]) if (!param.myself._anpai[p+3] && sthai!=p+3){
 						param.te_cnt[p+4]--;
 						sc = eval_Tehai_sub(param,sthai,atama_flag)+12;
 						if (sc>sc_max) sc_max = sc;
@@ -91,8 +91,8 @@ static double eval_Tehai_sub(MahjongAIState &param,int sthai,int atama_flag)
 		if (kazu<8){
 			if (param.te_cnt[p+1]){
 				chk = 0;
-				if (kazu>0) if (param.anpai[p-1][0] || sthai==p-1) chk = 1;
-				if (kazu<7) if (param.anpai[p+2][0] || sthai==p+2) chk = 1;
+				if (kazu>0) if (param.myself._anpai[p-1] || sthai==p-1) chk = 1;
+				if (kazu<7) if (param.myself._anpai[p+2] || sthai==p+2) chk = 1;
 				if (!chk){
 					param.te_cnt[p]--; param.te_cnt[p+1]--;
 					sc = eval_Tehai_sub(param,sthai,atama_flag)+8+(kazu>0 && kazu<7)*4;
@@ -127,7 +127,7 @@ static double eval_hai(MahjongAIState &param,int hai,UINT *dora,int doras)
 			ret += SCORE_SUPAI_34567;
 		}
 	}else {
-		tmp = param.nokori[hai];
+		tmp = param.myself._pai_kukan[hai];
 	
 		if (hai>30 || hai==param.cha+27 || hai==param.kaze+27){
 			if(param.te_cnt[hai] >= 3){
@@ -165,7 +165,11 @@ double MahjongAIType3::evalSutehaiSub(MahjongAIState &param,int hai)
 			ret1 += eval_hai(param,i,dora,doras);
 		}
 	}
-	shanten = search_tenpai((int*)param.tehai.tehai,param.tehai.tehai_max,NULL,&list,1,6);
+
+	MJITehai tehai;
+	
+	param.myself.toTehai(&tehai);
+	shanten = search_tenpai((int*)tehai.tehai,tehai.tehai_max,NULL,&list,1,6);
 
 	ret2 = eval_Tehai_sub(param,hai,0);
 

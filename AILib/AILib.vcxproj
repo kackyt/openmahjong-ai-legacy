@@ -77,7 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AILib.c" />
-    <ClCompile Include="MJ0.c" />
+    <ClCompile Include="MJ0.cpp" />
     <ClCompile Include="YakuCheck.c" />
   </ItemGroup>
   <ItemGroup>

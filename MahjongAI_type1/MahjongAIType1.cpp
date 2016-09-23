@@ -98,12 +98,12 @@ static int getPoint(AGARI_LIST *pList,void *ptr)
 	double coef = 1.0;
 	int remain = MahjongScoreAI::MJSendMessage(MJMI_GETHAIREMAIN,0,0)/4;
 
-	memcpy(&resulthai,&obj->tehai,sizeof(resulthai));
+	obj->myself.toTehai(&resulthai);
 	
 	for(i=0;i<pList->tehai_max;i++){
 		//if(remain < pList->tehai[i] >> 8) return 0;
         if (pList->tehai[i] >> 8){
-            int dist = paidistance(obj->tehai.tehai, pList->tehai[i]);
+            int dist = paidistance(obj->myself._tehai, pList->tehai[i]);
             coef *= dist_coef[dist + 1];
             coef *= getKindCoef(obj,pList->tehai[i]);
         }
@@ -143,7 +143,7 @@ static unsigned __stdcall evalSutehaiSubSub(void * param)
     double nokorihais;
     double nokoribuf[34];
 
-    memcpy(&resulthai, &prm->pState->tehai, sizeof(resulthai));
+	prm->pState->myself.toTehai(&resulthai);
 
     double value = 0;
 
@@ -162,11 +162,15 @@ static unsigned __stdcall evalSutehaiSubSub(void * param)
     for (i = 0; i<SIMULATECOUNT; i++){
         tmp = 0.0;
         for (j = 0; j<34; j++){
-            tmp += prm->pState->nokori[j];
         }
-        nokorihais = tmp;
-        memcpy(nokoribuf, prm->pState->nokori, sizeof(nokoribuf));
-        memcpy(simtehai, prm->pState->tehai.tehai, sizeof(prm->pState->tehai.tehai));
+		for (j = 0; j<34; j++) {
+			tmp += prm->pState->myself._pai_kukan[j];
+			nokoribuf[j] = prm->pState->myself._pai_kukan[j];
+		}
+		nokorihais = tmp;
+		for (j = 0; j < prm->pState->myself._tehai.size(); j++) {
+			simtehai[j] = prm->pState->myself._tehai[j].getNum();
+		}
 
         for (j = 0; j<paicount; j++){
             index = (nokorihais + 1.0) * (double)rand() / (double)(1.0 + RAND_MAX);
@@ -174,7 +178,7 @@ static unsigned __stdcall evalSutehaiSubSub(void * param)
             for (k = 0; k<34; k++){
                 tmp += nokoribuf[k];
                 if (index < tmp){
-                    simtehai[prm->pState->tehai.tehai_max + j] = 0x100 + k;
+                    simtehai[prm->pState->myself._tehai.size() + j] = 0x100 + k;
                     tmp2 = nokoribuf[k] > 1.0 ? 1.0 : nokoribuf[k];
                     nokoribuf[k] -= tmp2;
                     nokorihais -= tmp2;
@@ -183,9 +187,9 @@ static unsigned __stdcall evalSutehaiSubSub(void * param)
             }
         }
 
-        qsort(simtehai, prm->pState->tehai.tehai_max + paicount, sizeof(int), compare_hai);
+        qsort(simtehai, prm->pState->myself._tehai.size() + paicount, sizeof(int), compare_hai);
 
-        maxpts = search_agari(simtehai, prm->pState->tehai.tehai_max + paicount, &list, prm->pState->tehai.tehai_max + 1, prm->pState, getPoint);
+        maxpts = search_agari(simtehai, prm->pState->myself._tehai.size() + paicount, &list, prm->pState->myself._tehai.size() + 1, prm->pState, getPoint);
         value += (double)maxpts * 100 / SIMULATECOUNT;
         if (maxpts > 0){
             if (list.tehai[0] == 0 && list.tehai[1] == 1 && list.tehai[2] == 2){

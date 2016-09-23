@@ -2,11 +2,11 @@
  * Copyright (c) 2010-2012, Takaya Kakizaki(kacky)
  * All rights reserved.
 
-  ソースコード形式かバイナリ形式か、変更するかしないかを問わず、以下の条件を満たす場合に限り、再頒布および使用が許可されます。 
+  ソースコード形式かバイナリ形式か、変更するかしないかを問わず、以下の条件を満たす場合に限り、再頒布および使用が許可されます。
 
-  ・ソースコードを再頒布する場合、上記の著作権表示、本条件一覧、および下記免責条項を含めること。 
+  ・ソースコードを再頒布する場合、上記の著作権表示、本条件一覧、および下記免責条項を含めること。
 
-  ・バイナリ形式で再頒布する場合、頒布物に付属のドキュメント等の資料に、上記の著作権表示、本条件一覧、および下記免責条項を含めること。 
+  ・バイナリ形式で再頒布する場合、頒布物に付属のドキュメント等の資料に、上記の著作権表示、本条件一覧、および下記免責条項を含めること。
 
   ・書面による特別の許可なしに、本ソフトウェアから派生した製品の宣伝または販売促進に、オープン麻雀の名前またはコントリビューターの名前を使用してはならない。
 
@@ -16,7 +16,7 @@
   著作権者もコントリビューターも、事由のいかんを問わず、 損害発生の原因いかんを問わず、かつ責任の根拠が契約であるか厳格責任であるか
   （過失その他の）不法行為であるかを問わず、仮にそのような損害が発生する可能性を知らされていたとしても、本ソフトウェアの使用によって発生した
   （代替品または代用サービスの調達、使用の喪失、データの喪失、利益の喪失、業務の中断も含め、またそれに限定されない）
-  直接損害、間接損害、偶発的な損害、特別損害、懲罰的損害、または結果損害について、一切責任を負わないものとします。 
+  直接損害、間接損害、偶発的な損害、特別損害、懲罰的損害、または結果損害について、一切責任を負わないものとします。
 
 ****************************************************************************************/
 #include <assert.h>
@@ -24,8 +24,12 @@
 #include <stdio.h>
 #include <windows.h>
 #include <process.h>
+#include <vector>
+
 #include "MahjongScoreAI.h"
 #include "AILib.h"
+
+using namespace std;
 
 typedef struct {
 	MahjongAIState *pState;
@@ -82,188 +86,46 @@ static double dist_coef[] = {
 
 /* 牌の種類ごとの期待値の補正係数 */
 static double kind_coef[] = {
-    0.997,
-    0.998,
-    0.999,
-    0.996,
-    0.995
+	0.997,
+	0.998,
+	0.999,
+	0.996,
+	0.995
 };
 #endif
 
-static double getKindCoef(MahjongAIState *state,unsigned num){
-    num &= 0x3F;
+static double getKindCoef(MahjongAIState *state, unsigned num) {
+	num &= 0x3F;
 
-    if (num >= 31){
-        return kind_coef[3];
-    }
-    else if (num >= 27){
-        if (state->cha == num - 27 || state->kaze == num - 27){
-            return kind_coef[3];
-        }
-        else{
-            return kind_coef[4];
-        }
-    }
-    else{
-        switch (num % 9) {
-        case 0:
-        case 8:
-            return kind_coef[0];
-        case 1:
-        case 7:
-            return kind_coef[1];
-        default:
-            return kind_coef[2];
-        }
-    }
-}
-
-
-/* ベストな上がり形を探索する */
-static void bestagari(THREAD_PARAM *prm, RESULT_ITEM *ret, int *cnt, int *koutsucnt, int *shuntsucnt, int koutsunum, int shuntsunum, int koutsupos, int shuntsupos, int atama){
-	int i,pai;
-	int nakicnt;
-	RESULT_ITEM item;
-	GAMESTATE state;
-
-	memset(&state, 0, sizeof(state));
-	memset(&item, 0, sizeof(item));
-
-	state.tsumo = 1;
-	state.bakaze = prm->pState->kyoku / 4;
-	state.zikaze = prm->pState->cha;
-	state.count = 1;
-
-	nakicnt = prm->pState->tehai.ankan_max + prm->pState->tehai.minkan_max + prm->pState->tehai.minkou_max + prm->pState->tehai.minshun_max;
-
-	if (koutsunum + shuntsunum + nakicnt >= 4){
-		int count = 0;
-		int j;
-
-		item.mentsusize = 5;
-		item.menzen = 1;
-		item.machipos = 0;
-		item.han = 0;
-		item.fu = 0;
-
-		if (prm->pState->tehai.minkan_max > 0
-			|| prm->pState->tehai.minkou_max > 0
-			|| prm->pState->tehai.minshun_max > 0
-			){
-			item.menzen = 0;
+	if (num >= 31) {
+		return kind_coef[3];
+	}
+	else if (num >= 27) {
+		if (state->cha == num - 27 || state->kaze == num - 27) {
+			return kind_coef[3];
 		}
-
-		for (i = 0; i < 34; i++){
-			for (j = 0; j < koutsucnt[i]; j++){
-				assert(count < 4);
-				item.mentsulist[count].category = AI_KOUTSU;
-				item.mentsulist[count].pailist[0] = i;
-				item.mentsulist[count].pailist[1] = i;
-				item.mentsulist[count].pailist[2] = i;
-
-				count++;
-			}
-		}
-
-		for (i = 0; i < 21; i++){
-			for (j = 0; j < shuntsucnt[i]; j++){
-				assert(count < 4);
-				pai = (i / 7) * 9 + i % 7;
-				item.mentsulist[count].category = AI_SYUNTSU;
-				item.mentsulist[count].pailist[0] = pai;
-				item.mentsulist[count].pailist[1] = pai + 1;
-				item.mentsulist[count].pailist[2] = pai + 2;
-
-				count++;
-			}
-		}
-
-		for (i = 0; i < prm->pState->tehai.ankan_max; i++){
-			assert(count < 4);
-			item.mentsulist[count].category = AI_ANKAN;
-			item.mentsulist[count].pailist[0] = prm->pState->tehai.ankan[0];
-			item.mentsulist[count].pailist[1] = prm->pState->tehai.ankan[0];
-			item.mentsulist[count].pailist[2] = prm->pState->tehai.ankan[0];
-			count++;
-		}
-		for (i = 0; i < prm->pState->tehai.minkan_max; i++){
-			assert(count < 4);
-			item.mentsulist[count].category = AI_MINKAN;
-			item.mentsulist[count].pailist[0] = prm->pState->tehai.minkan[0];
-			item.mentsulist[count].pailist[1] = prm->pState->tehai.minkan[0];
-			item.mentsulist[count].pailist[2] = prm->pState->tehai.minkan[0];
-			count++;
-		}
-
-		for (i = 0; i < prm->pState->tehai.minkou_max; i++){
-			assert(count < 4);
-			item.mentsulist[count].category = AI_KOUTSU;
-			item.mentsulist[count].pailist[0] = prm->pState->tehai.minkou[0];
-			item.mentsulist[count].pailist[1] = prm->pState->tehai.minkou[0];
-			item.mentsulist[count].pailist[2] = prm->pState->tehai.minkou[0];
-			count++;
-		}
-
-		for (i = 0; i < prm->pState->tehai.minshun_max; i++){
-			assert(count < 4);
-			item.mentsulist[count].category = AI_SYUNTSU;
-			item.mentsulist[count].pailist[0] = prm->pState->tehai.minshun[0];
-			item.mentsulist[count].pailist[1] = prm->pState->tehai.minshun[1];
-			item.mentsulist[count].pailist[2] = prm->pState->tehai.minshun[2];
-			count++;
-		}
-
-		item.mentsulist[count].category = AI_TOITSU;
-		item.mentsulist[count].pailist[0] = atama;
-		item.mentsulist[count].pailist[1] = atama;
-
-		item.machi = item.mentsulist[0].category == AI_SYUNTSU ? AI_MACHI_RYANMEN : AI_MACHI_SHANPON;
-		item.machihai = item.mentsulist[0].pailist[0];
-		item.machipos = 0;
-
-		make_resultitem_bh(&item, &state);
-
-		if (ret->score < item.score){
-			*ret = item;
+		else {
+			return kind_coef[4];
 		}
 	}
-	else{
-		/* 刻子を探索 */
-		for (i = koutsupos; i < 34; i++){
-			if (cnt[i] >= 3) {
-				cnt[i] -= 3;
-				koutsucnt[i]++;
-				bestagari(prm, ret, cnt, koutsucnt, shuntsucnt, koutsunum + 1, shuntsunum, i + 1, shuntsupos, atama);
-
-				koutsucnt[i]--;
-				cnt[i] += 3;
-
-			}
-		}
-
-		/* 順子を探索 */
-		for (i = shuntsupos; i < 21; i++){
-			pai = (i / 7) * 9 + (i % 7);
-			if (cnt[pai] >= 1 && cnt[pai + 1] >= 1 && cnt[pai + 2] >= 1){
-				cnt[pai]--;
-				cnt[pai + 1]--;
-				cnt[pai + 2]--;
-				shuntsucnt[i]++;
-				bestagari(prm, ret, cnt, koutsucnt, shuntsucnt, koutsunum, shuntsunum + 1, koutsupos, i, atama);
-				cnt[pai]++;
-				cnt[pai + 1]++;
-				cnt[pai + 2]++;
-				shuntsucnt[i]--;
-			}
+	else {
+		switch (num % 9) {
+		case 0:
+		case 8:
+			return kind_coef[0];
+		case 1:
+		case 7:
+			return kind_coef[1];
+		default:
+			return kind_coef[2];
 		}
 	}
 }
-
 
 /* 待ち形を評価する係数を計算する */
-static double calcMachiCoef(THREAD_PARAM *prm, int *cnt,int machihai){
+static double calcMachiCoef(THREAD_PARAM *prm, PaiArrayInt cnt, int machihai) {
 	int machi[34];
-	int i,j;
+	int i, j;
 	int tehai[14];
 	int tehaisize = 0;
 	int furiten = FALSE;
@@ -274,8 +136,8 @@ static double calcMachiCoef(THREAD_PARAM *prm, int *cnt,int machihai){
 
 	/* 待ち牌を除く手牌を作成する */
 	cnt[machihai]--;
-	for (i = 0; i < 34; i++){
-		for (j = 0; j < cnt[i]; j++){
+	for (i = 0; i < 34; i++) {
+		for (j = 0; j < cnt[i]; j++) {
 			tehai[tehaisize++] = i;
 		}
 	}
@@ -284,14 +146,14 @@ static double calcMachiCoef(THREAD_PARAM *prm, int *cnt,int machihai){
 	/* テンパイの待ちを計算する */
 	search_tenpai(tehai, tehaisize, machi, NULL, 0, 0);
 
-	for (i = 0; i < 34; i++){
-		if (machi[i]){
-			if (prm->pState->sute_cnt[i]){
+	for (i = 0; i < 34; i++) {
+		if (machi[i]) {
+			if (prm->pState->sute_cnt[i]) {
 				furiten = TRUE;
 			}
 
-			if (i != machihai){
-				num += prm->pState->nokori[i] - cnt[i];
+			if (i != machihai) {
+				num += prm->pState->myself._pai_kukan[i] - cnt[i];
 			}
 
 		}
@@ -300,7 +162,7 @@ static double calcMachiCoef(THREAD_PARAM *prm, int *cnt,int machihai){
 	ret = 1.0 + num / 10.0;
 
 	/* フリテンはロン和了りできないので3分の1にさせる */
-	if (furiten){
+	if (furiten) {
 		ret *= 0.33;
 	}
 
@@ -308,18 +170,18 @@ static double calcMachiCoef(THREAD_PARAM *prm, int *cnt,int machihai){
 }
 
 
-static double calcscore(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shuntsucnt,int diff){
+static double calcscore(THREAD_PARAM *prm, PaiArrayInt cnt, vector<Mentsu> *pMentsu, int diff) {
 	RESULT_ITEM item;
 	int i, j, count = 0, pai;
-	int maxc, m, c,n,o;
+	int maxc, m, c, n, o;
 	int toitsu[4];
-	double probability,rest,ret = 0.0,value;
+	double probability, rest, ret = 0.0, value;
 	GAMESTATE state;
 
 	memset(&state, 0, sizeof(state));
 	memset(&item, 0, sizeof(item));
 
-	for (i = 0; i < 4; i++){
+	for (i = 0; i < 4; i++) {
 		toitsu[i] = -1;
 	}
 
@@ -334,323 +196,197 @@ static double calcscore(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shunts
 	item.han = 0;
 	item.fu = 0;
 
-	if (prm->pState->tehai.minkan_max > 0
-		|| prm->pState->tehai.minkou_max > 0
-		|| prm->pState->tehai.minshun_max > 0
-		){
+	if (prm->pState->myself._naki_mentsu.size() > 0
+		) {
 		item.menzen = 0;
 	}
 
-	for (i = 0; i < 34; i++){
-		for (j = 0; j < koutsucnt[i];j++){
-			assert(count < 4);
-			item.mentsulist[count].category = AI_KOUTSU;
-			item.mentsulist[count].pailist[0] = i;
-			item.mentsulist[count].pailist[1] = i;
-			item.mentsulist[count].pailist[2] = i;
-
-			count++;
-		}
+	for (auto m : *pMentsu) {
+		item.mentsulist[count++] = m.toTMentsu();
 	}
 
-	for (i = 0; i < 21; i++){
-		for (j = 0; j < shuntsucnt[i]; j++){
-			assert(count < 4);
-			pai = (i / 7) * 9 + i % 7;
-			item.mentsulist[count].category = AI_SYUNTSU;
-			item.mentsulist[count].pailist[0] = pai;
-			item.mentsulist[count].pailist[1] = pai + 1;
-			item.mentsulist[count].pailist[2] = pai + 2;
-
-			count++;
-		}
-	}
-
-	for (i = 0; i < prm->pState->tehai.ankan_max; i++){
-		assert(count < 4);
-		state.nakilist[state.naki].category = AI_ANKAN;
-		state.nakilist[state.naki].pailist[0] = prm->pState->tehai.ankan[0];
-		state.nakilist[state.naki].pailist[1] = prm->pState->tehai.ankan[0];
-		state.nakilist[state.naki].pailist[2] = prm->pState->tehai.ankan[0];
-		state.naki++;
-	}
-	for (i = 0; i < prm->pState->tehai.minkan_max; i++){
-		assert(count < 4);
-		state.nakilist[state.naki].category = AI_MINKAN;
-		state.nakilist[state.naki].pailist[0] = prm->pState->tehai.minkan[0];
-		state.nakilist[state.naki].pailist[1] = prm->pState->tehai.minkan[0];
-		state.nakilist[state.naki].pailist[2] = prm->pState->tehai.minkan[0];
-		state.naki++;
-	}
-
-	for (i = 0; i < prm->pState->tehai.minkou_max; i++){
-		assert(count < 4);
-		state.nakilist[state.naki].category = AI_KOUTSU;
-		state.nakilist[state.naki].pailist[0] = prm->pState->tehai.minkou[0];
-		state.nakilist[state.naki].pailist[1] = prm->pState->tehai.minkou[0];
-		state.nakilist[state.naki].pailist[2] = prm->pState->tehai.minkou[0];
-		state.naki++;
-	}
-
-	for (i = 0; i < prm->pState->tehai.minshun_max; i++){
-		assert(count < 4);
-		state.nakilist[state.naki].category = AI_SYUNTSU;
-		state.nakilist[state.naki].pailist[0] = prm->pState->tehai.minshun[0];
-		state.nakilist[state.naki].pailist[1] = prm->pState->tehai.minshun[1];
-		state.nakilist[state.naki].pailist[2] = prm->pState->tehai.minshun[2];
-		state.naki++;
+	for (auto m : prm->pState->myself._naki_mentsu)
+	{
+		state.nakilist[state.naki] = m.toTMentsu();
 	}
 
 	/* アタマを決定 */
 	maxc = -4;
-	for (m = 0; m < 34; m++){
+	for (m = 0; m < 34; m++) {
 		c = prm->pState->te_cnt[m] - cnt[m];
-		if (maxc < c && prm->pState->nokori[m] > 1 - c) {
+		if (maxc < c && prm->pState->myself._pai_kukan[m] > 1 - c) {
 			maxc = c;
 			toitsu[0] = m;
 		}
 	}
 
-#if 0
-	maxc = -4;
+	int koutsucnt2[34];
+	int shuntsucnt2[21];
+	int cnt2[34];
+	RESULT_ITEM best;
+	value = 0.0;
 
-	for (m = 9; m < 18; m++){
-		c = prm->pState->te_cnt[m] - cnt[m];
-		if (maxc < c && prm->pState->nokori[m] > 1 - c) {
-			maxc = c;
-			toitsu[1] = m;
+	probability = 1.0;
+	rest = prm->nokorisum;
+
+	cnt[toitsu[0]] += 2;
+
+	// ツモる確率を計算する
+	for (n = 0; n < 34; n++) {
+		if (cnt[n]) {
+			c = cnt[n] - prm->pState->te_cnt[n];
+			assert(prm->pState->myself._pai_kukan[n] - c + 1 >= 0);
+			int dist = paidistance(prm->pState->myself._tehai, n);
+
+			for (o = 0; o < c; o++) {
+				probability *= (double)(prm->pState->myself._pai_kukan[n] - o) / (double)rest;
+				probability *= dist_coef[dist + 1];
+				probability *= getKindCoef(prm->pState, n);
+
+				if (prm->pState->myself._pai_kukan[n] - o < 0) {
+					probability = 0;
+					break;
+				}
+				rest -= 1.0;
+			}
 		}
 	}
 
-	maxc = -4;
-	for (m = 18; m < 27; m++){
-		c = prm->pState->te_cnt[m] - cnt[m];
-		if (maxc < c && prm->pState->nokori[m] > 1 - c) {
-			maxc = c;
-			toitsu[2] = m;
+	item.mentsulist[count].category = AI_TOITSU;
+	item.mentsulist[count].pailist[0] = toitsu[0];
+	item.mentsulist[count].pailist[1] = toitsu[0];
+	count++;
+
+	item.mentsusize = count;
+	assert(probability >= 0);
+
+	/* 待ち形を全部探索する */
+	for (o = 0; o < item.mentsusize; o++) {
+		int pai;
+		if (item.mentsulist[o].category == AI_KOUTSU) {
+			pai = item.mentsulist[o].pailist[0];
+			if (cnt[pai] > prm->pState->te_cnt[pai]) {
+				item.machi = AI_MACHI_SHANPON;
+				item.machihai = pai;
+				item.machipos = o;
+				make_resultitem_bh(&item, &state);
+
+				value += calcMachiCoef(prm, cnt, pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
+			}
+
+		}
+		else if (item.mentsulist[o].category == AI_SYUNTSU) {
+			pai = item.mentsulist[o].pailist[0];
+
+			if (cnt[pai] > prm->pState->te_cnt[pai]) {
+
+				if ((pai % 9) == 7) {
+					item.machi = AI_MACHI_PENCHAN;
+				}
+				else {
+					item.machi = AI_MACHI_RYANMEN;
+				}
+
+				item.machihai = pai;
+				item.machipos = o;
+				make_resultitem_bh(&item, &state);
+
+				value += calcMachiCoef(prm, cnt, pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
+
+			}
+
+			if (cnt[pai + 1] > prm->pState->te_cnt[pai + 1]) {
+				item.machi = AI_MACHI_KANCHAN;
+
+				item.machihai = pai + 1;
+				item.machipos = o;
+				make_resultitem_bh(&item, &state);
+
+				value += calcMachiCoef(prm, cnt, pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
+			}
+
+			if (cnt[pai + 2] > prm->pState->te_cnt[pai + 2]) {
+
+				if ((pai % 9) == 0) {
+					item.machi = AI_MACHI_PENCHAN;
+				}
+				else {
+					item.machi = AI_MACHI_RYANMEN;
+				}
+
+				item.machihai = pai;
+				item.machipos = o;
+				make_resultitem_bh(&item, &state);
+
+				value += calcMachiCoef(prm, cnt, pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
+
+			}
+
+		}
+		else if (item.mentsulist[o].category == AI_TOITSU) {
+			pai = item.mentsulist[o].pailist[0];
+			if (cnt[pai] > prm->pState->te_cnt[pai]) {
+				item.machi = AI_MACHI_TANKI;
+				item.machihai = pai;
+				item.machipos = o;
+				make_resultitem_bh(&item, &state);
+
+				value += calcMachiCoef(prm, cnt, pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
+			}
 		}
 	}
-	maxc = -4;
-
-	for (m = 27; m < 34; m++){
-		c = prm->pState->te_cnt[m] - cnt[m];
-		if (maxc < c && prm->pState->nokori[m] > 1 - c) {
-			maxc = c;
-			toitsu[3] = m;
-		}
-	}
-#endif
-
-	for (m = 0; m < 1; m++){
-		int koutsucnt2[34];
-		int shuntsucnt2[21];
-		int cnt2[34];
-		RESULT_ITEM best;
-		value = 0.0;
-
-		if (toitsu[m] < 0) continue;
-		probability = 1.0;
-		rest = prm->nokorisum;
-
-#if 0
-		for (n = 0; n < 34; n++){
-			if (cnt[n] > prm->pState->te_cnt[n]) {
-				cnt2[n] = cnt[n];
-			}
-			else{
-				cnt2[n] = prm->pState->te_cnt[n];
-			}
-		}
-
-		memset(koutsucnt2, 0, sizeof(koutsucnt2));
-		memset(shuntsucnt2, 0, sizeof(shuntsucnt2));
-		memset(&best, 0, sizeof(best));
 
 
-		bestagari(prm, &best, cnt2, koutsucnt2, shuntsucnt2, 0, 0, 0, 0, toitsu[m]);
+	cnt[toitsu[0]] -= 2;
 
-		if (best.score == 0){
-			continue;
-		}
-
-		memset(koutsucnt2, 0, sizeof(koutsucnt2));
-		memset(shuntsucnt2, 0, sizeof(shuntsucnt2));
-
-		for (n = 0; n < best.mentsusize - (prm->pState->tehai.ankan_max + prm->pState->tehai.minkan_max + prm->pState->tehai.minkou_max + prm->pState->tehai.minshun_max + 1); n++){
-			if (best.mentsulist[n].category == AI_SYUNTSU){
-				shuntsucnt2[(best.mentsulist[n].pailist[0] / 9) * 7 + (best.mentsulist[n].pailist[0] % 9)]++;
-			}
-			else{
-				koutsucnt2[best.mentsulist[n].pailist[0]]++;
-			}
-		}
-
-		if (memcmp(koutsucnt2, koutsucnt, sizeof(koutsucnt2)) != 0 || memcmp(shuntsucnt2, shuntsucnt, sizeof(shuntsucnt2)) != 0){
-			prm->count++;
-			continue;
-		}
-#endif
-
-		cnt[toitsu[m]] += 2;
-		for (n = 0; n < 34; n++){
-			if (cnt[n]){
-				c = cnt[n] - prm->pState->te_cnt[n];
-				assert(prm->pState->nokori[n] - c + 1 >= 0);
-				int dist = paidistance(prm->pState->tehai.tehai, n);
-
-				for (o = 0; o < c; o++){
-					probability *= (double)(prm->pState->nokori[n] - o) / (double)rest;
-					probability *= dist_coef[dist + 1];
-					probability *= getKindCoef(prm->pState, n);
-
-					if (prm->pState->nokori[n] - o < 0){
-						probability = 0;
-						break;
-					}
-					rest -= 1.0;
-				}
-			}
-		}
-
-		item.mentsulist[count].category = AI_TOITSU;
-		item.mentsulist[count].pailist[0] = toitsu[m];
-		item.mentsulist[count].pailist[1] = toitsu[m];
-		count++;
-
-		item.mentsusize = count;
-		assert(probability >= 0);
-
-		/* 待ち形を全部探索する */
-		for (o = 0; o < item.mentsusize; o++) {
-			int pai;
-			if (item.mentsulist[o].category == AI_KOUTSU){
-				pai = item.mentsulist[o].pailist[0];
-				if (cnt[pai] > prm->pState->te_cnt[pai]) {
-					item.machi = AI_MACHI_SHANPON;
-					item.machihai = pai;
-					item.machipos = o;
-					make_resultitem_bh(&item, &state);
-
-					value += calcMachiCoef(prm,cnt,pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score)  / (double)diff;
-				}
-
-			}
-			else if (item.mentsulist[o].category == AI_SYUNTSU){
-				pai = item.mentsulist[o].pailist[0];
-
-				if (cnt[pai] > prm->pState->te_cnt[pai]){
-
-					if ((pai % 9) == 7) {
-						item.machi = AI_MACHI_PENCHAN;
-					}
-					else{
-						item.machi = AI_MACHI_RYANMEN;
-					}
-
-					item.machihai = pai;
-					item.machipos = o;
-					make_resultitem_bh(&item, &state);
-
-					value += calcMachiCoef(prm, cnt, pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
-
-				}
-
-				if (cnt[pai + 1] > prm->pState->te_cnt[pai + 1]){
-					item.machi = AI_MACHI_KANCHAN;
-
-					item.machihai = pai + 1;
-					item.machipos = o;
-					make_resultitem_bh(&item, &state);
-
-					value += calcMachiCoef(prm, cnt, pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
-				}
-
-				if (cnt[pai + 2] > prm->pState->te_cnt[pai + 2]){
-
-					if ((pai % 9) == 0) {
-						item.machi = AI_MACHI_PENCHAN;
-					}
-					else{
-						item.machi = AI_MACHI_RYANMEN;
-					}
-
-					item.machihai = pai;
-					item.machipos = o;
-					make_resultitem_bh(&item, &state);
-
-					value += calcMachiCoef(prm, cnt, pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
-
-				}
-
-			}
-			else if(item.mentsulist[o].category == AI_TOITSU){
-				pai = item.mentsulist[o].pailist[0];
-				if (cnt[pai] > prm->pState->te_cnt[pai]) {
-					item.machi = AI_MACHI_TANKI;
-					item.machihai = pai;
-					item.machipos = o;
-					make_resultitem_bh(&item, &state);
-
-					value += calcMachiCoef(prm, cnt, pai) * (0.8 * probability * probability * item.score + 0.2 * probability * item.score) / (double)diff;
-				}
-			}
-		}
-
-
-		cnt[toitsu[m]] -= 2;
-
-		if (prm->val < probability){
-			prm->val = probability;
-			sprintf(prm->debug, "%d*%d*%d*%d*%d",
+	if (prm->val < probability) {
+		prm->val = probability;
+		sprintf(prm->debug, "%d*%d*%d*%d*%d",
 				item.mentsulist[0].category * 100 + item.mentsulist[0].pailist[0],
 				item.mentsulist[1].category * 100 + item.mentsulist[1].pailist[0],
 				item.mentsulist[2].category * 100 + item.mentsulist[2].pailist[0],
 				item.mentsulist[3].category * 100 + item.mentsulist[3].pailist[0],
 				item.mentsulist[4].category * 100 + item.mentsulist[4].pailist[0]);
-		}
+	}
 
-		if (ret < value) {
-			ret = value;
-		}
+	if (ret < value) {
+		ret = value;
 	}
 
 	return ret;
 }
 
-static double koutsupoint(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shuntsucnt, int koutsunum, int shuntsunum, int koutsupos, int shuntsupos);
-static double shuntsupoint(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shuntsucnt, int koutsunum, int shuntsunum, int koutsupos, int shuntsupos);
+static double koutsupoint(THREAD_PARAM *prm, PaiArrayInt cnt, vector<Mentsu> *pMentsu, int koutsunum, int shuntsunum, int koutsupos, int shuntsupos);
+static double shuntsupoint(THREAD_PARAM *prm, PaiArrayInt cnt, vector<Mentsu> *pMentsu, int koutsunum, int shuntsunum, int koutsupos, int shuntsupos);
 
 
-static double shuntsupoint(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shuntsucnt, int koutsunum, int shuntsunum, int koutsupos, int shuntsupos){
+static double shuntsupoint(THREAD_PARAM *prm, PaiArrayInt cnt, vector<Mentsu> *pMentsu, int koutsunum, int shuntsunum, int koutsupos, int shuntsupos) {
 	int i;
 	double ret = 0.0;
-	int pai,diff = 0;
+	int pai, diff = 0;
 
-	for (i = 0; i < 34; i++){
+	for (i = 0; i < 34; i++) {
 		if (cnt[i] > prm->pState->te_cnt[i]) diff += cnt[i] - prm->pState->te_cnt[i];
 	}
 
-	if (diff > prm->shanten + 2 || diff >= 5 ) return ret;
+	if (diff > prm->shanten + 2 || diff >= 5) return ret;
 
 	if (shuntsunum <= 0) {
-		return calcscore(prm, cnt, koutsucnt, shuntsucnt,diff);
+		return calcscore(prm, cnt, pMentsu, diff);
 	}
-	else{
+	else {
 
-		for (i = shuntsupos; i < 21; i++){
+		for (i = shuntsupos; i < 21; i++) {
 			pai = (i / 7) * 9 + i % 7;
-
-#if 1
 			/* 自分の手牌に絡まない手は除去 */
 			if (prm->pState->te_cnt[pai] == 0 && prm->pState->te_cnt[pai + 1] == 0 && prm->pState->te_cnt[pai + 2] == 0) continue;
-#endif
 
-			if (prm->pState->nokori[pai] > cnt[pai] - prm->pState->te_cnt[pai]
-				&& prm->pState->nokori[pai + 1] > cnt[pai + 1] - prm->pState->te_cnt[pai + 1]
-				&& prm->pState->nokori[pai + 2] > cnt[pai + 2] - prm->pState->te_cnt[pai + 2]) {
+			if (prm->pState->myself._pai_kukan[pai] > cnt[pai] - prm->pState->te_cnt[pai]
+				&& prm->pState->myself._pai_kukan[pai + 1] > cnt[pai + 1] - prm->pState->te_cnt[pai + 1]
+				&& prm->pState->myself._pai_kukan[pai + 2] > cnt[pai + 2] - prm->pState->te_cnt[pai + 2]) {
 
 #if 0
-				if (prm->pState->te_cnt[pai + 1] == 0 && prm->pState->te_cnt[pai] > 0 && prm->pState->te_cnt[pai + 2] > 0){
+				if (prm->pState->te_cnt[pai + 1] == 0 && prm->pState->te_cnt[pai] > 0 && prm->pState->te_cnt[pai + 2] > 0) {
 					/* カンチャン待ちかつ両面とかぶってる場合は確率を計算しない */
 
 					if ((pai % 9) > 0 && prm->pState->te_cnt[pai - 1] > 0) continue; // 両面とかぶってる
@@ -660,16 +396,15 @@ static double shuntsupoint(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shu
 				cnt[pai]++;
 				cnt[pai + 1]++;
 				cnt[pai + 2]++;
-				shuntsucnt[i]++;
 
+				pMentsu->push_back(Mentsu(Mentsu::TYPE_SHUNTSU, i));
 
-				ret += shuntsupoint(prm, cnt, koutsucnt, shuntsucnt, koutsunum, shuntsunum - 1, koutsupos, i);
+				ret += shuntsupoint(prm, cnt, pMentsu, koutsunum, shuntsunum - 1, koutsupos, i);
 
 				cnt[pai]--;
 				cnt[pai + 1]--;
 				cnt[pai + 2]--;
-				shuntsucnt[i]--;
-
+				pMentsu->pop_back();
 			}
 		}
 	}
@@ -678,35 +413,32 @@ static double shuntsupoint(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shu
 }
 
 
-static double koutsupoint(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shuntsucnt, int koutsunum, int shuntsunum, int koutsupos, int shuntsupos){
+static double koutsupoint(THREAD_PARAM *prm, PaiArrayInt cnt, vector<Mentsu> *pMentsu, int koutsunum, int shuntsunum, int koutsupos, int shuntsupos) {
 	int i;
 	double ret = 0.0;
 	int diff = 0;
-	for (i = 0; i < 34; i++){
+	for (i = 0; i < 34; i++) {
 		if (cnt[i] > prm->pState->te_cnt[i]) diff += cnt[i] - prm->pState->te_cnt[i];
 	}
 
-	if (diff > prm->shanten + 2 || diff >= 5 ) return ret;
+	if (diff > prm->shanten + 2 || diff >= 5) return ret;
 
-	for (i = koutsupos; i < 34; i++){
-#if 1
+	for (i = koutsupos; i < 34; i++) {
 		/* 自分の手牌に絡まない手は除去 */
 		if (prm->pState->te_cnt[i] == 0) continue;
-#endif
-		if (prm->pState->nokori[i] > 2 + cnt[i] - prm->pState->te_cnt[i]) {
+		if (prm->pState->myself._pai_kukan[i] > 2 + cnt[i] - prm->pState->te_cnt[i]) {
 			cnt[i] += 3;
-			koutsucnt[i]++;
+			pMentsu->push_back(Mentsu(Mentsu::TYPE_KOUTSU, i));
 
 			if (koutsunum - 1 > 0) {
-				ret += koutsupoint(prm, cnt, koutsucnt, shuntsucnt, koutsunum - 1, shuntsunum, i + 1, shuntsupos);
+				ret += koutsupoint(prm, cnt, pMentsu, koutsunum - 1, shuntsunum, i + 1, shuntsupos);
 			}
-			else{
-				ret += shuntsupoint(prm, cnt, koutsucnt, shuntsucnt, koutsunum - 1, shuntsunum, i + 1, shuntsupos);
+			else {
+				ret += shuntsupoint(prm, cnt, pMentsu, koutsunum - 1, shuntsunum, i + 1, shuntsupos);
 			}
 
 			cnt[i] -= 3;
-			koutsucnt[i]--;
-
+			pMentsu->pop_back();
 		}
 	}
 
@@ -717,19 +449,16 @@ static double koutsupoint(THREAD_PARAM *prm, int *cnt, int *koutsucnt, int *shun
 static unsigned __stdcall threadfunc(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
-	int koutsucnt[34];
-	int shuntsucnt[21];
+	vector<Mentsu> mentsu;
 	int cnt[34];
 	int nakisum;
 
-	memset(koutsucnt, 0, sizeof(koutsucnt));
-	memset(shuntsucnt, 0, sizeof(shuntsucnt));
 	memset(cnt, 0, sizeof(cnt));
 
-	nakisum = prm->pState->tehai.ankan_max + prm->pState->tehai.minkan_max + prm->pState->tehai.minkou_max + prm->pState->tehai.minshun_max;
+	nakisum = prm->pState->myself._naki_mentsu.size();
 
 	if (nakisum < 1) {
-		prm->ret = koutsupoint(prm, cnt, koutsucnt, shuntsucnt, 4, 0, 0, 0);
+		prm->ret = koutsupoint(prm, cnt, &mentsu, 4, 0, 0, 0);
 	}
 
 #ifndef SINGLETHREAD
@@ -744,19 +473,16 @@ static unsigned __stdcall threadfunc(void * pParam)
 static unsigned __stdcall threadfunc2(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
-	int koutsucnt[34];
-	int shuntsucnt[21];
+	vector<Mentsu> mentsu;
 	int cnt[34];
 	int nakisum;
 
-	memset(koutsucnt, 0, sizeof(koutsucnt));
-	memset(shuntsucnt, 0, sizeof(shuntsucnt));
 	memset(cnt, 0, sizeof(cnt));
 
-	nakisum = prm->pState->tehai.ankan_max + prm->pState->tehai.minkan_max + prm->pState->tehai.minkou_max + prm->pState->tehai.minshun_max;
+	nakisum = prm->pState->myself._naki_mentsu.size();
 
 	if (nakisum < 2) {
-		prm->ret = koutsupoint(prm, cnt, koutsucnt, shuntsucnt, 3, 1 - nakisum, 0, 0);
+		prm->ret = koutsupoint(prm, cnt, &mentsu, 3, 1 - nakisum, 0, 0);
 	}
 
 #ifndef SINGLETHREAD
@@ -770,19 +496,16 @@ static unsigned __stdcall threadfunc2(void * pParam)
 static unsigned __stdcall threadfunc3(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
-	int koutsucnt[34];
-	int shuntsucnt[21];
+	vector<Mentsu> mentsu;
 	int cnt[34];
 	int nakisum;
 
-	memset(koutsucnt, 0, sizeof(koutsucnt));
-	memset(shuntsucnt, 0, sizeof(shuntsucnt));
 	memset(cnt, 0, sizeof(cnt));
 
-	nakisum = prm->pState->tehai.ankan_max + prm->pState->tehai.minkan_max + prm->pState->tehai.minkou_max + prm->pState->tehai.minshun_max;
+	nakisum = prm->pState->myself._naki_mentsu.size();
 
 	if (nakisum < 3) {
-		prm->ret = koutsupoint(prm, cnt, koutsucnt, shuntsucnt, 2, 2 - nakisum, 0, 0);
+		prm->ret = koutsupoint(prm, cnt, &mentsu, 2, 2 - nakisum, 0, 0);
 	}
 
 #ifndef SINGLETHREAD
@@ -795,19 +518,16 @@ static unsigned __stdcall threadfunc3(void * pParam)
 static unsigned __stdcall threadfunc4(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
-	int koutsucnt[34];
-	int shuntsucnt[21];
+	vector<Mentsu> mentsu;
 	int cnt[34];
 	int nakisum;
 
-	memset(koutsucnt, 0, sizeof(koutsucnt));
-	memset(shuntsucnt, 0, sizeof(shuntsucnt));
 	memset(cnt, 0, sizeof(cnt));
 
-	nakisum = prm->pState->tehai.ankan_max + prm->pState->tehai.minkan_max + prm->pState->tehai.minkou_max + prm->pState->tehai.minshun_max;
+	nakisum = prm->pState->myself._naki_mentsu.size();
 
 	if (nakisum < 4) {
-		prm->ret = koutsupoint(prm, cnt, koutsucnt, shuntsucnt, 1, 3 - nakisum, 0, 0);
+		prm->ret = koutsupoint(prm, cnt, &mentsu, 1, 3 - nakisum, 0, 0);
 	}
 
 #ifndef SINGLETHREAD
@@ -820,21 +540,19 @@ static unsigned __stdcall threadfunc4(void * pParam)
 static unsigned __stdcall threadfunc5(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
-	int koutsucnt[34];
-	int shuntsucnt[21];
+	vector<Mentsu> mentsu;
 	int cnt[34];
 	int nakisum;
 
-	memset(koutsucnt, 0, sizeof(koutsucnt));
-	memset(shuntsucnt, 0, sizeof(shuntsucnt));
 	memset(cnt, 0, sizeof(cnt));
 
-	nakisum = prm->pState->tehai.ankan_max + prm->pState->tehai.minkan_max + prm->pState->tehai.minkou_max + prm->pState->tehai.minshun_max;
+	nakisum = prm->pState->myself._naki_mentsu.size();
 
 	if (nakisum >= 4) {
-		prm->ret = calcscore(prm, cnt, koutsucnt, shuntsucnt,2);
-	} else{
-		prm->ret = shuntsupoint(prm, cnt, koutsucnt, shuntsucnt, 0, 4 - nakisum, 0, 0);
+		prm->ret = calcscore(prm, cnt, &mentsu, 2);
+	}
+	else {
+		prm->ret = shuntsupoint(prm, cnt, &mentsu, 0, 4 - nakisum, 0, 0);
 	}
 
 #ifndef SINGLETHREAD
@@ -845,18 +563,18 @@ static unsigned __stdcall threadfunc5(void * pParam)
 
 
 
-double chiitoipoint(THREAD_PARAM *prm, int cnt,unsigned long long tehaibitmap,unsigned long long bitmap,int pos){
+double chiitoipoint(THREAD_PARAM *prm, int cnt, unsigned long long tehaibitmap, unsigned long long bitmap, int pos) {
 	double rest = 0.0;
 	double probability = 1.0;
 	RESULT_ITEM item;
 	GAMESTATE state;
-	int i,num;
+	int i, num;
 	double sum = 0.0;
 	int dist;
 
-	if (cnt == 7){
-		for (i = 0; i<34; i++){
-			rest += prm->pState->nokori[i];
+	if (cnt == 7) {
+		for (i = 0; i < 34; i++) {
+			rest += prm->pState->myself._pai_kukan[i];
 		}
 		memset(&state, 0, sizeof(state));
 		memset(&item, 0, sizeof(item));
@@ -867,7 +585,7 @@ double chiitoipoint(THREAD_PARAM *prm, int cnt,unsigned long long tehaibitmap,un
 		state.count = 1;
 
 
-		for (i = 0,num = 0; i < 34; i++){
+		for (i = 0, num = 0; i < 34; i++) {
 			if (tehaibitmap & (1ULL << i)) {
 				item.mentsulist[num].category = AI_TOITSU;
 				item.mentsulist[num].pailist[0] = i;
@@ -875,9 +593,9 @@ double chiitoipoint(THREAD_PARAM *prm, int cnt,unsigned long long tehaibitmap,un
 				num++;
 			}
 			else if (bitmap & (1ULL << i)) {
-				dist = paidistance(prm->pState->tehai.tehai, i);
-				for (int c = 0; c < 2 - prm->pState->te_cnt[i]; c++){
-					probability *= (double)(prm->pState->nokori[i] - c) / (double)rest;
+				dist = paidistance(prm->pState->myself._tehai, i);
+				for (int c = 0; c < 2 - prm->pState->te_cnt[i]; c++) {
+					probability *= (double)(prm->pState->myself._pai_kukan[i] - c) / (double)rest;
 					probability *= dist_coef[dist + 1];
 					probability *= getKindCoef(prm->pState, i);
 					rest -= 1.0;
@@ -903,14 +621,14 @@ double chiitoipoint(THREAD_PARAM *prm, int cnt,unsigned long long tehaibitmap,un
 		if (probability >= 0) {
 			return 1.0 * (0.8 * probability * probability * item.score + 0.2 * probability * item.score);
 		}
-		else{
+		else {
 			return 0;
 		}
 	}
-	else{
-		for (i = pos; i < 34; i++){
-			if (prm->pState->nokori[i] > 1 - prm->pState->te_cnt[i] && ((tehaibitmap & (1ULL << i)) == 0) ){
-				sum += chiitoipoint(prm, cnt + 1, tehaibitmap,bitmap | (1ULL << i) ,i+1);
+	else {
+		for (i = pos; i < 34; i++) {
+			if (prm->pState->myself._pai_kukan[i] > 1 - prm->pState->te_cnt[i] && ((tehaibitmap & (1ULL << i)) == 0)) {
+				sum += chiitoipoint(prm, cnt + 1, tehaibitmap, bitmap | (1ULL << i), i + 1);
 			}
 		}
 
@@ -927,9 +645,9 @@ static unsigned __stdcall threadfunc6(void *pParam)
 	int toitsunum = 0;
 	unsigned long long bitmap = 0;
 
-	if (prm->pState->tehai.ankan_max > 0 || prm->pState->tehai.minkan_max > 0 || prm->pState->tehai.minkou_max > 0 || prm->pState->tehai.minshun_max > 0) return 0;
+	if (prm->pState->myself._naki_mentsu.size() > 0) return 0;
 
-	for (count = 0; count<34; count++){
+	for (count = 0; count < 34; count++) {
 		if (prm->pState->te_cnt[count] >= 2) {
 			bitmap |= 1ULL << count;
 			toitsunum++;
@@ -937,7 +655,7 @@ static unsigned __stdcall threadfunc6(void *pParam)
 	}
 
 	if (toitsunum >= 3) {
-		prm->ret =  chiitoipoint(prm, toitsunum, bitmap,0,0);
+		prm->ret = chiitoipoint(prm, toitsunum, bitmap, 0, 0);
 	}
 
 #ifndef SINGLETHREAD
@@ -948,12 +666,12 @@ static unsigned __stdcall threadfunc6(void *pParam)
 
 #define THREADNUM (6)
 
-double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
+double MahjongAIType4::evalSutehaiSub(MahjongAIState &param, int hai)
 {
 	double sum = 0.0;
 	THREAD_PARAM tparam[THREADNUM];
 	HANDLE hThread[THREADNUM];
-	int i,j;
+	int i, j;
 	char message[256];
 	double nokorisum = 0.0;
 	int tehai[14];
@@ -961,19 +679,19 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
 	TENPAI_LIST list;
 	int machi[34];
 
-	for (i = 0; i < 34; i++){
-		for (j = 0; j < param.te_cnt[i]; j++){
+	for (i = 0; i < 34; i++) {
+		for (j = 0; j < param.te_cnt[i]; j++) {
 			tehai[tehainum] = i;
 			tehainum++;
 		}
 	}
-	search_tenpai(tehai,tehainum,machi,&list,1,6);
+	search_tenpai(tehai, tehainum, machi, &list, 1, 6);
 
-	for (i = 0; i<34; i++){
-		nokorisum += param.nokori[i];
+	for (i = 0; i < 34; i++) {
+		nokorisum += param.myself._pai_kukan[i];
 	}
 
-	for(i=0;i<THREADNUM;i++){
+	for (i = 0; i < THREADNUM; i++) {
 		tparam[i].pState = &param;
 		tparam[i].hai = hai;
 		tparam[i].ret = 0.0;
@@ -992,7 +710,7 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
 	threadfunc5(&tparam[4]);
 	threadfunc6(&tparam[5]);
 #else
-	memset(hThread,0,sizeof(hThread));
+	memset(hThread, 0, sizeof(hThread));
 
 	hThread[0] = (HANDLE)_beginthreadex(NULL, 0, threadfunc, &tparam[0], 0, NULL);
 	hThread[1] = (HANDLE)_beginthreadex(NULL, 0, threadfunc2, &tparam[1], 0, NULL);
@@ -1004,15 +722,15 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
 	WaitForMultipleObjects(THREADNUM, hThread, TRUE, INFINITE);
 #endif
 
-	for(i=0;i<THREADNUM;i++){
+	for (i = 0; i < THREADNUM; i++) {
 		sum += tparam[i].ret;
 		CloseHandle(hThread[i]);
 	}
 
 #ifdef _DEBUG
-	sprintf(message, "[%d] %.2lf (%.2lf,%.2lf,%.2lf,%.2lf,%.2lf,%.2lf)\r\n", hai, sum, tparam[0].ret, tparam[1].ret, tparam[2].ret, tparam[3].ret, tparam[4].ret,tparam[5].ret);
+	sprintf(message, "[%d] %.2lf (%.2lf,%.2lf,%.2lf,%.2lf,%.2lf,%.2lf)\r\n", hai, sum, tparam[0].ret, tparam[1].ret, tparam[2].ret, tparam[3].ret, tparam[4].ret, tparam[5].ret);
 
-	MJSendMessage(MJMI_FUKIDASHI,(UINT)message,0);
+	MJSendMessage(MJMI_FUKIDASHI, (UINT)message, 0);
 	sprintf(message, "           (%d,%d,%d,%d,%d,%d)\r\n", tparam[0].count, tparam[1].count, tparam[2].count, tparam[3].count, tparam[4].count, tparam[5].count);
 
 	MJSendMessage(MJMI_FUKIDASHI, (UINT)message, 0);
@@ -1025,7 +743,7 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param,int hai)
 #endif
 
 	return sum;
-	
+
 }
 
 UINT MahjongAIType4::getDebugInt()

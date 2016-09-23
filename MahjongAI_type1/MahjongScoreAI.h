@@ -24,6 +24,7 @@
 #include <windows.h>
 #include <float.h>
 #include "MIPIface.h"
+#include "MJ0.h"
 
 #define SIMULATECOUNT      (5000)
 
@@ -50,26 +51,30 @@
 #define SCORE_HANPAI_BIAS       (0.001)
 #define SCORE_DORA_BIAS          (0.05)
 
+using namespace MJAI;
 
 typedef struct {
 	double sc;
 	int no;
 } HAIPOINT;
 
-typedef struct {
-	MJITehai tehai;
-	double nokori[34];
-	double kikenhai[34];
-	char anpai[34][4];
-	char reach_flag[4];
-	char ippatsu_flag[4];
-	int te_cnt[34];
-	int sute_cnt[34];
+struct MahjongAIState {
+	Players players;
+	Player myself;
+	PaiArrayInt te_cnt;
+	PaiArrayInt sute_cnt;
 	int kyoku;
 	int cha;
 	int kaze;
 	int tsumohai;
-} MahjongAIState;
+
+	MahjongAIState() {
+		for (size_t i = 0; i < 3; i++)
+		{
+			players.push_back(Player());
+		}
+	}
+};
 
 class MahjongScoreAI {
 public:

@@ -31,14 +31,14 @@ double MahjongAIKikenhai::evalSutehaiSub(MahjongAIState &param,int hai)
 	double minus = 0;
 	double plus = 0,tmp;
 
-	minus += SCORE_KIKENHAI * param.kikenhai[hai];
-	for(i=1;i<4;i++){
+	minus += SCORE_KIKENHAI * param.myself._kikenhai[hai];
+	for(i=0;i<3;i++){
 		tmp = 0.0;
-		if (param.anpai[hai][i]){
+		if (param.players[i]._anpai[hai]){
 		}else if (hai<27){
 			int kazu = hai%9,fl=1;
-			if (kazu>2) if (!param.anpai[hai-3][i]) fl = 0;
-			if (fl) if (kazu<6) if (!param.anpai[hai+3][i]) fl = 0;
+			if (kazu>2) if (!param.players[i]._anpai[hai-3]) fl = 0;
+			if (fl) if (kazu<6) if (!param.players[i]._anpai[hai+3]) fl = 0;
 			if (fl){
 				if(kazu == 0 || kazu == 8){
 					tmp -= SCORE_SUZI19;
@@ -62,10 +62,10 @@ double MahjongAIKikenhai::evalSutehaiSub(MahjongAIState &param,int hai)
 		}else{
 			tmp -= SCORE_ZIHAI + SCORE_ANPAI;
 		}
-		if(param.ippatsu_flag[i]){
+		if(param.players[i]._is_ippatsu){
 			tmp *= SCORE_IPPATSU_BIAS;
 			minus *= SCORE_IPPATSU_BIAS;
-		}else if (param.reach_flag[i]){
+		}else if (param.players[i]._is_riichi){
 			tmp *= SCORE_RIICHI_BIAS;
 			minus *= SCORE_RIICHI_BIAS;
 		}

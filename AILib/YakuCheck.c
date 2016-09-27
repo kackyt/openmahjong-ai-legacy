@@ -527,8 +527,9 @@ static int isHonroutou(GAMESTATE *gamestate, RESULT_ITEM *item)
                  ((gamestate->nakilist[i].pailist[0] % 9) == 0 ||
                   (gamestate->nakilist[i].pailist[0] % 9) == 8)){
             count++;
-        }
-
+		} else {
+			return 0;
+		}
     }
     
     for(i=0;i<item->mentsusize;i++){
@@ -546,7 +547,9 @@ static int isHonroutou(GAMESTATE *gamestate, RESULT_ITEM *item)
                  ((item->mentsulist[i].pailist[0] % 9) == 0 ||
                   (item->mentsulist[i].pailist[0] % 9) == 8)){
             count++;
-        }
+		} else {
+			return 0;
+		}
     }
 
 	if(count == 5 && jihai == 0){
@@ -762,6 +765,23 @@ static int (*funcs[])(GAMESTATE *, RESULT_ITEM *) = {
     isTyuren,
 };
 
+static int(*funcs_chiitoi[])(GAMESTATE *, RESULT_ITEM *) = {
+	isTsumo,
+	isRiichi,
+	isIppatsu,
+	isTanyao,
+	isHaitei,
+	isCyankan,
+	isDaburii,
+	isTiitoitsu,
+	isTyanta,
+	isHonitsu,
+	isHonroutou,
+	isRenhou,
+	isTenhou,
+	isTsuuiisou,
+};
+
 
 
 static int compare_int(const int *a, const int *b)
@@ -921,140 +941,156 @@ void make_resultitem_bh(RESULT_ITEM *item,GAMESTATE *gamestate)
     int pts,rpts;
 	int pinfu = 0;
     
-    /* 役の計算 */
-    for(i=0;i<sizeof(funcs)/sizeof(void*);i++){
-		han[i] = funcs[i](gamestate,item);
-        item->han += han[i];
-		if(i == 0 && han[i]) pinfu = 1;
-    }
+	if (item->mentsusize == 7)
+	{
+		/* 七対子 */
+		item->fu = 25; // 七対子は25符
 
-	if(item->han < 1) return 0;
-
-	/* ドラ */
-	for(i=0;i<gamestate->dorasize;i++){
-      for(j=0;j<item->mentsusize;j++){
-          switch(item->mentsulist[j].category){
-            case AI_ANKAN:
-            case AI_MINKAN:
-              if(gamestate->dorapai[i] == (item->mentsulist[j].pailist[0] & 0x3F)){
-                  item->han += 4;
-              }
-              break;
-            case AI_TOITSU:
-              if(gamestate->dorapai[i] == (item->mentsulist[j].pailist[0] & 0x3F)){
-                  item->han += 2;
-              }
-              break;
-            case AI_KOUTSU:
-              if(gamestate->dorapai[i] == (item->mentsulist[j].pailist[0] & 0x3F)){
-                  item->han += 3;
-              }
-              break;
-            case AI_SYUNTSU:
-              if(gamestate->dorapai[i] == (item->mentsulist[j].pailist[0] & 0x3F)){
-                  item->han++;
-              }
-              if(gamestate->dorapai[i] == (item->mentsulist[j].pailist[1] & 0x3F)){
-                  item->han++;
-              }
-              if(gamestate->dorapai[i] == (item->mentsulist[j].pailist[2] & 0x3F)){
-                  item->han++;
-              }
-              break;
-          }
-      }
-
-		for(j=0;j<gamestate->naki;j++){
-			switch(gamestate->nakilist[j].category){
-			case AI_ANKAN:
-			case AI_MINKAN:
-				if(gamestate->dorapai[i] == (gamestate->nakilist[j].pailist[0] & 0x3F)){
-					item->han += 4;
+		/* 役の計算 */
+		for (i = 0; i<sizeof(funcs_chiitoi) / sizeof(void*); i++) {
+			han[i] = funcs_chiitoi[i](gamestate, item);
+			item->han += han[i];
+			if (i == 0 && han[i]) pinfu = 1;
+		}
+		/* ドラ */
+		for (i = 0; i < gamestate->dorasize; i++) {
+			for (j = 0; j < item->mentsusize; j++) {
+				if (gamestate->dorapai[i] == (item->mentsulist[j].pailist[0] & 0x3F)) {
+					item->han += 2;
 				}
-				break;
-			case AI_KOUTSU:
-				if(gamestate->dorapai[i] == (gamestate->nakilist[j].pailist[0] & 0x3F)){
-					item->han += 3;
-				}
-				break;
-			case AI_SYUNTSU:
-				if(gamestate->dorapai[i] == (gamestate->nakilist[j].pailist[0] & 0x3F)){
-					item->han++;
-				}
-				if(gamestate->dorapai[i] == (gamestate->nakilist[j].pailist[1] & 0x3F)){
-					item->han++;
-				}
-				if(gamestate->dorapai[i] == (gamestate->nakilist[j].pailist[2] & 0x3F)){
-					item->han++;
-				}
-				break;
-
 			}
-
+		}
+	} else {
+		/* 役の計算 */
+		for (i = 0; i<sizeof(funcs) / sizeof(void*); i++) {
+			han[i] = funcs[i](gamestate, item);
+			item->han += han[i];
+			if (i == 0 && han[i]) pinfu = 1;
 		}
 
+		if (item->han < 1) {
+			item->score = item->coscore = item->oyascore = 0;
+			return;
+		}
 
+		item->fu = 20;
 
-	}
-
-    /* 符の計算 */
-    if(item->mentsusize == 7){
-        item->fu = 25; // 七対子は25符
-    }else{
-        item->fu = 20;
-
-        if(isMenzen(gamestate,item) && !gamestate->tsumo){
-            item->fu += 10; // 面前ロンは10符追加
-        }
-		if(gamestate->tsumo && !pinfu){
+		if (isMenzen(gamestate, item) && !gamestate->tsumo) {
+			item->fu += 10; // 面前ロンは10符追加
+		}
+		if (gamestate->tsumo && !pinfu) {
 			item->fu += 2;
 		}
-        
-        switch(item->machi){
-          case AI_MACHI_KANCHAN:
-          case AI_MACHI_PENCHAN:
-          case AI_MACHI_TANKI:
-            item->fu += 2;
-            break;
-          default:
-            break;
-        }
-        for(i=0;i<gamestate->naki;i++){
-            switch(gamestate->nakilist[i].category){
-              case AI_ANKAN:
-                item->fu += isYaotyu(gamestate->nakilist[i].pailist[0]) ? 32 : 16;
-                break;
-              case AI_MINKAN:
-                item->fu += isYaotyu(gamestate->nakilist[i].pailist[0]) ? 16 : 8;
-                break;
-              case AI_KOUTSU:
-                item->fu += isYaotyu(gamestate->nakilist[i].pailist[0]) ? 4 : 2;
-                break;
-              default:
-                break;
-            }
-        }
-        
-        for(i=0;i<item->mentsusize;i++){
-            switch(item->mentsulist[i].category){
-              case AI_TOITSU:
-                item->fu += numHanpai(gamestate,item->mentsulist[i].pailist[0]) * 2;
-                break;
-              case AI_KOUTSU:
-				  if(i == item->machipos && !gamestate->tsumo){
-					  item->fu += isYaotyu(item->mentsulist[i].pailist[0]) ? 4 : 2;
-				  }else{
-					  item->fu += isYaotyu(item->mentsulist[i].pailist[0]) ? 8 : 4;
-				  }
-                break;
-              default:
-                break;
-            }
-        }
+
+		switch (item->machi) {
+		case AI_MACHI_KANCHAN:
+		case AI_MACHI_PENCHAN:
+		case AI_MACHI_TANKI:
+			item->fu += 2;
+			break;
+		default:
+			break;
+		}
+		for (i = 0; i<gamestate->naki; i++) {
+			switch (gamestate->nakilist[i].category) {
+			case AI_ANKAN:
+				item->fu += isYaotyu(gamestate->nakilist[i].pailist[0]) ? 32 : 16;
+				break;
+			case AI_MINKAN:
+				item->fu += isYaotyu(gamestate->nakilist[i].pailist[0]) ? 16 : 8;
+				break;
+			case AI_KOUTSU:
+				item->fu += isYaotyu(gamestate->nakilist[i].pailist[0]) ? 4 : 2;
+				break;
+			default:
+				break;
+			}
+		}
+
+		for (i = 0; i<item->mentsusize; i++) {
+			switch (item->mentsulist[i].category) {
+			case AI_TOITSU:
+				item->fu += numHanpai(gamestate, item->mentsulist[i].pailist[0]) * 2;
+				break;
+			case AI_KOUTSU:
+				if (i == item->machipos && !gamestate->tsumo) {
+					item->fu += isYaotyu(item->mentsulist[i].pailist[0]) ? 4 : 2;
+				}
+				else {
+					item->fu += isYaotyu(item->mentsulist[i].pailist[0]) ? 8 : 4;
+				}
+				break;
+			default:
+				break;
+			}
+		}
 		/* 10符未満は切り上げ */
 		pts = item->fu % 10;
 		item->fu = item->fu - pts + (pts ? 10 : 0);
-    }
+		/* ドラ */
+		for (i = 0; i < gamestate->dorasize; i++) {
+			for (j = 0; j < item->mentsusize; j++) {
+				switch (item->mentsulist[j].category) {
+				case AI_ANKAN:
+				case AI_MINKAN:
+					if (gamestate->dorapai[i] == (item->mentsulist[j].pailist[0] & 0x3F)) {
+						item->han += 4;
+					}
+					break;
+				case AI_TOITSU:
+					if (gamestate->dorapai[i] == (item->mentsulist[j].pailist[0] & 0x3F)) {
+						item->han += 2;
+					}
+					break;
+				case AI_KOUTSU:
+					if (gamestate->dorapai[i] == (item->mentsulist[j].pailist[0] & 0x3F)) {
+						item->han += 3;
+					}
+					break;
+				case AI_SYUNTSU:
+					if (gamestate->dorapai[i] == (item->mentsulist[j].pailist[0] & 0x3F)) {
+						item->han++;
+					}
+					if (gamestate->dorapai[i] == (item->mentsulist[j].pailist[1] & 0x3F)) {
+						item->han++;
+					}
+					if (gamestate->dorapai[i] == (item->mentsulist[j].pailist[2] & 0x3F)) {
+						item->han++;
+					}
+					break;
+				}
+			}
+
+			for (j = 0; j < gamestate->naki; j++) {
+				switch (gamestate->nakilist[j].category) {
+				case AI_ANKAN:
+				case AI_MINKAN:
+					if (gamestate->dorapai[i] == (gamestate->nakilist[j].pailist[0] & 0x3F)) {
+						item->han += 4;
+					}
+					break;
+				case AI_KOUTSU:
+					if (gamestate->dorapai[i] == (gamestate->nakilist[j].pailist[0] & 0x3F)) {
+						item->han += 3;
+					}
+					break;
+				case AI_SYUNTSU:
+					if (gamestate->dorapai[i] == (gamestate->nakilist[j].pailist[0] & 0x3F)) {
+						item->han++;
+					}
+					if (gamestate->dorapai[i] == (gamestate->nakilist[j].pailist[1] & 0x3F)) {
+						item->han++;
+					}
+					if (gamestate->dorapai[i] == (gamestate->nakilist[j].pailist[2] & 0x3F)) {
+						item->han++;
+					}
+					break;
+
+				}
+
+			}
+		}
+	}
 
 
     if(item->han >= 13){
@@ -1131,9 +1167,7 @@ void make_resultitem_bh(RESULT_ITEM *item,GAMESTATE *gamestate)
                 rpts = (pts / 4) % 100;
                 item->coscore = pts/4 - rpts + (rpts ? 100 : 0);
             }
-        }
-
-        
+        }   
     }
 }
 

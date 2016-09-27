@@ -173,7 +173,7 @@ namespace MJAI {
 			return ret;
 		}
 
-		void addKiken(PaiArray *p) {
+		void addKiken(PaiArray *p) const {
 			switch (_type)
 			{
 			case MJAI::Mentsu::TYPE_SHUNTSU:
@@ -210,7 +210,7 @@ namespace MJAI {
 			return 0.0f;
 		}
 
-		void sub(PaiArray *p) {
+		void sub(PaiArray *p) const {
 			switch (_type)
 			{
 			case MJAI::Mentsu::TYPE_SHUNTSU:
@@ -236,33 +236,40 @@ namespace MJAI {
 		MentsuType getType() { return _type; }
 		int getNum() { return _num; }
 
-		static std::vector<Mentsu> all() {
-			std::vector<Mentsu> ret;
+		static std::vector<Mentsu> _all;
+		static std::vector<Mentsu> _all_atama;
 
-			for (int i = 0; i < 34; i++)
+		static const std::vector<Mentsu> &all() {
+			if (_all.empty())
 			{
-				ret.push_back(Mentsu(TYPE_KOUTSU, i));
+				for (int i = 0; i < 34; i++)
+				{
+					_all.push_back(Mentsu(TYPE_KOUTSU, i));
+				}
+
+				for (int i = 0; i < 8; i++)
+				{
+					_all.push_back(Mentsu(TYPE_SHUNTSU, i));
+					_all.push_back(Mentsu(TYPE_SHUNTSU, i + 9));
+					_all.push_back(Mentsu(TYPE_SHUNTSU, i + 18));
+				}
 			}
 
-			for (int i = 0; i < 8; i++)
-			{
-				ret.push_back(Mentsu(TYPE_SHUNTSU, i));
-				ret.push_back(Mentsu(TYPE_SHUNTSU, i + 9));
-				ret.push_back(Mentsu(TYPE_SHUNTSU, i + 18));
-			}
 
-			return ret;
+			return _all;
 		}
 
-		static std::vector<Mentsu> all_atama() {
-			std::vector<Mentsu> ret;
-
-			for (int i = 0; i < 34; i++)
+		static const std::vector<Mentsu> &all_atama() {
+			if (_all_atama.empty())
 			{
-				ret.push_back(Mentsu(TYPE_ATAMA, i));
+				for (int i = 0; i < 34; i++)
+				{
+					_all_atama.push_back(Mentsu(TYPE_ATAMA, i));
+				}
+
 			}
 
-			return ret;
+			return _all_atama;
 		}
 		static Mentsu& sample(std::vector<Mentsu> &set, const PaiArray &pai_kukan) {
 			float sum = 0.0f;

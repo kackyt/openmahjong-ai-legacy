@@ -296,7 +296,7 @@ namespace MJAI {
 	class Pai {
 	public:
 		Pai(int num = 0, bool aka = false, bool naki = false, bool riichi = false) :
-			_num(num & 31),
+			_num(num & 63),
 			_aka(aka),
 			_naki(naki),
 			_riichi(riichi)
@@ -413,6 +413,7 @@ namespace MJAI {
 		}
 
 		void fromKawahai(const MJIKawahai *kawa, size_t num) {
+			_kawahai.clear();
 			for (size_t i = 0; i < num; i++) {
 				_kawahai.push_back(Pai(kawa[i].hai, false, kawa[i].state & MJKS_NAKI, kawa[i].state & MJKS_REACH));
 			}

@@ -394,20 +394,7 @@ void MahjongAI::set_Tehai(int tsumohai)
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START MJ0\n");
 #endif
-	LARGE_INTEGER nFreq, nBefore, nAfter;
-	int time = 0;
-
-	memset(&nFreq, 0, sizeof(nFreq));
-	memset(&nBefore, 0, sizeof(nFreq));
-	memset(&nAfter, 0, sizeof(nFreq));
-	QueryPerformanceFrequency(&nFreq);
-	QueryPerformanceCounter(&nBefore);
 	MJ0(&param[0], (int*)dora, doralen, state.nokori, state.kikenhai, mentsu1, mentsu2, mentsu3);
-	QueryPerformanceCounter(&nAfter);
-
-	time = (nAfter.QuadPart - nBefore.QuadPart) * 1000 / nFreq.QuadPart;
-
-	printf("MJ0(C) %d ms\n", time);
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END MJ0\n");
 #endif

@@ -63,7 +63,7 @@ extern "C" {
 
 	/* ƒcƒ‚Ø‚è‚µ‚½ê‡‚É‚Ç‚Ì‚­‚ç‚¢Šm—¦‚ğC³‚·‚é‚© */
 	static float tempai_tsumogiri_table[] = {
-
+		0.0f
 	};
 
 

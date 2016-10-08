@@ -397,7 +397,7 @@ static double shuntsupoint(THREAD_PARAM *prm, PaiArrayInt cnt, vector<Mentsu> *p
 				cnt[pai + 1]++;
 				cnt[pai + 2]++;
 
-				pMentsu->push_back(Mentsu(Mentsu::TYPE_SHUNTSU, i));
+				pMentsu->push_back(Mentsu(Mentsu::TYPE_SHUNTSU, pai));
 
 				ret += shuntsupoint(prm, cnt, pMentsu, koutsunum, shuntsunum - 1, koutsupos, i);
 

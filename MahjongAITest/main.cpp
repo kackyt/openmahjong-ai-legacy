@@ -293,10 +293,10 @@ int main()
 	func = MJPInterfaceFunc;
 #endif
 
-	func(NULL,MJPI_INITIALIZE,0,(UINT)MJSendMessage);
 	size = func(NULL,MJPI_CREATEINSTANCE,0,0);
 	if(size > 0){
 		inst = malloc(size);
+		func(inst, MJPI_INITIALIZE, 0, (UINT)MJSendMessage);
 		/* 途中参加でエミュレート */
 		func(inst, MJPI_ONEXCHANGE, MJST_INKYOKU, MAKELPARAM(taku.kyoku, taku.zikaze));
 

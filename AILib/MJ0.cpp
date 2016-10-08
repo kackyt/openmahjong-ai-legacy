@@ -159,6 +159,7 @@ namespace MJAI {
 		for (size_t i = 0; i < SIMU_SIZE; i++) {
 			for (auto &player : *players) {
 				player._pai_kukan = nokorihai;
+				player._mentsu.clear();
 			}
 
 			myself->_pai_kukan = nokorihai;
@@ -171,10 +172,10 @@ namespace MJAI {
 					auto all = Mentsu::all();
 					const auto &pai_kukan = it->_pai_kukan;
 					// メンツをランダムで抽出する
-					float sum = accumulate(all.cbegin(), all.cend(), 0.0f, [pai_kukan](float a,const Mentsu &m) { return a + m.weight(pai_kukan); });
-					float val = rand() * sum / RAND_MAX;
-					float tmp = 0.0f;
-					auto mentsu = find_if(all.cbegin(), all.cend(), [val, tmp, pai_kukan](const Mentsu &m) mutable { tmp += m.weight(pai_kukan); return val < tmp; });
+					double sum = accumulate(all.cbegin(), all.cend(), 0.0f, [pai_kukan](double a,const Mentsu &m) { return a + m.weight(pai_kukan); });
+					double val = rand() * sum / RAND_MAX;
+					double tmp = 0.0f;
+					auto mentsu = find_if(all.cbegin(), all.cend(), [val, tmp, pai_kukan](const Mentsu &m) mutable { tmp += m.weight(pai_kukan); return val <= tmp; });
 					(it->_mentsu).push_back(*mentsu);
 
 					// メンツを構成する牌を牌空間から除去する
@@ -195,9 +196,9 @@ namespace MJAI {
 				auto all = Mentsu::all_atama();
 				const auto &pai_kukan = player._pai_kukan;
 				// アタマをランダムで抽出する
-				float sum = accumulate(all.cbegin(), all.cend(), 0.0f, [pai_kukan](float a, const Mentsu &m) { return a + m.weight(pai_kukan); });
-				float val = rand() * sum / RAND_MAX;
-				float tmp = 0.0f;
+				double sum = accumulate(all.cbegin(), all.cend(), 0.0f, [pai_kukan](double a, const Mentsu &m) { return a + m.weight(pai_kukan); });
+				double val = rand() * sum / RAND_MAX;
+				double tmp = 0.0f;
 				auto mentsu = find_if(all.cbegin(), all.cend(), [val, tmp, pai_kukan](const Mentsu &m) mutable { tmp += m.weight(pai_kukan); return val <= tmp; });
 				(player._mentsu).push_back(*mentsu);
 

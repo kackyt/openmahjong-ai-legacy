@@ -41,13 +41,13 @@ namespace MJAI {
 
 	class PaiArray {
 	public:
-		float _nums[34];
+		double _nums[34];
 
-		PaiArray(float iniVal = 0.0f) {
+		PaiArray(double iniVal = 0.0f) {
 			fill(iniVal);
 		}
 
-		void fill(float val) {
+		void fill(double val) {
 			for (int i = 0; i < 34; i++)
 			{
 				_nums[i] = val;
@@ -89,7 +89,7 @@ namespace MJAI {
 			return ret;
 		}
 
-		PaiArray operator +(const float val) const {
+		PaiArray operator +(const double val) const {
 			PaiArray ret;
 
 			for (int i = 0; i < 34; i++)
@@ -100,7 +100,7 @@ namespace MJAI {
 			return ret;
 		}
 
-		PaiArray operator -(const float val) const {
+		PaiArray operator -(const double val) const {
 			PaiArray ret;
 
 			for (int i = 0; i < 34; i++)
@@ -111,7 +111,7 @@ namespace MJAI {
 			return ret;
 		}
 
-		PaiArray operator /(const float val) const {
+		PaiArray operator /(const double val) const {
 			PaiArray ret;
 
 			for (int i = 0; i < 34; i++)
@@ -122,7 +122,7 @@ namespace MJAI {
 			return ret;
 		}
 
-		PaiArray operator *(const float val) const {
+		PaiArray operator *(const double val) const {
 			PaiArray ret;
 
 			for (int i = 0; i < 34; i++)
@@ -133,7 +133,7 @@ namespace MJAI {
 			return ret;
 		}
 
-		float & operator[](const int idx) {
+		double & operator[](const int idx) {
 			return _nums[idx];
 		}
 	};
@@ -194,7 +194,7 @@ namespace MJAI {
 			}
 		}
 
-		float weight(const PaiArray &p) const {
+		double weight(const PaiArray &p) const {
 			switch (_type)
 			{
 			case MJAI::Mentsu::TYPE_SHUNTSU:
@@ -272,13 +272,13 @@ namespace MJAI {
 			return _all_atama;
 		}
 		static Mentsu& sample(std::vector<Mentsu> &set, const PaiArray &pai_kukan) {
-			float sum = 0.0f;
-			float it = 0.0f;
+			double sum = 0.0f;
+			double it = 0.0f;
 			for (auto m : set) {
 				sum += m.weight(pai_kukan);
 			}
 
-			float r = rand() * sum / RAND_MAX;
+			double r = rand() * sum / RAND_MAX;
 
 			auto smpl = std::find_if(set.begin(), set.end(), [r, it, pai_kukan](Mentsu &m) mutable {
 				it += m.weight(pai_kukan);

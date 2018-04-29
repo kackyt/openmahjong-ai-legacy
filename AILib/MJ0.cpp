@@ -199,7 +199,11 @@ namespace MJAI {
 				double sum = accumulate(all.cbegin(), all.cend(), 0.0f, [pai_kukan](double a, const Mentsu &m) { return a + m.weight(pai_kukan); });
 				double val = rand() * sum / RAND_MAX;
 				double tmp = 0.0f;
-				auto mentsu = find_if(all.cbegin(), all.cend(), [val, tmp, pai_kukan](const Mentsu &m) mutable { tmp += m.weight(pai_kukan); return val <= tmp; });
+				auto &mentsu = find_if(all.cbegin(), all.cend(), [val, tmp, pai_kukan](const Mentsu &m) mutable { tmp += m.weight(pai_kukan); return val <= tmp; });
+				if (mentsu == all.cend())
+				{
+					mentsu--;
+				}
 				(player._mentsu).push_back(*mentsu);
 
 				// ƒAƒ^ƒ}‚ð\¬‚·‚é”v‚ð”v‹óŠÔ‚©‚çœ‹Ž‚·‚é

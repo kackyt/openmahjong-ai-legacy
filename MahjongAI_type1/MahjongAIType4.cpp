@@ -609,7 +609,7 @@ double chiitoipoint(THREAD_PARAM *prm, int cnt, unsigned long long tehaibitmap, 
 
 		item.han = 0;
 		item.fu = 0;
-		item.mentsusize = 7;
+		item.mentsusize = 5;
 		item.menzen = 1;
 		item.machipos = 0;
 

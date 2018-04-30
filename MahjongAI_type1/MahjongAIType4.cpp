@@ -159,7 +159,7 @@ static double calcMachiCoef(THREAD_PARAM *prm, PaiArrayInt cnt, int machihai) {
 		}
 	}
 
-	ret = 1.0 + num / 10.0;
+	ret = num / 5.0;
 
 	/* フリテンはロン和了りできないので3分の1にさせる */
 	if (furiten) {
@@ -189,6 +189,10 @@ static double calcscore(THREAD_PARAM *prm, PaiArrayInt cnt, vector<Mentsu> *pMen
 	state.bakaze = prm->pState->kyoku / 4;
 	state.zikaze = prm->pState->cha;
 	state.count = 1;
+	state.dorasize = prm->pState->doras.size();
+	for (int i = 0; i < state.dorasize; i++) {
+		state.dorapai[i] = prm->pState->doras[i].getNum();
+	}
 
 	item.mentsusize = 5;
 	item.menzen = 1;
@@ -207,7 +211,7 @@ static double calcscore(THREAD_PARAM *prm, PaiArrayInt cnt, vector<Mentsu> *pMen
 
 	for (auto m : prm->pState->myself._naki_mentsu)
 	{
-		state.nakilist[state.naki] = m.toTMentsu();
+		state.nakilist[state.naki++] = m.toTMentsu();
 	}
 
 	/* アタマを決定 */
@@ -369,7 +373,7 @@ static double shuntsupoint(THREAD_PARAM *prm, PaiArrayInt cnt, vector<Mentsu> *p
 		if (cnt[i] > prm->pState->te_cnt[i]) diff += cnt[i] - prm->pState->te_cnt[i];
 	}
 
-	if (diff > prm->shanten + 2 || diff >= 5) return ret;
+	if (diff > prm->shanten + 2 || diff >= 7) return ret;
 
 	if (shuntsunum <= 0) {
 		return calcscore(prm, cnt, pMentsu, diff);
@@ -421,7 +425,7 @@ static double koutsupoint(THREAD_PARAM *prm, PaiArrayInt cnt, vector<Mentsu> *pM
 		if (cnt[i] > prm->pState->te_cnt[i]) diff += cnt[i] - prm->pState->te_cnt[i];
 	}
 
-	if (diff > prm->shanten + 2 || diff >= 5) return ret;
+	if (diff > prm->shanten + 2 || diff >= 7) return ret;
 
 	for (i = koutsupos; i < 34; i++) {
 		/* 自分の手牌に絡まない手は除去 */

@@ -23,6 +23,7 @@
 #pragma once
 #include <windows.h>
 #include <float.h>
+#include <vector>
 #include "MIPIface.h"
 #include "MJ0.h"
 
@@ -63,6 +64,7 @@ struct MahjongAIState {
 	Player myself;
 	PaiArrayInt te_cnt;
 	PaiArrayInt sute_cnt;
+	std::vector<Pai> doras;
 	int kyoku;
 	int cha;
 	int kaze;

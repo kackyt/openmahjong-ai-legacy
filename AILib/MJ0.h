@@ -383,8 +383,11 @@ namespace MJAI {
 			_tehai.clear();
 			_naki_mentsu.clear();
 
-			for (size_t i = 0; i < tehai->tehai_max; i++) {
-				_tehai.push_back(Pai(tehai->tehai[i]));
+			if (!(tehai->tehai_max > 4 && tehai->tehai[tehai->tehai_max-1] == 0))
+			{
+				for (size_t i = 0; i < tehai->tehai_max; i++) {
+					_tehai.push_back(Pai(tehai->tehai[i]));
+				}
 			}
 
 			for (size_t i = 0; i < tehai->ankan_max; i++) {

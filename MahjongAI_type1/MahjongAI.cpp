@@ -372,7 +372,6 @@ void MahjongAI::set_Tehai(int tsumohai)
 	double mentsu3[27 + 34];
 	int doralen;
 	int kawalength;
-	vector<Pai> doras;
 
 	pState->tsumohai = tsumohai;
 
@@ -396,14 +395,15 @@ void MahjongAI::set_Tehai(int tsumohai)
 	}
 
 	doralen = (*MJSendMessage)(this, MJMI_GETDORA, (UINT)dora, 0);
+	pState->doras.clear();
 	for (size_t i = 0; i < doralen; i++) {
-		doras.push_back(Pai(dora[i]));
+		pState->doras.push_back(Pai(dora[i]));
 	}
 
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START MJ0\n");
 #endif
-	MJAI::MJ0::simulate(&pState->players, &pState->myself, &doras);
+	MJAI::MJ0::simulate(&pState->players, &pState->myself, &pState->doras);
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END MJ0\n");
 #endif
@@ -1123,14 +1123,19 @@ UINT MahjongAI::on_action(int player, int taishou, UINT action)
 	int hai = action & 63;
 
 	if (action & MJPIR_REACH){
-		pState->players[player]._is_riichi = true;
-		pState->players[player]._is_ippatsu = true;
 		if (player == 0){
 			sendComment(AI_MESSAGE_RIICHI);
+		} else {
+			pState->players[player-1]._is_riichi = true;
+			pState->players[player-1]._is_ippatsu = true;
 		}
 	}
 	else{
-		pState->players[player]._is_ippatsu = false;
+		if (player == 0) {
+			pState->myself._is_ippatsu = false;
+		} else {
+			pState->players[player-1]._is_ippatsu = false;
+		}
 	}
 
 	if (action & MJPIR_TSUMO){
@@ -1142,10 +1147,15 @@ UINT MahjongAI::on_action(int player, int taishou, UINT action)
 		}
 	}
 	if (action & (MJPIR_SUTEHAI | MJPIR_REACH)){
-		pState->players[player]._anpai[hai] = 1.0f;
-		for (int i = 0; i < 3; i++) if (pState->players[i]._is_riichi) pState->players[i]._anpai[hai] = 1.0f;
-		if (player == 0) return 0;
-		return koe_req(player, hai);
+		if (player == 0)
+		{
+			return 0;
+		}
+		else {
+			pState->players[player-1]._anpai[hai] = 1.0f;
+			for (int i = 0; i < 3; i++) if (pState->players[i]._is_riichi) pState->players[i]._anpai[hai] = 1.0f;
+			return koe_req(player, hai);
+		}
 	}
 	if (action & MJPIR_RON){
 		if (player == 0){

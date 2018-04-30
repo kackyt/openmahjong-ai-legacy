@@ -36,6 +36,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <numeric>
 
 namespace MJAI {
 
@@ -56,6 +57,40 @@ namespace MJAI {
 
 		size_t size() {
 			return 34;
+		}
+
+		PaiArray inverse() {
+			PaiArray ret;
+
+			for (int i = 0; i < 34; i++)
+			{
+				if (_nums[i] > 0)
+				{
+					ret._nums[i] = 0;
+				}
+				else {
+					ret._nums[i] = 1.0;
+				}
+			}
+
+			return ret;
+		}
+
+		PaiArray partialMultiple(int category, double rate) {
+			PaiArray ret;
+
+			for (int i = 0; i < 34; i++)
+			{
+				if ((i / 9) == category)
+				{
+					ret._nums[i] = _nums[i] * rate;
+				}
+				else {
+					ret._nums[i] = _nums[i];
+				}
+			}
+
+			return ret;
 		}
 
 		PaiArray& operator =(const PaiArray &other) {
@@ -128,6 +163,17 @@ namespace MJAI {
 			for (int i = 0; i < 34; i++)
 			{
 				ret._nums[i] = _nums[i] * val;
+			}
+
+			return ret;
+		}
+
+		PaiArray operator *(const PaiArray &val) const {
+			PaiArray ret;
+
+			for (int i = 0; i < 34; i++)
+			{
+				ret._nums[i] = _nums[i] * val._nums[i];
 			}
 
 			return ret;
@@ -271,19 +317,22 @@ namespace MJAI {
 
 			return _all_atama;
 		}
-		static Mentsu& sample(std::vector<Mentsu> &set, const PaiArray &pai_kukan) {
+		static const Mentsu& sample(const std::vector<Mentsu> &set, const PaiArray &pai_kukan) {
 			double sum = 0.0f;
 			double it = 0.0f;
-			for (auto m : set) {
-				sum += m.weight(pai_kukan);
-			}
+			sum = accumulate(set.cbegin(), set.cend(), 0.0f, [pai_kukan](double a, const Mentsu &m) { return a + m.weight(pai_kukan); });
 
 			double r = rand() * sum / RAND_MAX;
 
-			auto smpl = std::find_if(set.begin(), set.end(), [r, it, pai_kukan](Mentsu &m) mutable {
+			auto smpl = std::find_if(set.cbegin(), set.cend(), [r, it, pai_kukan](const Mentsu &m) mutable {
 				it += m.weight(pai_kukan);
 				return r < it;
 			});
+
+			if (smpl == set.cend())
+			{
+				smpl--;
+			}
 
 			return *smpl;
 		}
@@ -349,10 +398,12 @@ namespace MJAI {
 		std::vector<Pai> _kawahai;
 		bool _is_riichi;
 		bool _is_ippatsu;
+		double _rate;
 
 		Player() :
 			_is_riichi(false),
-			_is_ippatsu(false)
+			_is_ippatsu(false),
+			_rate(1.0)
 		{
 
 		}
@@ -369,6 +420,43 @@ namespace MJAI {
 			_is_ippatsu = false;
 		}
 
+		double rate()
+		{
+			/* テンパイする確率(鳴き有り) */
+			static float tempai_table[] = {
+				0.0,
+				0.001,
+				0.003,
+				0.018,
+				0.053,
+				0.105,
+				0.197,
+				0.328,
+				0.467,
+				0.587,
+				0.705,
+				0.772,
+				0.839,
+				0.886,
+				0.917,
+				0.937,
+				0.952,
+				0.960,
+				1.0,
+				1.0,
+				1.0,
+				1.0
+			};
+
+			if (_is_riichi)
+			{
+				return 1.0;
+			}
+			else {
+				return tempai_table[_kawahai.size()];
+			}
+		}
+
 		bool isMenzen() {
 			for (auto mentsu : _naki_mentsu) {
 				if (mentsu.getType() != Mentsu::TYPE_ANKAN) {
@@ -377,6 +465,10 @@ namespace MJAI {
 			}
 
 			return true;
+		}
+
+		PaiArray kikenhai() {
+			return _kikenhai * _anpai.inverse() * rate();
 		}
 
 		void fromTehai(const MJITehai *tehai) {

@@ -30,7 +30,6 @@
 
 #include "MJ0.h"
 #include <array>
-#include <numeric>
 #include <vector>
 
 #define SIMU_SIZE (5000)
@@ -172,22 +171,18 @@ namespace MJAI {
 					auto all = Mentsu::all();
 					const auto &pai_kukan = it->_pai_kukan;
 					// メンツをランダムで抽出する
-					double sum = accumulate(all.cbegin(), all.cend(), 0.0f, [pai_kukan](double a,const Mentsu &m) { return a + m.weight(pai_kukan); });
-					double val = rand() * sum / RAND_MAX;
-					double tmp = 0.0f;
-					auto mentsu = find_if(all.cbegin(), all.cend(), [val, tmp, pai_kukan](const Mentsu &m) mutable { tmp += m.weight(pai_kukan); return val <= tmp; });
-					(it->_mentsu).push_back(*mentsu);
+					auto mentsu = Mentsu::sample(all, pai_kukan);
+					it->_mentsu.push_back(mentsu);
 
 					// メンツを構成する牌を牌空間から除去する
 					for (auto &p2 : *players)
 					{
-						mentsu->sub(&p2._pai_kukan);
+						mentsu.sub(&p2._pai_kukan);
 					}
-					mentsu->sub(&myself->_pai_kukan);
+					mentsu.sub(&myself->_pai_kukan);
 
 					// 牌の危険度を更新する
-					mentsu->addKiken(&it->_kikenhai);
-					mentsu->addKiken(&myself->_kikenhai);
+					mentsu.addKiken(&it->_kikenhai);
 					it++;
 				}
 			}
@@ -196,32 +191,24 @@ namespace MJAI {
 				auto all = Mentsu::all_atama();
 				const auto &pai_kukan = player._pai_kukan;
 				// アタマをランダムで抽出する
-				double sum = accumulate(all.cbegin(), all.cend(), 0.0f, [pai_kukan](double a, const Mentsu &m) { return a + m.weight(pai_kukan); });
-				double val = rand() * sum / RAND_MAX;
-				double tmp = 0.0f;
-				auto &mentsu = find_if(all.cbegin(), all.cend(), [val, tmp, pai_kukan](const Mentsu &m) mutable { tmp += m.weight(pai_kukan); return val <= tmp; });
-				if (mentsu == all.cend())
-				{
-					mentsu--;
-				}
-				(player._mentsu).push_back(*mentsu);
+				auto &mentsu = Mentsu::sample(all, pai_kukan);
+				(player._mentsu).push_back(mentsu);
 
 				// アタマを構成する牌を牌空間から除去する
 				for (auto &p2 : *players)
 				{
-					mentsu->sub(&p2._pai_kukan);
+					mentsu.sub(&p2._pai_kukan);
 				}
-				mentsu->sub(&myself->_pai_kukan);
+				mentsu.sub(&myself->_pai_kukan);
 
 				// 牌の危険度を更新する
-				mentsu->addKiken(&player._kikenhai);
-				mentsu->addKiken(&myself->_kikenhai);
+				mentsu.addKiken(&player._kikenhai);
 			}
 
 			pai_kukan += myself->_pai_kukan;
 		}
 
 		myself->_pai_kukan = pai_kukan / SIMU_SIZE;
-		myself->_kikenhai = myself->_kikenhai / SIMU_SIZE;
+		myself->_kikenhai = ((*players)[0].kikenhai() + (*players)[1].kikenhai() + (*players)[2].kikenhai()) / SIMU_SIZE;
 	}
 } // MJAI

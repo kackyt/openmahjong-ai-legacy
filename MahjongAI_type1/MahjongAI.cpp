@@ -665,7 +665,7 @@ int MahjongAI::select_Score(double scc_max)
 	}
 
 #if 1
-	if (rnum > 0 && rnum + shanten > 2 && scc_max < 50.0){
+	if (rnum > 0 && rnum + shanten >= 2){
 		decision = AI_DECISION_ORI;
 	}
 	else{
@@ -725,9 +725,11 @@ int MahjongAI::calc_sutehai(void)
 
 	if (decision == AI_DECISION_AGARI1){
 		memcpy(hp, hp1, sizeof(hp1));
+		MJSendMessage(this, MJMI_FUKIDASHI, (UINT)"‰Ÿ‚µ", 0);
 	}
 	else{
 		memcpy(hp, hp2, sizeof(hp2));
+		MJSendMessage(this, MJMI_FUKIDASHI, (UINT)"“¦‚°", 0);
 	}
 
 	qsort(hp, size1, sizeof(HAIPOINT), (int(*)(const void*, const void*))compare_hp);

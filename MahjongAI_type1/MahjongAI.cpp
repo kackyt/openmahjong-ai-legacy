@@ -28,6 +28,8 @@
 #include "AILib.h"
 #include "MahjongScoreAI.h"
 
+using namespace std;
+
 //#define AIDUMP
 #ifdef AIDUMP
 //#define AIDUMP_1
@@ -77,7 +79,7 @@ public:
 	FILE *fp;
 #endif
 protected:
-	MahjongAIState state;
+	MahjongAIState *pState;
 	int machi[34];
 	int menzen;
 	int nakiok_flag;
@@ -243,6 +245,8 @@ void MahjongAI::initParam(void)
 {
 	int siz = 1, i;
 
+	pState = new MahjongAIState();
+
 	for (i = 0; i < PARAM_MAX; i++){
 		siz *= param_size[i];
 	}
@@ -257,6 +261,8 @@ void MahjongAI::initParam(void)
 void MahjongAI::destroyParam(void)
 {
 	if (resultBuf) free(resultBuf);
+
+	delete pState;
 }
 
 int MahjongAI::getParam(int index)
@@ -315,14 +321,14 @@ int MahjongAI::search(int obj, int start, int mask)
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START search\n");
 #endif
-	while (start < (int)state.tehai.tehai_max){
-		if (!(mask&(1 << start)) && (int)state.tehai.tehai[start] == obj) break;
+	while (start < (int)pState->myself._tehai.size()){
+		if (!(mask&(1 << start)) && (int)pState->myself._tehai[start].getNum() == obj) break;
 		start++;
 	}
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END search\n");
 #endif
-	return start < (int)state.tehai.tehai_max ? start : -1;
+	return start < (int)pState->myself._tehai.size() ? start : -1;
 }
 
 // ìñÇΩÇËîvÇí≤Ç◊ÅAîzóÒmachiÇ…ì¸ÇÍÇÈÅB
@@ -338,7 +344,7 @@ void MahjongAI::set_machi(void)
 	for (i = 0; i < 34; i++){
 		if (machi[i]) {
 			cnt = 0;
-			for (j = 0; j < (int)state.tehai.tehai_max; j++) if ((int)state.tehai.tehai[j] == i) cnt++;
+			for (j = 0; j < (int)pState->myself._tehai.size(); j++) if ((int)pState->myself._tehai[j].getNum() == i) cnt++;
 			if (cnt + (*MJSendMessage)(this, MJMI_GETVISIBLEHAIS, i, 0) < 4){
 				tenpai_flag = 1;
 				return;
@@ -358,43 +364,46 @@ void MahjongAI::set_machi(void)
 void MahjongAI::set_Tehai(int tsumohai)
 {
 	int i;
-	MJ0PARAM param[4];
-	MJITehai mjtehai[4];
-	MJIKawahai kawahai[4][20];
+	MJITehai tehai;
+	MJIKawahai kawahai[20];
 	UINT dora[8];
 	double mentsu1[27 + 34];
 	double mentsu2[27 + 34];
 	double mentsu3[27 + 34];
 	int doralen;
+	int kawalength;
 
-	state.tsumohai = tsumohai;
+	pState->tsumohai = tsumohai;
 
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START set_Tehai\n");
 #endif
-	param[0].pTehai = (MJITehai1 *)&mjtehai[0];
-	param[1].pTehai = (MJITehai1 *)&mjtehai[1];
-	param[2].pTehai = (MJITehai1 *)&mjtehai[2];
-	param[3].pTehai = (MJITehai1 *)&mjtehai[3];
-	(*MJSendMessage)(this, MJMI_GETTEHAI, 0, (UINT)&mjtehai[0]);
-	(*MJSendMessage)(this, MJMI_GETTEHAI, 1, (UINT)&mjtehai[1]);
-	(*MJSendMessage)(this, MJMI_GETTEHAI, 2, (UINT)&mjtehai[2]);
-	(*MJSendMessage)(this, MJMI_GETTEHAI, 3, (UINT)&mjtehai[3]);
-	param[0].pKawahai = &kawahai[0][0];
-	param[1].pKawahai = &kawahai[1][0];
-	param[2].pKawahai = &kawahai[2][0];
-	param[3].pKawahai = &kawahai[3][0];
-	param[0].kawalength = (*MJSendMessage)(this, MJMI_GETKAWAEX, (20 << 16) + 0, (UINT)&kawahai[0][0]);
-	param[1].kawalength = (*MJSendMessage)(this, MJMI_GETKAWAEX, (20 << 16) + 1, (UINT)&kawahai[1][0]);
-	param[2].kawalength = (*MJSendMessage)(this, MJMI_GETKAWAEX, (20 << 16) + 2, (UINT)&kawahai[2][0]);
-	param[3].kawalength = (*MJSendMessage)(this, MJMI_GETKAWAEX, (20 << 16) + 3, (UINT)&kawahai[3][0]);
+	(*MJSendMessage)(this, MJMI_GETTEHAI, 0, (UINT)&tehai);
+
+	pState->myself.fromTehai(&tehai);
+
+	kawalength = (*MJSendMessage)(this, MJMI_GETKAWAEX, (20 << 16) + 0, (UINT)&kawahai);
+
+	pState->myself.fromKawahai(&kawahai[0], kawalength);
+
+	for (size_t i = 0; i < 3; i++)
+	{
+		(*MJSendMessage)(this, MJMI_GETTEHAI, i+1, (UINT)&tehai);
+		pState->players[i].fromTehai(&tehai);
+		kawalength = (*MJSendMessage)(this, MJMI_GETKAWAEX, (20 << 16) + i+1, (UINT)&kawahai);
+		pState->players[i].fromKawahai(&kawahai[0], kawalength);
+	}
 
 	doralen = (*MJSendMessage)(this, MJMI_GETDORA, (UINT)dora, 0);
+	pState->doras.clear();
+	for (size_t i = 0; i < doralen; i++) {
+		pState->doras.push_back(Pai(dora[i]));
+	}
 
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START MJ0\n");
 #endif
-	MJ0(&param[0], (int*)dora, doralen, state.nokori, state.kikenhai, mentsu1, mentsu2, mentsu3);
+	MJAI::MJ0::simulate(&pState->players, &pState->myself, &pState->doras);
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END MJ0\n");
 #endif
@@ -409,20 +418,25 @@ void MahjongAI::set_Tehai(int tsumohai)
 	fprintf(fp,TEXT("</NOKORI>"));
 #endif
 
-	(*MJSendMessage)(this, MJMI_GETTEHAI, 0, (UINT)&state.tehai);
 #ifdef AIDUMP_COMMAND
 	fprintf(fp, TEXT("GET TEHAI\n"));
 #endif
 	for (i = 0; i < 34; i++){
-		state.te_cnt[i] = 0;
-		state.sute_cnt[i] = 0;
+		pState->te_cnt[i] = 0;
+		pState->sute_cnt[i] = 0;
 	}
-	for (i = 0; i < (int)state.tehai.tehai_max; i++) state.te_cnt[state.tehai.tehai[i]]++;
-	for (i = 0; i < param[0].kawalength; i++) state.sute_cnt[param[0].pKawahai[i].hai & 63]++;
+
+
+	for (auto pai : pState->myself._tehai) {
+		pState->te_cnt[pai.getNum()]++;
+	}
+	for (auto pai : pState->myself._kawahai) {
+		pState->sute_cnt[pai.getNum()]++;
+	}
 
 	doranum = 0;
 	for (i = 0; i < doralen; i++){
-		doranum += state.te_cnt[dora[i]];
+		doranum += pState->te_cnt[dora[i]];
 	}
 #ifdef AIDUMP_STACKTRACE
 	int j;
@@ -469,7 +483,7 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 	debug_count = 0;
 
 	// åªç›ÇÃéËîvÇÃèÛë‘ÇÉZÉbÉgÇ∑ÇÈ
-	if (!state.reach_flag[0])set_Tehai(tsumohai);
+	if (!pState->myself._is_riichi)set_Tehai(tsumohai);
 
 	// åªç›ÇÃë“ÇøîvÇéÊìæÇ∑ÇÈ
 	set_machi();
@@ -486,7 +500,7 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 	}
 
 	// ÉäÅ[É`ÇÇ©ÇØÇƒÇ¢ÇÈèÍçáÇÕÅuÉcÉÇêÿÇËÅv
-	if (state.reach_flag[0]) return MJPIR_SUTEHAI | 13;
+	if (pState->myself._is_riichi) return MJPIR_SUTEHAI | 13;
 
 	// ã„éÌã„îvÇ≈ó¨ÇπÇÈèÍçáÇÕó¨Ç∑
 	tmp = (*MJSendMessage)(this, MJMI_KKHAIABILITY, 0, 0);
@@ -498,11 +512,11 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 	if (tmp) return MJPIR_NAGASHI;
 
 	// Ç‡ÇµÉcÉÇÇ¡ÇƒÇ´ÇΩîvÇ™Ç†ÇÈÇ»ÇÁÅAÇªÇÃîvÇì¸ÇÍÇÈ
-	if (tsumohai >= 0 && tsumohai < 34) state.te_cnt[tsumohai]++;
+	if (tsumohai >= 0 && tsumohai < 34) pState->te_cnt[tsumohai]++;
 
 	// éÃÇƒÇÈîvÇåàÇﬂÇÈ
 	hai = calc_sutehai();
-	if (hai < (int)state.tehai.tehai_max) del_hai = state.tehai.tehai[hai]; else del_hai = tsumohai;
+	if (hai < (int)pState->myself._tehai.size()) del_hai = pState->myself._tehai[hai].getNum(); else del_hai = tsumohai;
 
 #ifdef AIDUMP_POINT
 	fprintf(fp,"\n");
@@ -517,15 +531,15 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 		furiten = 0;
 		hais = 0;
 
-		memcpy(&tmphai, &state.tehai, sizeof(tmphai));
-		state.te_cnt[del_hai]--;
+		memset(&tmphai, 0, sizeof(tmphai));
+		pState->te_cnt[del_hai]--;
 		tmphai.tehai_max = 0;
 		for (i = 0; i < 34; i++){
-			for (j = 0; j < state.te_cnt[i]; j++){
+			for (j = 0; j < pState->te_cnt[i]; j++){
 				tmphai.tehai[tmphai.tehai_max++] = i;
 			}
 		}
-		state.te_cnt[del_hai]++;
+		pState->te_cnt[del_hai]++;
 
 		hai_remain = (*MJSendMessage)(this, MJMI_GETHAIREMAIN, 0, 0);
 #ifdef AIDUMP_COMMAND
@@ -542,8 +556,8 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 #ifdef AIDUMP_COMMAND
 				fprintf(fp, TEXT("GETVISIBLEHAIS %u\n"), tmp);
 #endif
-				if (state.te_cnt[i] + tmp < 4 && hai_remain>60){ rchk = MJPIR_REACH; break; }
-				hais += 4 - (state.te_cnt[i] + tmp);
+				if (pState->te_cnt[i] + tmp < 4 && hai_remain>60){ rchk = MJPIR_REACH; break; }
+				hais += 4 - (pState->te_cnt[i] + tmp);
 				mpoint += (*MJSendMessage)(this, MJMI_GETAGARITEN, (UINT)&tmphai, i);
 				mhai = i;
 				if (!furiten){
@@ -569,7 +583,7 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 			}
 		}
 		else{
-			if (((mhai >= 27 && mhai <= 30 && mhai != 27 + state.kaze && mhai != 27 + state.kyoku / 4) || hais > getParam(0))){
+			if (((mhai >= 27 && mhai <= 30 && mhai != 27 + pState->kaze && mhai != 27 + pState->kyoku / 4) || hais > getParam(0))){
 				rchk = MJPIR_REACH;
 			}
 
@@ -608,7 +622,7 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 		}
 
 #endif
-		state.reach_flag[0] = 1;
+		pState->myself._is_riichi = true;
 	}
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END sutehai_sub\n");
@@ -630,9 +644,12 @@ int MahjongAI::select_Score(double scc_max)
 	int rnum = 0;
 	int shanten = 0;
 	TENPAI_LIST list;
+	MJITehai tehai;
+
+	pState->myself.toTehai(&tehai);
 
 	/* ÉVÉÉÉìÉeÉìêîÇêîÇ¶ÇÈ */
-	shanten = search_tenpai((int*)state.tehai.tehai, state.tehai.tehai_max, NULL, &list, 1, 6);
+	shanten = search_tenpai((int*)tehai.tehai, tehai.tehai_max, NULL, &list, 1, 6);
 
 	if (shanten != 0){
 		shanten = list.shanten;
@@ -643,8 +660,8 @@ int MahjongAI::select_Score(double scc_max)
 
 
 	/* ÉIÉäÇÈÇ©çUÇﬂÇÈÇ©ÇÃîªíf */
-	for (i = 1; i < 4; i++){
-		if (state.reach_flag[i]) rnum++;
+	for (i = 0; i < 3; i++){
+		if (pState->players[i]._is_riichi) rnum++;
 	}
 
 #if 1
@@ -701,8 +718,8 @@ int MahjongAI::calc_sutehai(void)
 
 #endif
 
-	scc_max = ai.evalSutehai(state, hp1, size1);
-	kikenhai.evalSutehai(state, hp2, size2);
+	scc_max = ai.evalSutehai(*pState, hp1, size1);
+	kikenhai.evalSutehai(*pState, hp2, size2);
 
 	decision = select_Score(scc_max);
 
@@ -720,20 +737,20 @@ int MahjongAI::calc_sutehai(void)
 		int max1=-1,max2=-1,max3=-1;
 		double maxd1=0,maxd2=0,maxd3=0;
 		for(i=0;i<34;i++){
-			if(maxd1 < state.nokori[i]){
+			if(maxd1 < pState->myself._pai_kukan[i]){
 				maxd3 = maxd2;
 				maxd2 = maxd1;
 				max3 = max2;
 				max2 = max1;
-				maxd1 = state.nokori[i];
+				maxd1 = pState->myself._pai_kukan[i];
 				max1 = i;
-			}else if(maxd2 < state.nokori[i]){
+			}else if(maxd2 < pState->myself._pai_kukan[i]){
 				maxd3 = maxd2;
 				max3 = max2;
-				maxd2 = state.nokori[i];
+				maxd2 = pState->myself._pai_kukan[i];
 				max2 = i;
-			}else if(maxd3 < state.nokori[i]){
-				maxd3 = state.nokori[i];
+			}else if(maxd3 < pState->myself._pai_kukan[i]){
+				maxd3 = pState->myself._pai_kukan[i];
 				max3 = i;
 			}
 		}
@@ -791,7 +808,7 @@ int MahjongAI::calc_sutehai_easy(double *pMax)
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("START calc_sutehai_easy\n");
 #endif
-	score_max = ai.evalSutehai(state, hp, size);
+	score_max = ai.evalSutehai(*pState, hp, size);
 
 	if(pMax != NULL) *pMax=score_max;
 
@@ -842,14 +859,14 @@ int MahjongAI::nakability(int hai, int chii_flag)
 			ret |= 32;
 		}
 	}
-	if (state.reach_flag[0]) return ret;
+	if (pState->myself._is_riichi) return ret;
 	if ((*MJSendMessage)(this, MJMI_GETHAIREMAIN, 0, 0) == 0) return ret;
 	if ((x = search(hai, 0, 0)) >= 0){
-		if (x < (int)state.tehai.tehai_max - 1){
-			if ((int)state.tehai.tehai[x + 1] == hai){
+		if (x < (int)pState->myself._tehai.size() - 1){
+			if ((int)pState->myself._tehai[x + 1].getNum() == hai){
 				ret |= 1;
-				if (x < (int)state.tehai.tehai_max - 2){
-					if ((int)state.tehai.tehai[x + 2] == hai) ret |= 2;
+				if (x < (int)pState->myself._tehai.size() - 2){
+					if ((int)pState->myself._tehai[x + 2].getNum() == hai) ret |= 2;
 				}
 			}
 		}
@@ -858,13 +875,13 @@ int MahjongAI::nakability(int hai, int chii_flag)
 		if (hai < 27){
 			kazu = hai % 9;
 			if (kazu > 1){
-				if (state.te_cnt[hai - 2] > 0 && state.te_cnt[hai - 1] > 0) ret |= 8;
+				if (pState->te_cnt[hai - 2] > 0 && pState->te_cnt[hai - 1] > 0) ret |= 8;
 			}
 			if (kazu < 7){
-				if (state.te_cnt[hai + 2] > 0 && state.te_cnt[hai + 1] > 0) ret |= 4;
+				if (pState->te_cnt[hai + 2] > 0 && pState->te_cnt[hai + 1] > 0) ret |= 4;
 			}
 			if (kazu > 0 && kazu < 8){
-				if (state.te_cnt[hai - 1] > 0 && state.te_cnt[hai + 1] > 0) ret |= 16;
+				if (pState->te_cnt[hai - 1] > 0 && pState->te_cnt[hai + 1] > 0) ret |= 16;
 			}
 		}
 	}
@@ -883,7 +900,7 @@ int MahjongAI::tehai2Array(int *p)
 #endif
 
 	for (i = 0; i < 34; i++){
-		for (j = 0; j < state.te_cnt[i]; j++){
+		for (j = 0; j < pState->te_cnt[i]; j++){
 			p[size++] = i;
 		}
 	}
@@ -939,11 +956,11 @@ UINT MahjongAI::koe_req(int no, int hai)
 	if (tenpai_flag == 1 || decision == AI_DECISION_ORI) return 0;
 
 	if (naki_ok & 1){
-		state.te_cnt[hai] -= 2;
-		state.tehai.minkou[state.tehai.minkou_max++] = hai;
+		pState->te_cnt[hai] -= 2;
+		pState->myself._naki_mentsu.push_back(Mentsu(Mentsu::TYPE_KOUTSU, hai));
 		calc_sutehai_easy(&score_max);
-		state.tehai.minkou_max--;
-		state.te_cnt[hai] += 2;
+		pState->myself._naki_mentsu.pop_back();
+		pState->te_cnt[hai] += 2;
 
 		if (score_max > 0.01 && score_max > tehai_score){
 			return MJPIR_PON;
@@ -951,39 +968,39 @@ UINT MahjongAI::koe_req(int no, int hai)
 	}
 
 	if (naki_ok & 4){
-		state.te_cnt[hai + 1]--;
-		state.te_cnt[hai + 2]--;
-		state.tehai.minshun[state.tehai.minshun_max++] = hai;
+		pState->te_cnt[hai + 1]--;
+		pState->te_cnt[hai + 2]--;
+		pState->myself._naki_mentsu.push_back(Mentsu(Mentsu::TYPE_SHUNTSU, hai));
 		calc_sutehai_easy(&score_max);
-		state.tehai.minshun_max--;
-		state.te_cnt[hai + 1]++;
-		state.te_cnt[hai + 2]++;
+		pState->myself._naki_mentsu.pop_back();
+		pState->te_cnt[hai + 1]++;
+		pState->te_cnt[hai + 2]++;
 
 		if (score_max > 0.01 && score_max > tehai_score){
 			return MJPIR_CHII1;
 		}
 	}
 	if (naki_ok & 8){
-		state.te_cnt[hai - 1]--;
-		state.te_cnt[hai - 2]--;
-		state.tehai.minshun[state.tehai.minshun_max++] = hai - 2;
+		pState->te_cnt[hai - 1]--;
+		pState->te_cnt[hai - 2]--;
+		pState->myself._naki_mentsu.push_back(Mentsu(Mentsu::TYPE_SHUNTSU, hai - 2));
 		calc_sutehai_easy(&score_max);
-		state.tehai.minshun_max--;
-		state.te_cnt[hai - 1]++;
-		state.te_cnt[hai - 2]++;
+		pState->myself._naki_mentsu.pop_back();
+		pState->te_cnt[hai - 1]++;
+		pState->te_cnt[hai - 2]++;
 
 		if (score_max > 0.01 && score_max > tehai_score){
 			return MJPIR_CHII2;
 		}
 	}
 	if (naki_ok & 16){
-		state.te_cnt[hai + 1]--;
-		state.te_cnt[hai - 1]--;
-		state.tehai.minshun[state.tehai.minshun_max++] = hai - 1;
+		pState->te_cnt[hai + 1]--;
+		pState->te_cnt[hai - 1]--;
+		pState->myself._naki_mentsu.push_back(Mentsu(Mentsu::TYPE_SHUNTSU, hai - 1));
 		calc_sutehai_easy(&score_max);
-		state.tehai.minshun_max--;
-		state.te_cnt[hai + 1]++;
-		state.te_cnt[hai - 1]++;
+		pState->myself._naki_mentsu.pop_back();
+		pState->te_cnt[hai + 1]++;
+		pState->te_cnt[hai - 1]++;
 
 		if (score_max > 0.01 && score_max > tehai_score){
 			return MJPIR_CHII3;
@@ -1008,20 +1025,18 @@ UINT MahjongAI::on_start_kyoku(int k, int c)
 	kyokustate = AI_KYOKUSTS_NORMAL;
 	decision = AI_DECISION_AGARI1;
 	//set_Tehai();
-	for (i = 0; i < 34; i++) {
-		for (j = 0; j < 4; j++) state.anpai[i][j] = 0;
-	}
-	state.kyoku = k;
-	state.kaze = state.kyoku / 4;
-	state.cha = c;
+	pState->kyoku = k;
+	pState->kaze = pState->kyoku / 4;
+	pState->cha = c;
 	menzen = 1;
 	nakiok_flag = 0;
 	jun = 0;
 	sthai = -1;
-	for (i = 0; i < 4; i++){
-		state.reach_flag[i] = 0;
-		state.ippatsu_flag[i] = 0;
+	for (i = 0; i < 3; i++){
+		pState->players[i].clear();
 	}
+
+	pState->myself.clear();
 	//tehai_score = eval_Tehai(0);
 	//set_machi();
 	tehai_score = DBL_MAX;
@@ -1108,14 +1123,19 @@ UINT MahjongAI::on_action(int player, int taishou, UINT action)
 	int hai = action & 63;
 
 	if (action & MJPIR_REACH){
-		state.reach_flag[player] = 1;
-		state.ippatsu_flag[player] = 1;
 		if (player == 0){
 			sendComment(AI_MESSAGE_RIICHI);
+		} else {
+			pState->players[player-1]._is_riichi = true;
+			pState->players[player-1]._is_ippatsu = true;
 		}
 	}
 	else{
-		state.ippatsu_flag[player] = 0;
+		if (player == 0) {
+			pState->myself._is_ippatsu = false;
+		} else {
+			pState->players[player-1]._is_ippatsu = false;
+		}
 	}
 
 	if (action & MJPIR_TSUMO){
@@ -1127,10 +1147,15 @@ UINT MahjongAI::on_action(int player, int taishou, UINT action)
 		}
 	}
 	if (action & (MJPIR_SUTEHAI | MJPIR_REACH)){
-		state.anpai[hai][player] = 1;
-		for (int i = 0; i < 4; i++) if (state.reach_flag[i]) state.anpai[hai][i] = 1;
-		if (player == 0) return 0;
-		return koe_req(player, hai);
+		if (player == 0)
+		{
+			return 0;
+		}
+		else {
+			pState->players[player-1]._anpai[hai] = 1.0f;
+			for (int i = 0; i < 3; i++) if (pState->players[i]._is_riichi) pState->players[i]._anpai[hai] = 1.0f;
+			return koe_req(player, hai);
+		}
 	}
 	if (action & MJPIR_RON){
 		if (player == 0){
@@ -1196,31 +1221,28 @@ UINT MahjongAI::on_exchange(UINT ex_state, UINT option)
 		int i, j, k, size;
 		HAIPOINT hp[14];
 		set_Tehai(-1);
-		for (i = 0; i < 34; i++) {
-			for (j = 0; j < 4; j++) state.anpai[i][j] = 0;
+		for (i = 0; i < 3; i++){
+			pState->players[i].clear();
 		}
-		for (i = 0; i < 4; i++){
-			state.reach_flag[i] = 0;
-			state.ippatsu_flag[i] = 0;
-		}
+
+		pState->myself.clear();
 
 		MJIKawahai kawa[30];
 		for (i = 0; i < 4; i++){
 			k = (*MJSendMessage)(this, MJMI_GETKAWAEX, MAKELPARAM(i, 30), (UINT)kawa);
-			state.reach_flag[i] = 0;
 			for (j = 0; j < k; j++){
-				state.anpai[kawa[j].hai & 63][i] = 1;
-				if (kawa[j].state&MJKS_REACH) state.reach_flag[i] = 1;
+				pState->players[i]._anpai[kawa[j].hai & 63] = 1;
+				if (kawa[j].state&MJKS_REACH) pState->players[i]._is_riichi = true;
 			}
 		}
 
-		state.kyoku = LOWORD(option);
-		state.kaze = state.kyoku / 4;
-		state.cha = HIWORD(option);
-		menzen = state.tehai.minshun_max + state.tehai.minkan_max + state.tehai.minkou_max == 0;
+		pState->kyoku = LOWORD(option);
+		pState->kaze = pState->kyoku / 4;
+		pState->cha = HIWORD(option);
+		menzen = pState->myself.isMenzen();
 		nakiok_flag = !menzen;
 		sthai = -1;
-		tehai_score = ai.evalSutehai(state, hp, size);
+		tehai_score = ai.evalSutehai(*pState, hp, size);
 		set_machi();
 	}
 	return 0;

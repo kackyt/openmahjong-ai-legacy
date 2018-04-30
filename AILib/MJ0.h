@@ -28,27 +28,428 @@
 ****************************************************************************************/
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <windows.h>
 #include "MIPIface.h"
+#include "AILib.h"
 
 #define SIMU_SIZE (5000)
 
-typedef struct{
-	MJITehai1 *pTehai;
-	MJIKawahai *pKawahai;
-	int kawalength;
-} MJ0PARAM;
+#include <vector>
+#include <algorithm>
 
-extern int MJ0(/* inputs */
-		MJ0PARAM *pParam,int *pDora,int dlength,
-		/* outputs */
-		double *pNokoriHai,double *pKikenhai,
-		double *pMentsuSimo,double *pMentsuToimen,double *pMentsuKami);
+namespace MJAI {
 
-#ifdef __cplusplus
-}
-#endif
+	class PaiArray {
+	public:
+		double _nums[34];
+
+		PaiArray(double iniVal = 0.0f) {
+			fill(iniVal);
+		}
+
+		void fill(double val) {
+			for (int i = 0; i < 34; i++)
+			{
+				_nums[i] = val;
+			}
+		}
+
+		size_t size() {
+			return 34;
+		}
+
+		PaiArray& operator =(const PaiArray &other) {
+
+			for (int i = 0; i < 34; i++)
+			{
+				_nums[i] = other._nums[i];
+			}
+
+			return *this;
+		}
+
+		PaiArray &operator +=(const PaiArray &other) {
+
+			for (int i = 0; i < 34; i++)
+			{
+				_nums[i] += other._nums[i];
+			}
+
+			return *this;
+		}
+
+		PaiArray operator +(const PaiArray &other) const {
+			PaiArray ret;
+
+			for (int i = 0; i < 34; i++)
+			{
+				ret._nums[i] = _nums[i] + other._nums[i];
+			}
+
+			return ret;
+		}
+
+		PaiArray operator +(const double val) const {
+			PaiArray ret;
+
+			for (int i = 0; i < 34; i++)
+			{
+				ret._nums[i] = _nums[i] + val;
+			}
+
+			return ret;
+		}
+
+		PaiArray operator -(const double val) const {
+			PaiArray ret;
+
+			for (int i = 0; i < 34; i++)
+			{
+				ret._nums[i] = _nums[i] - val;
+			}
+
+			return ret;
+		}
+
+		PaiArray operator /(const double val) const {
+			PaiArray ret;
+
+			for (int i = 0; i < 34; i++)
+			{
+				ret._nums[i] = _nums[i] / val;
+			}
+
+			return ret;
+		}
+
+		PaiArray operator *(const double val) const {
+			PaiArray ret;
+
+			for (int i = 0; i < 34; i++)
+			{
+				ret._nums[i] = _nums[i] * val;
+			}
+
+			return ret;
+		}
+
+		double & operator[](const int idx) {
+			return _nums[idx];
+		}
+	};
+
+	class Mentsu {
+	public:
+		enum MentsuType {
+			TYPE_SHUNTSU = AI_SYUNTSU,
+			TYPE_KOUTSU = AI_KOUTSU,
+			TYPE_MINKAN = AI_MINKAN,
+			TYPE_ANKAN = AI_ANKAN,
+			TYPE_ATAMA = AI_ATAMA
+		};
+
+		Mentsu(MentsuType type = TYPE_SHUNTSU, int num = 0) :
+			_type(type),
+			_num(num)
+		{}
+
+		t_mentsu toTMentsu() {
+			t_mentsu ret;
+			ret.category = static_cast<int>(_type);
+			switch (_type)
+			{
+			case MJAI::Mentsu::TYPE_SHUNTSU:
+				ret.pailist[0] = _num;
+				ret.pailist[1] = _num + 1;
+				ret.pailist[2] = _num + 2;
+				break;
+			default:
+				ret.pailist[0] = _num;
+				ret.pailist[1] = _num;
+				ret.pailist[2] = _num;
+				break;
+			}
+
+			return ret;
+		}
+
+		void addKiken(PaiArray *p) const {
+			switch (_type)
+			{
+			case MJAI::Mentsu::TYPE_SHUNTSU:
+				if ((_num % 9) > 0) p->_nums[_num - 1] += 0.1f;
+				p->_nums[_num] += 0.2f;
+				p->_nums[_num + 1] += 0.1f;
+				p->_nums[_num + 2] += 0.2f;
+				if ((_num % 9) < 6) p->_nums[_num + 3] += 0.1f;
+				break;
+			case MJAI::Mentsu::TYPE_KOUTSU:
+				p->_nums[_num] += 0.05f;
+				break;
+			case MJAI::Mentsu::TYPE_ATAMA:
+				p->_nums[_num] += 0.1f;
+				break;
+			default:
+				break;
+			}
+		}
+
+		double weight(const PaiArray &p) const {
+			switch (_type)
+			{
+			case MJAI::Mentsu::TYPE_SHUNTSU:
+				return p._nums[_num] * p._nums[_num + 1] * p._nums[_num + 2];
+			case MJAI::Mentsu::TYPE_KOUTSU:
+				return p._nums[_num] >= 2.0f ? (p._nums[_num] - 2) * (p._nums[_num] - 2) : 0.0f;
+			case MJAI::Mentsu::TYPE_ATAMA:
+				return p._nums[_num] >= 1.0f ? (p._nums[_num] - 1) * (p._nums[_num] - 1) * 0.6f : 0.0f;
+			default:
+				break;
+			}
+
+			return 0.0f;
+		}
+
+		void sub(PaiArray *p) const {
+			switch (_type)
+			{
+			case MJAI::Mentsu::TYPE_SHUNTSU:
+				p->_nums[_num]--;
+				p->_nums[_num + 1]--;
+				p->_nums[_num + 2]--;
+				break;
+			case MJAI::Mentsu::TYPE_KOUTSU:
+				p->_nums[_num] -= 3;
+				break;
+			case MJAI::Mentsu::TYPE_MINKAN:
+			case MJAI::Mentsu::TYPE_ANKAN:
+				p->_nums[_num] -= 4;
+				break;
+			case MJAI::Mentsu::TYPE_ATAMA:
+				p->_nums[_num] -= 2;
+				break;
+			default:
+				break;
+			}
+		}
+
+		MentsuType getType() { return _type; }
+		int getNum() { return _num; }
+
+		static std::vector<Mentsu> _all;
+		static std::vector<Mentsu> _all_atama;
+
+		static const std::vector<Mentsu> &all() {
+			if (_all.empty())
+			{
+				for (int i = 0; i < 34; i++)
+				{
+					_all.push_back(Mentsu(TYPE_KOUTSU, i));
+				}
+
+				for (int i = 0; i < 8; i++)
+				{
+					_all.push_back(Mentsu(TYPE_SHUNTSU, i));
+					_all.push_back(Mentsu(TYPE_SHUNTSU, i + 9));
+					_all.push_back(Mentsu(TYPE_SHUNTSU, i + 18));
+				}
+			}
+
+
+			return _all;
+		}
+
+		static const std::vector<Mentsu> &all_atama() {
+			if (_all_atama.empty())
+			{
+				for (int i = 0; i < 34; i++)
+				{
+					_all_atama.push_back(Mentsu(TYPE_ATAMA, i));
+				}
+
+			}
+
+			return _all_atama;
+		}
+		static Mentsu& sample(std::vector<Mentsu> &set, const PaiArray &pai_kukan) {
+			double sum = 0.0f;
+			double it = 0.0f;
+			for (auto m : set) {
+				sum += m.weight(pai_kukan);
+			}
+
+			double r = rand() * sum / RAND_MAX;
+
+			auto smpl = std::find_if(set.begin(), set.end(), [r, it, pai_kukan](Mentsu &m) mutable {
+				it += m.weight(pai_kukan);
+				return r < it;
+			});
+
+			return *smpl;
+		}
+
+	private:
+		MentsuType _type;
+		int _num;
+	};
+
+	class Pai {
+	public:
+		Pai(int num = 0, bool aka = false, bool naki = false, bool riichi = false) :
+			_num(num & 63),
+			_aka(aka),
+			_naki(naki),
+			_riichi(riichi)
+		{
+			if (num & 64) {
+				_aka = true;
+			}
+		}
+
+		int getNum() const { return _num; }
+		bool isAka() const { return _aka; }
+		bool isNaki() const { return _naki; }
+		bool isRiichi() const { return _riichi; }
+
+		int getDorahyouji()
+		{
+			if (_num < 27) {
+				if ((_num % 9) == 0) {
+					return _num + 8;
+				}
+				else {
+					return _num - 1;
+				}
+			}
+			else if (_num == 27) {
+				return 30;
+			}
+			else if (_num == 31) {
+				return 33;
+			}
+			else {
+				return _num - 1;
+			}
+		}
+	private:
+		int _num;
+		bool _aka;
+		bool _naki;
+		bool _riichi;
+	};
+
+	class Player {
+	public:
+		std::vector<Mentsu> _mentsu;
+		std::vector<Mentsu> _naki_mentsu;
+		PaiArray _pai_kukan;
+		PaiArray _anpai;
+		PaiArray _kikenhai;
+		std::vector<Pai> _tehai;
+		std::vector<Pai> _kawahai;
+		bool _is_riichi;
+		bool _is_ippatsu;
+
+		Player() :
+			_is_riichi(false),
+			_is_ippatsu(false)
+		{
+
+		}
+
+		void clear() {
+			_mentsu.clear();
+			_naki_mentsu.clear();
+			_pai_kukan = PaiArray();
+			_anpai = PaiArray();
+			_kikenhai = PaiArray();
+			_tehai.clear();
+			_kawahai.clear();
+			_is_riichi = false;
+			_is_ippatsu = false;
+		}
+
+		bool isMenzen() {
+			for (auto mentsu : _naki_mentsu) {
+				if (mentsu.getType() != Mentsu::TYPE_ANKAN) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		void fromTehai(const MJITehai *tehai) {
+			_tehai.clear();
+			_naki_mentsu.clear();
+
+			if (!(tehai->tehai_max > 4 && tehai->tehai[tehai->tehai_max-1] == 0))
+			{
+				for (size_t i = 0; i < tehai->tehai_max; i++) {
+					_tehai.push_back(Pai(tehai->tehai[i]));
+				}
+			}
+
+			for (size_t i = 0; i < tehai->ankan_max; i++) {
+				_naki_mentsu.push_back(Mentsu(Mentsu::TYPE_ANKAN, tehai->ankan[i]));
+			}
+			for (size_t i = 0; i < tehai->minkan_max; i++) {
+				_naki_mentsu.push_back(Mentsu(Mentsu::TYPE_MINKAN, tehai->minkan[i]));
+			}
+			for (size_t i = 0; i < tehai->minshun_max; i++) {
+				_naki_mentsu.push_back(Mentsu(Mentsu::TYPE_SHUNTSU, tehai->minshun[i]));
+			}
+			for (size_t i = 0; i < tehai->minkou_max; i++) {
+				_naki_mentsu.push_back(Mentsu(Mentsu::TYPE_KOUTSU, tehai->minkou[i]));
+			}
+		}
+
+		void toTehai(MJITehai *tehai) {
+			tehai->tehai_max = 0;
+			tehai->ankan_max = 0;
+			tehai->minkan_max = 0;
+			tehai->minshun_max = 0;
+			tehai->minkou_max = 0;
+			for (auto pai : _tehai) {
+				tehai->tehai[tehai->tehai_max++] = pai.getNum();
+			}
+		}
+
+		void fromKawahai(const MJIKawahai *kawa, size_t num) {
+			_kawahai.clear();
+			for (size_t i = 0; i < num; i++) {
+				_kawahai.push_back(Pai(kawa[i].hai, false, kawa[i].state & MJKS_NAKI, kawa[i].state & MJKS_REACH));
+			}
+		}
+	};
+
+	using Players = std::vector<Player>;
+	using PaiArrayInt = int[34];
+
+	/* θ”v‚Ζ“Α’θ‚Μ”v‚Ζ‚Μ‹——£‚π•Τ‚·
+	”z—ρ‚Νω‚Ιƒ\[ƒg‚³‚κ‚Δ‚Ά‚ι‚Ζ‰Ό’θ‚·‚ι
+	”z—ρ‚©‚η“Α’θ‚Μ”v‚π”²‚«o‚·‘€μ‚π‚·‚ικ‡A‚»‚Μκ‚Ι‚Ν0x3F(34‚ζ‚θ‘ε‚«‚―‚κ‚Ξ‚ζ‚Ά)‚π“ό‚κ‚ιB
+
+	θ”v‚Ζ‚Μ‹——£‚Ζ‚Ν
+	1)””v‚Μκ‡
+	θ”v‚Μ’†‚Ε‚»‚Μθ”v‚Ι‹ί‚Ά””v‚Μ”‚Ζ‚Μ·‚Μβ‘Ξ’l
+	—α‚¦‚Ξκδέ‚π‚Α‚Δ‚Ά‚½‚Ζ‚µ‚Δ
+
+	θ”v‚Ικδέ‚ª‚ ‚κ‚Ξ0
+	“ρδέ‚ª‚ ‚κ‚Ξ1
+	Oδέ‚Θ‚η2
+	‚Ζ‚Θ‚ι
+	θ”v‚Ιδέq‚ª‚Θ‚―‚κ‚Ξ-1(–³ΐ‘ε)‚Ζ‚Θ‚ι
+
+	2)”v‚Μκ‡
+	θ”v‚Ι“―‚¶‚ΰ‚Μ‚π‚Α‚Δ‚Ά‚κ‚Ξ0A‚Θ‚―‚κ‚Ξ-1(–³ΐ‘ε)
+
+	*/
+	int paidistance(const std::vector<Pai>&tehai, int pai);
+
+	class MJ0 {
+	public:
+		static void simulate(Players *players, Player *myself, std::vector<Pai> *doras);
+	};
+} // MJAI
+

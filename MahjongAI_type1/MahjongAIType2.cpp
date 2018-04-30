@@ -45,7 +45,7 @@ static double eval_Tehai_sub(MahjongAIState &param,int sthai,int atama_flag)
 	// 対子の評価
 	if (c>=2) {
 		param.te_cnt[p]-=2;
-		tmpd = 4.0 - param.nokori[p];
+		tmpd = 4.0 - param.myself._pai_kukan[p];
 		sc = eval_Tehai_sub(param,sthai,1)+(10 - tmpd)*(!atama_flag) + 4 - tmpd;
 		if (sc>sc_max) sc_max = sc;
 		param.te_cnt[p]+=2;
@@ -64,16 +64,16 @@ static double eval_Tehai_sub(MahjongAIState &param,int sthai,int atama_flag)
 					sc = eval_Tehai_sub(param,sthai,atama_flag)+80;
 					if (sc>sc_max) sc_max = sc;
 					param.te_cnt[p+1]++;
-				}else if (!param.anpai[p+1][0] && sthai!=p+1){
+				}else if (!param.myself._anpai[p+1] && sthai!=p+1){
 					// カンチャンの評価
 					// リャンカン形
-					if (kazu<5 && param.te_cnt[p+4] && !param.te_cnt[p+3] &&!param.anpai[p+3][0] && sthai!=p+3){
+					if (kazu<5 && param.te_cnt[p+4] && !param.te_cnt[p+3] &&!param.myself._anpai[p+3] && sthai!=p+3){
 						param.te_cnt[p+4]--;
-						tmpd = 8.0 - param.nokori[p+1] - param.nokori[p+3];
+						tmpd = 8.0 - param.myself._pai_kukan[p+1] - param.myself._pai_kukan[p+3];
 						sc = eval_Tehai_sub(param,sthai,atama_flag)+15-tmpd;
 						param.te_cnt[p+4]++;
 					}else{
-						tmpd = 4.0 - param.nokori[p+1];
+						tmpd = 4.0 - param.myself._pai_kukan[p+1];
 						sc = eval_Tehai_sub(param,sthai,atama_flag)+8-tmpd;
 					}
 					if (sc>sc_max) sc_max = sc;
@@ -86,18 +86,18 @@ static double eval_Tehai_sub(MahjongAIState &param,int sthai,int atama_flag)
 		if (kazu<8){
 			if (param.te_cnt[p+1]){
 				chk = 0;
-				if (kazu>0 && param.anpai[p-1][0] || sthai==p-1) chk = 1;
-				if (kazu<7 && param.anpai[p+2][0] || sthai==p+2) chk = 1;
+				if (kazu>0 && param.myself._anpai[p-1] || sthai==p-1) chk = 1;
+				if (kazu<7 && param.myself._anpai[p+2] || sthai==p+2) chk = 1;
 				if (!chk){
 					param.te_cnt[p]--; param.te_cnt[p+1]--;
 					if(kazu>0 && kazu<7){
-						tmpd = 8.0 - param.nokori[p-1] - param.nokori[p+2];
+						tmpd = 8.0 - param.myself._pai_kukan[p-1] - param.myself._pai_kukan[p+2];
 						sc = eval_Tehai_sub(param,sthai,atama_flag)+30-tmpd;
 					}else{
 						if(kazu==0){
-							tmpd = 4.0 - param.nokori[p+2];
+							tmpd = 4.0 - param.myself._pai_kukan[p+2];
 						}else{
-							tmpd = 4.0 - param.nokori[p-1];
+							tmpd = 4.0 - param.myself._pai_kukan[p-1];
 						}
 						sc = eval_Tehai_sub(param,sthai,atama_flag)+6-tmpd;
 					}
@@ -132,7 +132,7 @@ static double eval_hai(MahjongAIState &param,int hai,UINT *dora,int doras)
 			ret += SCORE_SUPAI_34567;
 		}
 	}else {
-		tmp = param.nokori[hai];
+		tmp = param.myself._pai_kukan[hai];
 	
 		if (hai>30 || hai==param.cha+27 || hai==param.kaze+27){
 			if(param.te_cnt[hai] >= 3){

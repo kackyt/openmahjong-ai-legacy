@@ -184,6 +184,51 @@ namespace MJAI {
 		}
 	};
 
+	class Pai {
+	public:
+		Pai(int num = 0, bool aka = false, bool naki = false, bool riichi = false) :
+			_num(num & 63),
+			_aka(aka),
+			_naki(naki),
+			_riichi(riichi)
+		{
+			if (num & 64) {
+				_aka = true;
+			}
+		}
+
+		int getNum() const { return _num; }
+		bool isAka() const { return _aka; }
+		bool isNaki() const { return _naki; }
+		bool isRiichi() const { return _riichi; }
+
+		int getDorahyouji()
+		{
+			if (_num < 27) {
+				if ((_num % 9) == 0) {
+					return _num + 8;
+				}
+				else {
+					return _num - 1;
+				}
+			}
+			else if (_num == 27) {
+				return 30;
+			}
+			else if (_num == 31) {
+				return 33;
+			}
+			else {
+				return _num - 1;
+			}
+		}
+	private:
+		int _num;
+		bool _aka;
+		bool _naki;
+		bool _riichi;
+	};
+
 	class Mentsu {
 	public:
 		enum MentsuType {
@@ -199,7 +244,7 @@ namespace MJAI {
 			_num(num)
 		{}
 
-		t_mentsu toTMentsu() {
+		t_mentsu toTMentsu() const {
 			t_mentsu ret;
 			ret.category = static_cast<int>(_type);
 			switch (_type)
@@ -244,16 +289,61 @@ namespace MJAI {
 			switch (_type)
 			{
 			case MJAI::Mentsu::TYPE_SHUNTSU:
-				return p._nums[_num] * p._nums[_num + 1] * p._nums[_num + 2];
+				return (p._nums[_num] >= 1.0 &&  p._nums[_num+1] >= 1.0 &&  p._nums[_num+2] >= 1.0) ? p._nums[_num] * p._nums[_num + 1] * p._nums[_num + 2] : 0.0;
 			case MJAI::Mentsu::TYPE_KOUTSU:
-				return p._nums[_num] >= 2.0f ? (p._nums[_num] - 2) * (p._nums[_num] - 2) : 0.0f;
+				return p._nums[_num] >= 2.0 ? (p._nums[_num] - 2) * (p._nums[_num] - 2) : 0.0;
 			case MJAI::Mentsu::TYPE_ATAMA:
-				return p._nums[_num] >= 1.0f ? (p._nums[_num] - 1) * (p._nums[_num] - 1) * 0.6f : 0.0f;
+				return p._nums[_num] >= 1.0 ? (p._nums[_num] - 1) * (p._nums[_num] - 1) * 0.6 : 0.0;
 			default:
 				break;
 			}
 
 			return 0.0f;
+		}
+
+		void add(std::vector<Pai> &array) const {
+			switch (_type)
+			{
+			case MJAI::Mentsu::TYPE_SHUNTSU:
+				array.push_back(Pai(_num));
+				array.push_back(Pai(_num+1));
+				array.push_back(Pai(_num+2));
+				break;
+			case MJAI::Mentsu::TYPE_MINKAN:
+			case MJAI::Mentsu::TYPE_ANKAN:
+				array.push_back(Pai(_num));
+			case MJAI::Mentsu::TYPE_KOUTSU:
+				array.push_back(Pai(_num));
+			case MJAI::Mentsu::TYPE_ATAMA:
+				array.push_back(Pai(_num));
+				array.push_back(Pai(_num));
+				break;
+			default:
+				break;
+			}
+		}
+
+		void add(PaiArray *p) const {
+			switch (_type)
+			{
+			case MJAI::Mentsu::TYPE_SHUNTSU:
+				p->_nums[_num]++;
+				p->_nums[_num + 1]++;
+				p->_nums[_num + 2]++;
+				break;
+			case MJAI::Mentsu::TYPE_KOUTSU:
+				p->_nums[_num] += 3;
+				break;
+			case MJAI::Mentsu::TYPE_MINKAN:
+			case MJAI::Mentsu::TYPE_ANKAN:
+				p->_nums[_num] += 4;
+				break;
+			case MJAI::Mentsu::TYPE_ATAMA:
+				p->_nums[_num] += 2;
+				break;
+			default:
+				break;
+			}
 		}
 
 		void sub(PaiArray *p) const {
@@ -279,8 +369,8 @@ namespace MJAI {
 			}
 		}
 
-		MentsuType getType() { return _type; }
-		int getNum() { return _num; }
+		MentsuType getType() const { return _type; }
+		int getNum() const { return _num; }
 
 		static std::vector<Mentsu> _all;
 		static std::vector<Mentsu> _all_atama;
@@ -320,7 +410,7 @@ namespace MJAI {
 		static const Mentsu& sample(const std::vector<Mentsu> &set, const PaiArray &pai_kukan) {
 			double sum = 0.0f;
 			double it = 0.0f;
-			sum = accumulate(set.cbegin(), set.cend(), 0.0f, [pai_kukan](double a, const Mentsu &m) { return a + m.weight(pai_kukan); });
+			sum = std::accumulate(set.cbegin(), set.cend(), 0.0, [pai_kukan](double a, const Mentsu &m) { return a + m.weight(pai_kukan); });
 
 			double r = rand() * sum / RAND_MAX;
 
@@ -340,51 +430,6 @@ namespace MJAI {
 	private:
 		MentsuType _type;
 		int _num;
-	};
-
-	class Pai {
-	public:
-		Pai(int num = 0, bool aka = false, bool naki = false, bool riichi = false) :
-			_num(num & 63),
-			_aka(aka),
-			_naki(naki),
-			_riichi(riichi)
-		{
-			if (num & 64) {
-				_aka = true;
-			}
-		}
-
-		int getNum() const { return _num; }
-		bool isAka() const { return _aka; }
-		bool isNaki() const { return _naki; }
-		bool isRiichi() const { return _riichi; }
-
-		int getDorahyouji()
-		{
-			if (_num < 27) {
-				if ((_num % 9) == 0) {
-					return _num + 8;
-				}
-				else {
-					return _num - 1;
-				}
-			}
-			else if (_num == 27) {
-				return 30;
-			}
-			else if (_num == 31) {
-				return 33;
-			}
-			else {
-				return _num - 1;
-			}
-		}
-	private:
-		int _num;
-		bool _aka;
-		bool _naki;
-		bool _riichi;
 	};
 
 	class Player {

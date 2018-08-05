@@ -725,11 +725,11 @@ int MahjongAI::calc_sutehai(void)
 
 	if (decision == AI_DECISION_AGARI1){
 		memcpy(hp, hp1, sizeof(hp1));
-		MJSendMessage(this, MJMI_FUKIDASHI, (UINT)"押し", 0);
+//		MJSendMessage(this, MJMI_FUKIDASHI, (UINT)"押し", 0);
 	}
 	else{
 		memcpy(hp, hp2, sizeof(hp2));
-		MJSendMessage(this, MJMI_FUKIDASHI, (UINT)"逃げ", 0);
+//		MJSendMessage(this, MJMI_FUKIDASHI, (UINT)"逃げ", 0);
 	}
 
 	qsort(hp, size1, sizeof(HAIPOINT), (int(*)(const void*, const void*))compare_hp);
@@ -1339,6 +1339,8 @@ UINT MahjongAI::InterfaceFunc(UINT message, UINT param1, UINT param2)
 		fprintf(fp, TEXT("ISEXCHANGEABLE\n"));
 #endif
 		ret = 0; // 途中参加に対応する。対応したくない場合は0以外にする。
+		break;
+	default:
 		break;
 	}
 

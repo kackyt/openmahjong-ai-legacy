@@ -383,7 +383,7 @@ namespace MJAI {
 					_all.push_back(Mentsu(TYPE_KOUTSU, i));
 				}
 
-				for (int i = 0; i < 8; i++)
+				for (int i = 0; i < 7; i++)
 				{
 					_all.push_back(Mentsu(TYPE_SHUNTSU, i));
 					_all.push_back(Mentsu(TYPE_SHUNTSU, i + 9));

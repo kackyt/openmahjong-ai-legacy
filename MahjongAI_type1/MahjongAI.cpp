@@ -483,7 +483,7 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 	debug_count = 0;
 
 	// Œ»İ‚Ìè”v‚Ìó‘Ô‚ğƒZƒbƒg‚·‚é
-	if (!pState->myself._is_riichi)set_Tehai(tsumohai);
+	set_Tehai(tsumohai);
 
 	// Œ»İ‚Ì‘Ò‚¿”v‚ğæ“¾‚·‚é
 	set_machi();

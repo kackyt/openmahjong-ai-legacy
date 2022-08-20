@@ -31,6 +31,7 @@ double MahjongAIKikenhai::evalSutehaiSub(MahjongAIState &param,int hai)
 	double minus = 0;
 	double plus = 0,tmp;
 
+	return -param.myself._kikenhai[hai];
 	minus += SCORE_KIKENHAI * param.myself._kikenhai[hai];
 	for(i=0;i<3;i++){
 		tmp = 0.0;

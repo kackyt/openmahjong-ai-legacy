@@ -986,12 +986,10 @@ int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int l
                     memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
                 }
 
-				if(flag != 1){
-					flag = setsyuntsul(paicountlist,mentsu_stack[stackpos],paicount_size);
-					orflag = orflag || flag;
-					if (flag) {
-						stackpos++;
-					}
+				flag = setsyuntsul(paicountlist, mentsu_stack[stackpos], paicount_size);
+				orflag = orflag || flag;
+				if (flag) {
+					stackpos++;
 				}
 
 				if(!orflag && maxshanten > 0){
@@ -1244,14 +1242,11 @@ int search_score(int *paiarray,int paiSize,void *inf,int (*callback)(int*paiarra
                     memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
                 }
 
-				if(flag != 1){
-					flag = setsyuntsul(paicountlist,mentsu_stack[stackpos],paicount_size);
-					orflag = orflag || flag;
-					if (flag) {
-						stackpos++;
-					}
+				flag = setsyuntsul(paicountlist, mentsu_stack[stackpos], paicount_size);
+				orflag = orflag || flag;
+				if (flag) {
+					stackpos++;
 				}
-
             } else {
 				val = callback(paiarray,mentsu_stack[stackpos],paiSize,machi,inf);
 				if(val > maxval) maxval = val;

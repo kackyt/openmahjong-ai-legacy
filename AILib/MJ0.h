@@ -36,6 +36,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <numeric>
 
 namespace MJAI {
 
@@ -56,6 +57,40 @@ namespace MJAI {
 
 		size_t size() {
 			return 34;
+		}
+
+		PaiArray inverse() {
+			PaiArray ret;
+
+			for (int i = 0; i < 34; i++)
+			{
+				if (_nums[i] > 0)
+				{
+					ret._nums[i] = 0;
+				}
+				else {
+					ret._nums[i] = 1.0;
+				}
+			}
+
+			return ret;
+		}
+
+		PaiArray partialMultiple(int category, double rate) {
+			PaiArray ret;
+
+			for (int i = 0; i < 34; i++)
+			{
+				if ((i / 9) == category)
+				{
+					ret._nums[i] = _nums[i] * rate;
+				}
+				else {
+					ret._nums[i] = _nums[i];
+				}
+			}
+
+			return ret;
 		}
 
 		PaiArray& operator =(const PaiArray &other) {
@@ -133,164 +168,20 @@ namespace MJAI {
 			return ret;
 		}
 
-		double & operator[](const int idx) {
-			return _nums[idx];
-		}
-	};
+		PaiArray operator *(const PaiArray &val) const {
+			PaiArray ret;
 
-	class Mentsu {
-	public:
-		enum MentsuType {
-			TYPE_SHUNTSU = AI_SYUNTSU,
-			TYPE_KOUTSU = AI_KOUTSU,
-			TYPE_MINKAN = AI_MINKAN,
-			TYPE_ANKAN = AI_ANKAN,
-			TYPE_ATAMA = AI_ATAMA
-		};
-
-		Mentsu(MentsuType type = TYPE_SHUNTSU, int num = 0) :
-			_type(type),
-			_num(num)
-		{}
-
-		t_mentsu toTMentsu() {
-			t_mentsu ret;
-			ret.category = static_cast<int>(_type);
-			switch (_type)
+			for (int i = 0; i < 34; i++)
 			{
-			case MJAI::Mentsu::TYPE_SHUNTSU:
-				ret.pailist[0] = _num;
-				ret.pailist[1] = _num + 1;
-				ret.pailist[2] = _num + 2;
-				break;
-			default:
-				ret.pailist[0] = _num;
-				ret.pailist[1] = _num;
-				ret.pailist[2] = _num;
-				break;
+				ret._nums[i] = _nums[i] * val._nums[i];
 			}
 
 			return ret;
 		}
 
-		void addKiken(PaiArray *p) const {
-			switch (_type)
-			{
-			case MJAI::Mentsu::TYPE_SHUNTSU:
-				if ((_num % 9) > 0) p->_nums[_num - 1] += 0.1f;
-				p->_nums[_num] += 0.2f;
-				p->_nums[_num + 1] += 0.1f;
-				p->_nums[_num + 2] += 0.2f;
-				if ((_num % 9) < 6) p->_nums[_num + 3] += 0.1f;
-				break;
-			case MJAI::Mentsu::TYPE_KOUTSU:
-				p->_nums[_num] += 0.05f;
-				break;
-			case MJAI::Mentsu::TYPE_ATAMA:
-				p->_nums[_num] += 0.1f;
-				break;
-			default:
-				break;
-			}
+		double & operator[](const int idx) {
+			return _nums[idx];
 		}
-
-		double weight(const PaiArray &p) const {
-			switch (_type)
-			{
-			case MJAI::Mentsu::TYPE_SHUNTSU:
-				return p._nums[_num] * p._nums[_num + 1] * p._nums[_num + 2];
-			case MJAI::Mentsu::TYPE_KOUTSU:
-				return p._nums[_num] >= 2.0f ? (p._nums[_num] - 2) * (p._nums[_num] - 2) : 0.0f;
-			case MJAI::Mentsu::TYPE_ATAMA:
-				return p._nums[_num] >= 1.0f ? (p._nums[_num] - 1) * (p._nums[_num] - 1) * 0.6f : 0.0f;
-			default:
-				break;
-			}
-
-			return 0.0f;
-		}
-
-		void sub(PaiArray *p) const {
-			switch (_type)
-			{
-			case MJAI::Mentsu::TYPE_SHUNTSU:
-				p->_nums[_num]--;
-				p->_nums[_num + 1]--;
-				p->_nums[_num + 2]--;
-				break;
-			case MJAI::Mentsu::TYPE_KOUTSU:
-				p->_nums[_num] -= 3;
-				break;
-			case MJAI::Mentsu::TYPE_MINKAN:
-			case MJAI::Mentsu::TYPE_ANKAN:
-				p->_nums[_num] -= 4;
-				break;
-			case MJAI::Mentsu::TYPE_ATAMA:
-				p->_nums[_num] -= 2;
-				break;
-			default:
-				break;
-			}
-		}
-
-		MentsuType getType() { return _type; }
-		int getNum() { return _num; }
-
-		static std::vector<Mentsu> _all;
-		static std::vector<Mentsu> _all_atama;
-
-		static const std::vector<Mentsu> &all() {
-			if (_all.empty())
-			{
-				for (int i = 0; i < 34; i++)
-				{
-					_all.push_back(Mentsu(TYPE_KOUTSU, i));
-				}
-
-				for (int i = 0; i < 8; i++)
-				{
-					_all.push_back(Mentsu(TYPE_SHUNTSU, i));
-					_all.push_back(Mentsu(TYPE_SHUNTSU, i + 9));
-					_all.push_back(Mentsu(TYPE_SHUNTSU, i + 18));
-				}
-			}
-
-
-			return _all;
-		}
-
-		static const std::vector<Mentsu> &all_atama() {
-			if (_all_atama.empty())
-			{
-				for (int i = 0; i < 34; i++)
-				{
-					_all_atama.push_back(Mentsu(TYPE_ATAMA, i));
-				}
-
-			}
-
-			return _all_atama;
-		}
-		static Mentsu& sample(std::vector<Mentsu> &set, const PaiArray &pai_kukan) {
-			double sum = 0.0f;
-			double it = 0.0f;
-			for (auto m : set) {
-				sum += m.weight(pai_kukan);
-			}
-
-			double r = rand() * sum / RAND_MAX;
-
-			auto smpl = std::find_if(set.begin(), set.end(), [r, it, pai_kukan](Mentsu &m) mutable {
-				it += m.weight(pai_kukan);
-				return r < it;
-			});
-
-			return *smpl;
-		}
-
-	private:
-		MentsuType _type;
-		int _num;
 	};
 
 	class Pai {
@@ -338,6 +229,209 @@ namespace MJAI {
 		bool _riichi;
 	};
 
+	class Mentsu {
+	public:
+		enum MentsuType {
+			TYPE_SHUNTSU = AI_SYUNTSU,
+			TYPE_KOUTSU = AI_KOUTSU,
+			TYPE_MINKAN = AI_MINKAN,
+			TYPE_ANKAN = AI_ANKAN,
+			TYPE_ATAMA = AI_ATAMA
+		};
+
+		Mentsu(MentsuType type = TYPE_SHUNTSU, int num = 0) :
+			_type(type),
+			_num(num)
+		{}
+
+		t_mentsu toTMentsu() const {
+			t_mentsu ret;
+			ret.category = static_cast<int>(_type);
+			switch (_type)
+			{
+			case MJAI::Mentsu::TYPE_SHUNTSU:
+				ret.pailist[0] = _num;
+				ret.pailist[1] = _num + 1;
+				ret.pailist[2] = _num + 2;
+				break;
+			default:
+				ret.pailist[0] = _num;
+				ret.pailist[1] = _num;
+				ret.pailist[2] = _num;
+				break;
+			}
+
+			return ret;
+		}
+
+		void addKiken(PaiArray *p) const {
+			switch (_type)
+			{
+			case MJAI::Mentsu::TYPE_SHUNTSU:
+				if ((_num % 9) > 0) p->_nums[_num - 1] += 0.1f;
+				p->_nums[_num] += 0.2f;
+				p->_nums[_num + 1] += 0.1f;
+				p->_nums[_num + 2] += 0.2f;
+				if ((_num % 9) < 6) p->_nums[_num + 3] += 0.1f;
+				break;
+			case MJAI::Mentsu::TYPE_KOUTSU:
+				p->_nums[_num] += 0.05f;
+				break;
+			case MJAI::Mentsu::TYPE_ATAMA:
+				p->_nums[_num] += 0.1f;
+				break;
+			default:
+				break;
+			}
+		}
+
+		double weight(const PaiArray &p) const {
+			switch (_type)
+			{
+			case MJAI::Mentsu::TYPE_SHUNTSU:
+				return (p._nums[_num] >= 1.0 &&  p._nums[_num+1] >= 1.0 &&  p._nums[_num+2] >= 1.0) ? p._nums[_num] * p._nums[_num + 1] * p._nums[_num + 2] : 0.0;
+			case MJAI::Mentsu::TYPE_KOUTSU:
+				return p._nums[_num] >= 2.0 ? (p._nums[_num] - 2) * (p._nums[_num] - 2) : 0.0;
+			case MJAI::Mentsu::TYPE_ATAMA:
+				return p._nums[_num] >= 1.0 ? (p._nums[_num] - 1) * (p._nums[_num] - 1) * 0.6 : 0.0;
+			default:
+				break;
+			}
+
+			return 0.0f;
+		}
+
+		void add(std::vector<Pai> &array) const {
+			switch (_type)
+			{
+			case MJAI::Mentsu::TYPE_SHUNTSU:
+				array.push_back(Pai(_num));
+				array.push_back(Pai(_num+1));
+				array.push_back(Pai(_num+2));
+				break;
+			case MJAI::Mentsu::TYPE_MINKAN:
+			case MJAI::Mentsu::TYPE_ANKAN:
+				array.push_back(Pai(_num));
+			case MJAI::Mentsu::TYPE_KOUTSU:
+				array.push_back(Pai(_num));
+			case MJAI::Mentsu::TYPE_ATAMA:
+				array.push_back(Pai(_num));
+				array.push_back(Pai(_num));
+				break;
+			default:
+				break;
+			}
+		}
+
+		void add(PaiArray *p) const {
+			switch (_type)
+			{
+			case MJAI::Mentsu::TYPE_SHUNTSU:
+				p->_nums[_num]++;
+				p->_nums[_num + 1]++;
+				p->_nums[_num + 2]++;
+				break;
+			case MJAI::Mentsu::TYPE_KOUTSU:
+				p->_nums[_num] += 3;
+				break;
+			case MJAI::Mentsu::TYPE_MINKAN:
+			case MJAI::Mentsu::TYPE_ANKAN:
+				p->_nums[_num] += 4;
+				break;
+			case MJAI::Mentsu::TYPE_ATAMA:
+				p->_nums[_num] += 2;
+				break;
+			default:
+				break;
+			}
+		}
+
+		void sub(PaiArray *p) const {
+			switch (_type)
+			{
+			case MJAI::Mentsu::TYPE_SHUNTSU:
+				p->_nums[_num]--;
+				p->_nums[_num + 1]--;
+				p->_nums[_num + 2]--;
+				break;
+			case MJAI::Mentsu::TYPE_KOUTSU:
+				p->_nums[_num] -= 3;
+				break;
+			case MJAI::Mentsu::TYPE_MINKAN:
+			case MJAI::Mentsu::TYPE_ANKAN:
+				p->_nums[_num] -= 4;
+				break;
+			case MJAI::Mentsu::TYPE_ATAMA:
+				p->_nums[_num] -= 2;
+				break;
+			default:
+				break;
+			}
+		}
+
+		MentsuType getType() const { return _type; }
+		int getNum() const { return _num; }
+
+		static std::vector<Mentsu> _all;
+		static std::vector<Mentsu> _all_atama;
+
+		static const std::vector<Mentsu> &all() {
+			if (_all.empty())
+			{
+				for (int i = 0; i < 34; i++)
+				{
+					_all.push_back(Mentsu(TYPE_KOUTSU, i));
+				}
+
+				for (int i = 0; i < 7; i++)
+				{
+					_all.push_back(Mentsu(TYPE_SHUNTSU, i));
+					_all.push_back(Mentsu(TYPE_SHUNTSU, i + 9));
+					_all.push_back(Mentsu(TYPE_SHUNTSU, i + 18));
+				}
+			}
+
+
+			return _all;
+		}
+
+		static const std::vector<Mentsu> &all_atama() {
+			if (_all_atama.empty())
+			{
+				for (int i = 0; i < 34; i++)
+				{
+					_all_atama.push_back(Mentsu(TYPE_ATAMA, i));
+				}
+
+			}
+
+			return _all_atama;
+		}
+		static const Mentsu& sample(const std::vector<Mentsu> &set, const PaiArray &pai_kukan) {
+			double sum = 0.0f;
+			double it = 0.0f;
+			sum = std::accumulate(set.cbegin(), set.cend(), 0.0, [pai_kukan](double a, const Mentsu &m) { return a + m.weight(pai_kukan); });
+
+			double r = rand() * sum / RAND_MAX;
+
+			auto smpl = std::find_if(set.cbegin(), set.cend(), [r, it, pai_kukan](const Mentsu &m) mutable {
+				it += m.weight(pai_kukan);
+				return r < it;
+			});
+
+			if (smpl == set.cend())
+			{
+				smpl--;
+			}
+
+			return *smpl;
+		}
+
+	private:
+		MentsuType _type;
+		int _num;
+	};
+
 	class Player {
 	public:
 		std::vector<Mentsu> _mentsu;
@@ -349,10 +443,12 @@ namespace MJAI {
 		std::vector<Pai> _kawahai;
 		bool _is_riichi;
 		bool _is_ippatsu;
+		double _rate;
 
 		Player() :
 			_is_riichi(false),
-			_is_ippatsu(false)
+			_is_ippatsu(false),
+			_rate(1.0)
 		{
 
 		}
@@ -369,6 +465,43 @@ namespace MJAI {
 			_is_ippatsu = false;
 		}
 
+		double rate()
+		{
+			/* テンパイする確率(鳴き有り) */
+			static float tempai_table[] = {
+				0.0,
+				0.001,
+				0.003,
+				0.018,
+				0.053,
+				0.105,
+				0.197,
+				0.328,
+				0.467,
+				0.587,
+				0.705,
+				0.772,
+				0.839,
+				0.886,
+				0.917,
+				0.937,
+				0.952,
+				0.960,
+				1.0,
+				1.0,
+				1.0,
+				1.0
+			};
+
+			if (_is_riichi)
+			{
+				return 1.0;
+			}
+			else {
+				return tempai_table[_kawahai.size()];
+			}
+		}
+
 		bool isMenzen() {
 			for (auto mentsu : _naki_mentsu) {
 				if (mentsu.getType() != Mentsu::TYPE_ANKAN) {
@@ -377,6 +510,10 @@ namespace MJAI {
 			}
 
 			return true;
+		}
+
+		PaiArray kikenhai() {
+			return _kikenhai * _anpai.inverse() * rate();
 		}
 
 		void fromTehai(const MJITehai *tehai) {

@@ -30,7 +30,6 @@
 
 #include "MJ0.h"
 #include <array>
-#include <numeric>
 #include <vector>
 
 #define SIMU_SIZE (5000)
@@ -40,6 +39,40 @@ using namespace std;
 namespace MJAI {
 	vector<Mentsu> Mentsu::_all;
 	vector<Mentsu> Mentsu::_all_atama;
+	static int lt(const void *a, const void *b) {
+		return *(const int *)a - *(const int *)b;
+	}
+
+	int copyTo(const vector<Mentsu> &m, int *paiarray)
+	{
+		int num = 0;
+		for (const auto & mentsu : m)
+		{
+			switch (mentsu.getType())
+			{
+			case MJAI::Mentsu::TYPE_SHUNTSU:
+				paiarray[num++] = mentsu.getNum();
+				paiarray[num++] = mentsu.getNum() + 1;
+				paiarray[num++] = mentsu.getNum() + 2;
+				break;
+			case MJAI::Mentsu::TYPE_MINKAN:
+			case MJAI::Mentsu::TYPE_ANKAN:
+				paiarray[num++] = mentsu.getNum();
+			case MJAI::Mentsu::TYPE_KOUTSU:
+				paiarray[num++] = mentsu.getNum();
+			case MJAI::Mentsu::TYPE_ATAMA:
+				paiarray[num++] = mentsu.getNum();
+				paiarray[num++] = mentsu.getNum();
+				break;
+			default:
+				break;
+			}
+		}
+
+		qsort(paiarray, num, sizeof(int), lt);
+
+		return num;
+	}
 
 	int paidistance(const std::vector<Pai>&tehai, int pai) {
 		int i;
@@ -172,22 +205,16 @@ namespace MJAI {
 					auto all = Mentsu::all();
 					const auto &pai_kukan = it->_pai_kukan;
 					// メンツをランダムで抽出する
-					double sum = accumulate(all.cbegin(), all.cend(), 0.0f, [pai_kukan](double a,const Mentsu &m) { return a + m.weight(pai_kukan); });
-					double val = rand() * sum / RAND_MAX;
-					double tmp = 0.0f;
-					auto mentsu = find_if(all.cbegin(), all.cend(), [val, tmp, pai_kukan](const Mentsu &m) mutable { tmp += m.weight(pai_kukan); return val <= tmp; });
-					(it->_mentsu).push_back(*mentsu);
+					auto mentsu = Mentsu::sample(all, pai_kukan);
+					it->_mentsu.push_back(mentsu);
 
 					// メンツを構成する牌を牌空間から除去する
 					for (auto &p2 : *players)
 					{
-						mentsu->sub(&p2._pai_kukan);
+						mentsu.sub(&p2._pai_kukan);
 					}
-					mentsu->sub(&myself->_pai_kukan);
+					mentsu.sub(&myself->_pai_kukan);
 
-					// 牌の危険度を更新する
-					mentsu->addKiken(&it->_kikenhai);
-					mentsu->addKiken(&myself->_kikenhai);
 					it++;
 				}
 			}
@@ -196,32 +223,43 @@ namespace MJAI {
 				auto all = Mentsu::all_atama();
 				const auto &pai_kukan = player._pai_kukan;
 				// アタマをランダムで抽出する
-				double sum = accumulate(all.cbegin(), all.cend(), 0.0f, [pai_kukan](double a, const Mentsu &m) { return a + m.weight(pai_kukan); });
-				double val = rand() * sum / RAND_MAX;
-				double tmp = 0.0f;
-				auto &mentsu = find_if(all.cbegin(), all.cend(), [val, tmp, pai_kukan](const Mentsu &m) mutable { tmp += m.weight(pai_kukan); return val <= tmp; });
-				if (mentsu == all.cend())
-				{
-					mentsu--;
-				}
-				(player._mentsu).push_back(*mentsu);
+				auto &mentsu = Mentsu::sample(all, pai_kukan);
+				(player._mentsu).push_back(mentsu);
 
 				// アタマを構成する牌を牌空間から除去する
 				for (auto &p2 : *players)
 				{
-					mentsu->sub(&p2._pai_kukan);
+					mentsu.sub(&p2._pai_kukan);
 				}
-				mentsu->sub(&myself->_pai_kukan);
-
-				// 牌の危険度を更新する
-				mentsu->addKiken(&player._kikenhai);
-				mentsu->addKiken(&myself->_kikenhai);
+				mentsu.sub(&myself->_pai_kukan);
 			}
+
+			// 牌の危険度を更新する
+			int rplayer = rand() % 3;
+			int paiarray[14];
+			int machi[34] = { 0 };
+
+			int painum = copyTo((*players)[rplayer]._mentsu, paiarray);
+
+			int pai = rand() % painum;
+
+			for (int i = pai; i < painum - 1; i++)
+			{
+				paiarray[i] = paiarray[i + 1];
+			}
+
+			search_tenpai(paiarray, painum - 1, machi, nullptr, 0, 0);
+
+			for (int i = 0; i < 34; i++)
+			{
+				(*players)[rplayer]._kikenhai[i] += 0.2 * machi[i];
+			}
+
 
 			pai_kukan += myself->_pai_kukan;
 		}
 
 		myself->_pai_kukan = pai_kukan / SIMU_SIZE;
-		myself->_kikenhai = myself->_kikenhai / SIMU_SIZE;
+		myself->_kikenhai = ((*players)[0].kikenhai() + (*players)[1].kikenhai() + (*players)[2].kikenhai()) / SIMU_SIZE;
 	}
 } // MJAI

@@ -464,7 +464,7 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 	int mcount, mpoint;
 	UINT rchk = MJPIR_SUTEHAI;
 	int i, j, hai, del_hai, hai_remain, tmp, furiten, kazu;
-	int mhai, hais;
+	int mhai = -1, hais;
 	MJITehai tmphai;
 	unsigned int seed;
 

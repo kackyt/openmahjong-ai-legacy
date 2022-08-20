@@ -459,11 +459,11 @@ void MahjongAI::set_Tehai(int tsumohai)
 // tsumohai : 今つもってきた牌
 UINT MahjongAI::sutehai_sub(int tsumohai)
 {
-	int mc[34];
-	UINT kawa[30];
+	int mc[34] = { 0 };
+	UINT kawa[30] = { 0 };
 	int mcount, mpoint;
 	UINT rchk = MJPIR_SUTEHAI;
-	int i, j, hai, del_hai, hai_remain, tmp, furiten, kazu;
+	int i, j, hai, del_hai = 0, hai_remain, tmp, furiten, kazu;
 	int mhai = -1, hais;
 	MJITehai tmphai;
 	unsigned int seed;
@@ -523,6 +523,7 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 #endif
 
 	if (machi[hai]){
+		// bug??
 	}
 	// 門前で、テンパった場合はリーチをかけようかなぁ？
 	if (menzen){
@@ -574,20 +575,68 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 			}
 		}
 
+		/* 他の人のリーチ数 */
+		int rnum = 0;
+		for (i = 0; i < 3; i++) {
+			if (pState->players[i]._is_riichi) rnum++;
+		}
 		TCHAR comment[256];
 		if (mcount > 0) mpoint /= mcount;
 
 		if (furiten){
-			if ((mpoint > 2000 || doranum >= 2) && hais > 4){
+			if ((mpoint > 2000 || doranum >= 2) && hais > 4 && rnum <= 1){
 				rchk = MJPIR_REACH;
 			}
 		}
-		else{
-			if (((mhai >= 27 && mhai <= 30 && mhai != 27 + pState->kaze && mhai != 27 + pState->kyoku / 4) || hais > getParam(0))){
-				rchk = MJPIR_REACH;
+		else if (hai_remain >= 14){
+			// 良形は即リーでよい(1人未満)
+			if (rnum <= 1) {
+				// 両面以上
+				if (hais > 4) {
+					rchk = MJPIR_REACH;
+				}
+				// 字牌待ち
+				if (mhai >= 27 && mhai <= 30) {
+					if (rnum == 0 || mpoint >= 1600 || pState->cha == 0) {
+						rchk = MJPIR_REACH;
+					}
+				}
+				else {
+					// スジひっかけ
+					if ((mhai % 9) < 3 && kawa[mhai + 3] >= 1) {
+						if (rnum == 0 || mpoint >= 1600 || pState->cha == 0) {
+							rchk = MJPIR_REACH;
+						}
+					}
+
+					if ((mhai % 9) >= 6 && kawa[mhai - 3] >= 1) {
+						if (rnum == 0 || mpoint >= 1600 || pState->cha == 0) {
+							rchk = MJPIR_REACH;
+						}
+					}
+
+					if ((mhai % 9) >= 3 && (mhai % 9) < 6 && kawa[mhai + 3] >= 1 && kawa[mhai - 3] >= 1) {
+						if (rnum == 0 || mpoint >= 1600 || pState->cha == 0) {
+							rchk = MJPIR_REACH;
+						}
+					}
+				}
 			}
 
-			if (hais >= 2){
+			// 追っかけリーチ
+			if ((rchk & MJPIR_REACH) == 0 && rnum == 1) {
+				// 親 or 1600以上の上がりアリ
+				if (mhai >= 3 && (mpoint >= 1600 || pState->cha == 0)) {
+					rchk = MJPIR_REACH;
+				}
+				// 超愚形
+				if (mhai <= 2 && (mpoint >= 3200 || (pState->cha == 0 && mpoint >= 2000))) {
+					rchk = MJPIR_REACH;
+				}
+			}
+
+			// 2人リーチの追っかけは両面以上
+			if (rnum == 2 && mpoint >= 1300 && hais > 4) {
 				rchk = MJPIR_REACH;
 			}
 		}

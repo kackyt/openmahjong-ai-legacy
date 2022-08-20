@@ -465,9 +465,9 @@ namespace MJAI {
 			_is_ippatsu = false;
 		}
 
+		/* テンパイする確率(鳴き有り) */
 		double rate()
 		{
-			/* テンパイする確率(鳴き有り) */
 			static float tempai_table[] = {
 				0.0,
 				0.001,

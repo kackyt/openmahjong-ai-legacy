@@ -78,11 +78,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AILib.c" />
+    <ClCompile Include="Mikiri.cpp" />
     <ClCompile Include="MJ0.cpp" />
     <ClCompile Include="YakuCheck.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AILib.h" />
+    <ClInclude Include="Mikiri.h" />
     <ClInclude Include="MIPIface.h" />
     <ClInclude Include="MJ0.h" />
   </ItemGroup>

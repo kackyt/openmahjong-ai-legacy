@@ -181,6 +181,7 @@ namespace MJAI {
 			}
 
 			player._mentsu.clear();
+			player.calcSomete();
 		}
 
 		myself->_kikenhai = PaiArray();
@@ -252,14 +253,127 @@ namespace MJAI {
 
 			for (int i = 0; i < 34; i++)
 			{
-				(*players)[rplayer]._kikenhai[i] += 0.2 * machi[i];
+				(*players)[rplayer]._kikenhai[i] += machi[i];
 			}
 
 
 			pai_kukan += myself->_pai_kukan;
 		}
 
+		// 染め気配者の染め確率 => 64.6%
+		// 染め待ちの危険度率 1 / (1 - 0.646) =>  2.604 (16種)
+		// 補正係数 x = 34 / (2.604 * 16 + 1 * 18) => 0.569
+		for (auto& player : *players) {
+			if (player._somete == 0) {
+				for (int i = 0; i < 34; i++) {
+					if (i < 9 || i >= 27) {
+						player._kikenhai[i] *= 1.481;
+					}
+					else {
+						player._kikenhai[i] *= 0.569;
+
+					}
+				}
+			}
+			else if (player._somete == 1) {
+				for (int i = 0; i < 34; i++) {
+					if ((i >= 9 && i < 18) || i >= 27) {
+						player._kikenhai[i] *= 1.481;
+					}
+					else {
+						player._kikenhai[i] *= 0.569;
+
+					}
+				}
+			}
+			else if (player._somete == 2) {
+				for (int i = 0; i < 34; i++) {
+					if (i >= 18) {
+						player._kikenhai[i] *= 1.481;
+					}
+					else {
+						player._kikenhai[i] *= 0.569;
+
+					}
+				}
+
+			}
+
+		}
 		myself->_pai_kukan = pai_kukan / SIMU_SIZE;
 		myself->_kikenhai = ((*players)[0].kikenhai() + (*players)[1].kikenhai() + (*players)[2].kikenhai()) / SIMU_SIZE;
+	}
+
+	void Player::calcSomete()
+	{
+		bool some[] = { true, true, true };
+		int num3TurnTan = 0;
+		int num6TurnTan = 0;
+		int num6TurnZihai = 0;
+
+		_somete = -1;
+
+		if (_kawahai.size() < 6) {
+			return;
+		}
+
+		for (auto& naki : _naki_mentsu) {
+			int num = naki.getNum();
+			if (num < 9) {
+				some[1] = false;
+				some[2] = false;
+			}
+			else if (num < 18) {
+				some[0] = false;
+				some[2] = false;
+			}
+			else if (num < 27) {
+				some[0] = false;
+				some[1] = false;
+			}
+		}
+
+		for (int i = 0; i < _kawahai.size(); i++) {
+			const auto hai = _kawahai.at(i);
+			auto num = hai.getNum();
+			if (i < 3 && num < 27 && (num % 9) >= 1 && (num % 9) <= 7) {
+				num3TurnTan++;
+			}
+			if (i < 6 && num < 27 && (num % 9) >= 1 && (num % 9) <= 7) {
+				num6TurnTan++;
+			}
+
+			if (i < 6) {
+				if (num < 9) {
+					some[0] = false;
+				}
+				else if (num < 18) {
+					some[1] = false;
+				}
+				else if (num < 27) {
+					some[2] = false;
+				}
+				else {
+					num6TurnZihai++;
+				}
+			}
+		}
+
+		if (num3TurnTan == 0 || num6TurnTan < 3 || num6TurnZihai > 1) {
+			return;
+		}
+
+		if (some[0]) {
+			_somete = 0;
+			return;
+		}
+		if (some[1]) {
+			_somete = 1;
+			return;
+		}
+		if (some[2]) {
+			_somete = 2;
+			return;
+		}
 	}
 } // MJAI

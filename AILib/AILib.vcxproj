@@ -78,7 +78,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AILib.c" />
-    <ClCompile Include="Mikiri.cpp" />
     <ClCompile Include="MJ0.cpp" />
     <ClCompile Include="YakuCheck.c" />
   </ItemGroup>

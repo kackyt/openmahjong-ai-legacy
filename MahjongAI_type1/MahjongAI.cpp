@@ -61,11 +61,11 @@ typedef enum {
 } AI_DECISION;
 
 #define MAHJONGAI( method ) MahjongAI##method
-#define PLAYERNAME( method ) "tKING" #method
+#define PLAYERNAME( method ) "KING" #method
 
 
 #define MAHJONGAITYPE MAHJONGAI(Type4)
-#define AINAME PLAYERNAME(Type4)
+#define AINAME PLAYERNAME(v2)
 
 MAHJONGAITYPE ai;
 MahjongAIKikenhai kikenhai;
@@ -103,7 +103,7 @@ protected:
 	int search(int obj, int start, int mask);
 	void set_machi(void);
 	void set_Tehai(int);
-	int select_Score(double scc_max);
+	int select_Score(int hai_remain);
 	UINT sutehai_sub(int tsumohai);
 	int calc_sutehai(void);
 	int calc_sutehai_easy(double*);
@@ -583,61 +583,72 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 		TCHAR comment[256];
 		if (mcount > 0) mpoint /= mcount;
 
-		if (furiten){
-			if ((mpoint > 2000 || doranum >= 2) && hais > 4 && rnum <= 1){
-				rchk = MJPIR_REACH;
-			}
-		}
-		else if (hai_remain >= 14){
-			// 良形は即リーでよい(1人未満)
-			if (rnum <= 1) {
-				// 両面以上
-				if (hais > 4) {
+		if (mhai >= 0) {
+			if (furiten) {
+				if ((mpoint > 2000 || doranum >= 2) && hais > 4 && rnum <= 1) {
 					rchk = MJPIR_REACH;
 				}
-				// 字牌待ち
-				if (mhai >= 27 && mhai <= 30) {
-					if (rnum == 0 || mpoint >= 1600 || pState->cha == 0) {
+			}
+			else if (hai_remain >= 14) {
+				// 良形は即リーでよい(1人未満)
+				if (rnum <= 1) {
+					// 両面以上
+					if (hais >= 4) {
+						rchk = MJPIR_REACH;
+					}
+					// 字牌待ち
+					if (mhai >= 27) {
+						if (rnum == 0 || mpoint >= 1600 || pState->cha == 0) {
+							rchk = MJPIR_REACH;
+						}
+					}
+					else {
+						// スジひっかけ
+						if ((mhai % 9) < 3 && kawa[mhai + 3] >= 1) {
+							if (rnum == 0 || mpoint >= 1600 || pState->cha == 0) {
+								rchk = MJPIR_REACH;
+							}
+						}
+
+						if ((mhai % 9) >= 6 && kawa[mhai - 3] >= 1) {
+							if (rnum == 0 || mpoint >= 1600 || pState->cha == 0) {
+								rchk = MJPIR_REACH;
+							}
+						}
+
+						if ((mhai % 9) >= 3 && (mhai % 9) < 6 && kawa[mhai + 3] >= 1 && kawa[mhai - 3] >= 1) {
+							if (rnum == 0 || mpoint >= 1600 || pState->cha == 0) {
+								rchk = MJPIR_REACH;
+							}
+						}
+
+						// 愚形でも先制 かつ 大差でなければリーチ
+						if (rnum == 0 && pState->myself._score <= 40000) {
+							rchk = MJPIR_REACH;
+						}
+					}
+				}
+
+				// 追っかけリーチ
+				if ((rchk & MJPIR_REACH) == 0 && rnum == 1) {
+					// 親 or 1600以上の上がりアリ
+					if (mhai >= 3 && (mpoint >= 1600 || pState->cha == 0)) {
+						rchk = MJPIR_REACH;
+					}
+					// 超愚形
+					if (mhai <= 2 && (mpoint >= 3200 || (pState->cha == 0 && mpoint >= 2000))) {
 						rchk = MJPIR_REACH;
 					}
 				}
-				else {
-					// スジひっかけ
-					if ((mhai % 9) < 3 && kawa[mhai + 3] >= 1) {
-						if (rnum == 0 || mpoint >= 1600 || pState->cha == 0) {
-							rchk = MJPIR_REACH;
-						}
-					}
 
-					if ((mhai % 9) >= 6 && kawa[mhai - 3] >= 1) {
-						if (rnum == 0 || mpoint >= 1600 || pState->cha == 0) {
-							rchk = MJPIR_REACH;
-						}
-					}
-
-					if ((mhai % 9) >= 3 && (mhai % 9) < 6 && kawa[mhai + 3] >= 1 && kawa[mhai - 3] >= 1) {
-						if (rnum == 0 || mpoint >= 1600 || pState->cha == 0) {
-							rchk = MJPIR_REACH;
-						}
-					}
-				}
-			}
-
-			// 追っかけリーチ
-			if ((rchk & MJPIR_REACH) == 0 && rnum == 1) {
-				// 親 or 1600以上の上がりアリ
-				if (mhai >= 3 && (mpoint >= 1600 || pState->cha == 0)) {
-					rchk = MJPIR_REACH;
-				}
-				// 超愚形
-				if (mhai <= 2 && (mpoint >= 3200 || (pState->cha == 0 && mpoint >= 2000))) {
+				// 2人リーチの追っかけは両面以上
+				if (rnum == 2 && mpoint >= 1300 && hais > 4) {
 					rchk = MJPIR_REACH;
 				}
 			}
 
-			// 2人リーチの追っかけは両面以上
-			if (rnum == 2 && mpoint >= 1300 && hais > 4) {
-				rchk = MJPIR_REACH;
+			if ((rchk & MJPIR_REACH) == 0) {
+				MJSendMessage(this, MJMI_FUKIDASHI, (UINT)"ダマテン", 0);
 			}
 		}
 
@@ -683,7 +694,7 @@ UINT MahjongAI::sutehai_sub(int tsumohai)
 
 
 
-int MahjongAI::select_Score(double scc_max)
+int MahjongAI::select_Score(int hai_remain)
 {
 	int i;
 #ifdef AIDUMP_STACKTRACE
@@ -691,6 +702,7 @@ int MahjongAI::select_Score(double scc_max)
 #endif
 
 	int rnum = 0;
+	int knum = 0;
 	int shanten = 0;
 	TENPAI_LIST list;
 	MJITehai tehai;
@@ -709,19 +721,62 @@ int MahjongAI::select_Score(double scc_max)
 
 
 	/* オリるか攻めるかの判断 */
+	decision = AI_DECISION_AGARI1;
+
 	for (i = 0; i < 3; i++){
-		if (pState->players[i]._is_riichi) rnum++;
+		/* 他家のリーチ数 */
+		if (pState->players[i]._is_riichi) {
+			rnum++;
+		}
+		else {
+			/* 染め手の危険度計算(リーチ相当) */
+			if (pState->players[i]._somete >= 0) {
+				if (pState->players[i]._naki_mentsu.size() >= 3) {
+					rnum++;
+				}
+				else {
+					// 中盤以降に余り牌が出ていたら染め手テンパイ気配
+					auto siz = pState->players[i]._kawahai.size();
+					for (int j = 6; j < siz; j++) {
+						if ((pState->players[i]._kawahai[j].getNum() / 9) == pState->players[i]._somete) {
+							rnum++;
+							break;
+						}
+					}
+				}
+			}
+		}
+		/* 他家の喰い仕掛け人数 */
+		if (pState->players[i]._naki_mentsu.size() > 0) knum++;
 	}
 
-#if 1
-	if (rnum > 0 && rnum + shanten >= 2){
-		decision = AI_DECISION_ORI;
+	if (rnum == 0) {
+		if (knum == 1 && shanten >= 1 && hai_remain < 24) {
+			decision = AI_DECISION_ORI;
+		}
+		if (knum >= 2 && shanten >= 1 && pState->myself._naki_mentsu.size() == 0 && hai_remain < 16) {
+			decision = AI_DECISION_ORI;
+		} else if (knum >= 2 && shanten >= 1 && pState->myself._naki_mentsu.size() >= 1 && hai_remain < 8) {
+			decision = AI_DECISION_ORI;
+		}
 	}
-	else{
-		decision = AI_DECISION_AGARI1;
-	}
-#endif
+	else if (rnum == 1) {
+		if (shanten == 1 && pState->cha == 0 && hai_remain >= 24) {
+			decision = AI_DECISION_AGARI1;
+		}
+		else if (shanten >= 1 && pState->myself._naki_mentsu.size() == 0 && hai_remain < 24) {
+			decision = AI_DECISION_ORI;
+		}
+		else if (shanten >= 1 && pState->myself._naki_mentsu.size() >= 1 && hai_remain < 12) {
+			decision = AI_DECISION_ORI;
+		}
 
+	}
+	else if (rnum == 2) {
+		if (hai_remain < 34) {
+			decision = AI_DECISION_ORI;
+		}
+	}
 
 
 #ifdef AIDUMP_STACKTRACE
@@ -766,11 +821,12 @@ int MahjongAI::calc_sutehai(void)
 	fprintf(fp,"</TEHAI>");
 
 #endif
+	int hai_remain = (*MJSendMessage)(this, MJMI_GETHAIREMAIN, 0, 0);
 
 	scc_max = ai.evalSutehai(*pState, hp1, size1);
 	kikenhai.evalSutehai(*pState, hp2, size2);
 
-	decision = select_Score(scc_max);
+	decision = select_Score(hai_remain);
 
 	if (decision == AI_DECISION_AGARI1){
 		memcpy(hp, hp1, sizeof(hp1));
@@ -1006,6 +1062,8 @@ UINT MahjongAI::koe_req(int no, int hai)
 	/* テンパイまたはオリているばあいは鳴かない */
 	if (tenpai_flag == 1 || decision == AI_DECISION_ORI) return 0;
 
+#if 0
+
 	if (naki_ok & 1){
 		pState->te_cnt[hai] -= 2;
 		pState->myself._naki_mentsu.push_back(Mentsu(Mentsu::TYPE_KOUTSU, hai));
@@ -1057,6 +1115,7 @@ UINT MahjongAI::koe_req(int no, int hai)
 			return MJPIR_CHII3;
 		}
 	}
+#endif
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END koe_req\n");
 #endif
@@ -1092,11 +1151,13 @@ UINT MahjongAI::on_start_kyoku(int k, int c)
 	//set_machi();
 	tehai_score = DBL_MAX;
 
-	mysc = (*MJSendMessage)(this, MJMI_GETSCORE, 0, 0);
+	pState->myself._score = mysc = (*MJSendMessage)(this, MJMI_GETSCORE, 0, 0);
 
-	for (i = 1; i<4; i++){
-		j = (*MJSendMessage)(this, MJMI_GETSCORE, i, 0);
-		if (j > sc_max) sc_max = j;
+	for (i = 0; i < 3; i++){
+		pState->players[i]._score = j = (*MJSendMessage)(this, MJMI_GETSCORE, i + 1, 0);
+		if (j > sc_max) {
+			sc_max = j;
+		}
 	}
 
 	if (k > 4 && sc_max - mysc > 20000){

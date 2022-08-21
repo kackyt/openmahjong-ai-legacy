@@ -184,6 +184,19 @@ namespace MJAI {
 			player.calcSomete();
 		}
 
+
+		for (auto pai : myself->_tehai) {
+			nokorihai[pai.getNum()] -= 1.0f;
+		}
+
+		for (auto pai : myself->_kawahai) {
+			if (!pai.isNaki()) nokorihai[pai.getNum()] -= 1.0f;
+		}
+
+		for (auto m : myself->_naki_mentsu) {
+			m.sub(&nokorihai);
+		}
+
 		myself->_kikenhai = PaiArray();
 
 		for (auto dora : *doras) {

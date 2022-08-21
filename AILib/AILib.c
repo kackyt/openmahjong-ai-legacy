@@ -1155,6 +1155,312 @@ int search_tenpai(int *paiarray,int paiSize,int *pMachi,TENPAI_LIST *pList,int l
 	
 }
 
+int search_tenpai2(int* paiarray, int paiSize, int* pMachi, TENPAI_LIST* pList, int listSize, int maxshanten, GAMESTATE* gamestate)
+{
+	PAICOUNT paicountlist[AI_TEHAI_LIMIT + 1];
+	int notanki = 0;
+	int atamaque[AI_TEHAI_LIMIT];
+	int atamaque_count, atamapos;
+	int mentsu_stack[256][AI_TEHAI_LIMIT];
+	int mentsu[AI_TEHAI_LIMIT];
+	int stackpos;
+	int i, j, initresult, flag, orflag;
+	int paicount_size;
+	int resultcount;
+	int maxval, maxind;
+	TENPAI_LIST tenpai_list;
+
+	if (pList != NULL && listSize > 0) memset(pList, 0, sizeof(TENPAI_LIST) * listSize);
+	memset(&tenpai_list, 0, sizeof(tenpai_list));
+	memset(mentsu_stack, 0, sizeof(mentsu_stack));
+	memset(mentsu, 0, sizeof(mentsu));
+	if (pMachi != NULL) memset(pMachi, 0, sizeof(int) * 34);
+
+	/* 頭の候補を得る */
+	resultcount = 0;
+	atamaque_count = 0;
+
+	if (paiSize >= 4) {
+		i = 0;
+		while (i < paiSize - 1) {
+			if (paiarray[i] == paiarray[i + 1]) {
+				atamaque[atamaque_count] = i;
+				mentsu[i] = AI_ATAMA;
+				mentsu[i + 1] = AI_ATAMA;
+				atamaque_count++;
+				i++;
+			}
+			i++;
+		}
+
+		/* 七対子の判定 */
+
+		if (atamaque_count == 6) {
+			for (i = 0; i < paiSize; i++) {
+				if (mentsu[i] == AI_UKIHAI) {
+					tenpai_list.machi[paiarray[i]] = AI_FLAG_MACHI;
+				}
+			}
+			tenpai_list.shanten = 0;
+		}
+		else {
+			for (i = 0; i < paiSize; i++) {
+				if (mentsu[i] == AI_UKIHAI) {
+					tenpai_list.machi[paiarray[i]] = AI_FLAG_EFFECT_ATAMA;
+				}
+			}
+
+			tenpai_list.shanten = 6 - atamaque_count;
+		}
+		memcpy(&tenpai_list.mentsuflag, mentsu, AI_TEHAI_LIMIT * sizeof(int));
+		if (pList != NULL && tenpai_list.shanten <= maxshanten) {
+			if (resultcount == listSize) {
+				maxval = 0;
+				maxind = 0;
+				for (j = 0; j < listSize; j++) {
+					if (pList[j].shanten > maxval) {
+						maxval = pList[j].shanten;
+						maxind = j;
+					}
+				}
+
+				if (maxval > tenpai_list.shanten) {
+					pList[maxind] = tenpai_list;
+				}
+			}
+			else {
+				pList[resultcount] = tenpai_list;
+				resultcount++;
+			}
+		}
+
+		if (pMachi != NULL && tenpai_list.shanten == 0) {
+			for (j = 0; j < 34; j++) {
+				pMachi[j] = pMachi[j] || tenpai_list.machi[j];
+			}
+		}
+
+		memset(&tenpai_list, 0, sizeof(tenpai_list));
+	}
+
+
+
+	/* 頭として取ったあとで刻子/順子などの面子の状況を見る(両面、カンチャン、ペンチャン、シャンポン待ち) */
+	for (i = 0; i < atamaque_count; i++) {
+		atamapos = atamaque[i];
+
+		/* 探索を開始する面子の初期状態を設定 */
+		initresult = setstartmentsu(paiarray, paiSize, mentsu_stack[0], atamapos);
+		if (initresult != 0)
+			return initresult;
+
+		/* 探索 */
+		stackpos = 0;
+		do {
+			paicount_size = setpaicount(paicountlist, paiarray, paiSize, mentsu_stack[stackpos]);
+			if (istenpai(paicountlist, paicount_size, &tenpai_list, paiarray[atamapos]) < 0) {  /* 浮き牌がまだある */
+				orflag = AI_FALSE;
+				memcpy(mentsu, mentsu_stack[stackpos], sizeof(mentsu));
+				flag = setkoutsu(paicountlist, mentsu_stack[stackpos], paicount_size);
+				orflag = orflag || flag;
+				if (flag) {
+					stackpos++;
+
+					/* 次に備えて待避しておいた内容をコピー */
+					memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+				}
+
+				flag = setkoutsul(paicountlist, mentsu_stack[stackpos], paicount_size);
+				orflag = orflag || flag;
+				if (flag) {
+					stackpos++;
+
+					/* 次に備えて待避しておいた内容をコピー */
+					memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+				}
+
+				flag = setsyuntsu(paicountlist, mentsu_stack[stackpos], paicount_size);
+				orflag = orflag || flag;
+				if (flag) {
+					stackpos++;
+					/* 次に備えて待避しておいた内容をコピー */
+					memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+				}
+
+				flag = setsyuntsul(paicountlist, mentsu_stack[stackpos], paicount_size);
+				orflag = orflag || flag;
+				if (flag) {
+					stackpos++;
+				}
+
+				if (!orflag && maxshanten > 0) {
+					/* 探索終了 */
+					memcpy(&tenpai_list.mentsuflag, mentsu_stack[stackpos], AI_TEHAI_LIMIT * sizeof(int));
+					search_shanten(paicountlist, paicount_size, &tenpai_list, paiarray[atamapos]);
+					if (pList != NULL && tenpai_list.shanten <= maxshanten) {
+						if (resultcount == listSize) {
+							maxval = 0;
+							maxind = 0;
+							for (j = 0; j < listSize; j++) {
+								if (pList[j].shanten > maxval) {
+									maxval = pList[j].shanten;
+									maxind = j;
+								}
+							}
+
+							if (maxval > tenpai_list.shanten) {
+								pList[maxind] = tenpai_list;
+							}
+						}
+						else {
+							pList[resultcount] = tenpai_list;
+							resultcount++;
+						}
+					}
+
+					memset(&tenpai_list, 0, sizeof(tenpai_list));
+				}
+
+			}
+			else {
+				memcpy(&tenpai_list.mentsuflag, mentsu_stack[stackpos], AI_TEHAI_LIMIT * sizeof(int));
+				if (pMachi != NULL) {
+					for (j = 0; j < 34; j++) {
+						pMachi[j] = pMachi[j] || tenpai_list.machi[j];
+					}
+				}
+				if (pList != NULL) {
+					if (resultcount == listSize) {
+						maxval = 0;
+						maxind = 0;
+						for (j = 0; j < listSize; j++) {
+							if (pList[j].shanten > maxval) {
+								maxval = pList[j].shanten;
+								maxind = j;
+							}
+						}
+						pList[maxind] = tenpai_list;
+					}
+					else {
+						pList[resultcount] = tenpai_list;
+						resultcount++;
+					}
+				}
+				memset(&tenpai_list, 0, sizeof(tenpai_list));
+
+			}
+			stackpos--;
+		} while (stackpos >= 0);
+	}
+
+	memset(mentsu_stack, 0, sizeof(mentsu_stack));
+
+	/* 探索 */
+	stackpos = 0;
+	do {
+		paicount_size = setpaicount(paicountlist, paiarray, paiSize, mentsu_stack[stackpos]);
+		if (isatamamachi(paicountlist, paicount_size, &tenpai_list) < 0) {  /* 浮き牌がまだある */
+			orflag = AI_FALSE;
+			memcpy(mentsu, mentsu_stack[stackpos], sizeof(mentsu));
+			flag = setkoutsu(paicountlist, mentsu_stack[stackpos], paicount_size);
+			orflag = orflag || flag;
+			if (flag) {
+				stackpos++;
+
+				/* 次に備えて待避しておいた内容をコピー */
+				memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+			}
+
+			flag = setkoutsul(paicountlist, mentsu_stack[stackpos], paicount_size);
+			orflag = orflag || flag;
+			if (flag) {
+				stackpos++;
+
+				/* 次に備えて待避しておいた内容をコピー */
+				memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+			}
+
+			flag = setsyuntsu(paicountlist, mentsu_stack[stackpos], paicount_size);
+			orflag = orflag || flag;
+			if (flag) {
+				stackpos++;
+				/* 次に備えて待避しておいた内容をコピー */
+				memcpy(mentsu_stack[stackpos], mentsu, sizeof(mentsu));
+			}
+
+			if (flag != 1) {
+				flag = setsyuntsul(paicountlist, mentsu_stack[stackpos], paicount_size);
+				orflag = orflag || flag;
+				if (flag) {
+					stackpos++;
+				}
+			}
+
+			if (!orflag && maxshanten > 0) {
+				/* 探索終了 */
+				memcpy(&tenpai_list.mentsuflag, mentsu_stack[stackpos], AI_TEHAI_LIMIT * sizeof(int));
+				search_shanten_atamaless(paicountlist, paicount_size, &tenpai_list);
+				if (pList != NULL && tenpai_list.shanten <= maxshanten) {
+					if (resultcount == listSize) {
+						maxval = 0;
+						maxind = 0;
+						for (j = 0; j < listSize; j++) {
+							if (pList[j].shanten > maxval) {
+								maxval = pList[j].shanten;
+								maxind = j;
+							}
+						}
+
+						if (maxval > tenpai_list.shanten) {
+							pList[maxind] = tenpai_list;
+						}
+					}
+					else {
+						pList[resultcount] = tenpai_list;
+						resultcount++;
+					}
+				}
+
+				memset(&tenpai_list, 0, sizeof(tenpai_list));
+			}
+
+		}
+		else {
+			memcpy(&tenpai_list.mentsuflag, mentsu_stack[stackpos], AI_TEHAI_LIMIT * sizeof(int));
+
+			if (pMachi != NULL) {
+				for (j = 0; j < 34; j++) {
+					pMachi[j] = pMachi[j] || tenpai_list.machi[j];
+				}
+			}
+
+			if (pList != NULL) {
+				if (resultcount == listSize) {
+					maxval = 0;
+					maxind = 0;
+					for (j = 0; j < listSize; j++) {
+						if (pList[j].shanten > maxval) {
+							maxval = pList[j].shanten;
+							maxind = j;
+						}
+					}
+					pList[maxind] = tenpai_list;
+				}
+				else {
+					pList[resultcount] = tenpai_list;
+					resultcount++;
+				}
+			}
+			memset(&tenpai_list, 0, sizeof(tenpai_list));
+
+		}
+		stackpos--;
+	} while (stackpos >= 0);
+
+
+	return resultcount;
+}
+
 int search_score(int *paiarray,int paiSize,void *inf,int (*callback)(int*paiarray,int*mentsu,int length,int machi,void *inf))
 {
     PAICOUNT paicountlist[AI_TEHAI_LIMIT + 1];

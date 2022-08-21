@@ -778,6 +778,12 @@ int MahjongAI::select_Score(int hai_remain)
 		}
 	}
 
+	if (decision == AI_DECISION_AGARI1) {
+		MJSendMessage(this, MJMI_FUKIDASHI, (UINT)"ツッパ", 0);
+	}
+	else {
+		MJSendMessage(this, MJMI_FUKIDASHI, (UINT)"オリ", 0);
+	}
 
 #ifdef AIDUMP_STACKTRACE
 	printStackTrace("END select_Score\n");
@@ -839,7 +845,7 @@ int MahjongAI::calc_sutehai(void)
 
 	qsort(hp, size1, sizeof(HAIPOINT), (int(*)(const void*, const void*))compare_hp);
 
-#ifdef _DEBUG
+#if 1
 	{
 		int max1=-1,max2=-1,max3=-1;
 		double maxd1=0,maxd2=0,maxd3=0;
@@ -865,7 +871,7 @@ int MahjongAI::calc_sutehai(void)
 		sethaitext(haitext2,max2);
 		sethaitext(haitext3,max3);
 
-		sprintf(comment,"%s:%.1f %s:%.1f %s:%.1f",
+		sprintf(comment,"[牌空間] %s:%.1f %s:%.1f %s:%.1f",
 			haitext,maxd1,
 			haitext2,maxd2,
 			haitext3,maxd3);
@@ -878,7 +884,7 @@ int MahjongAI::calc_sutehai(void)
 	sethaitext(haitext2,hp[1].no);
 	sethaitext(haitext3,hp[2].no);
 
-	sprintf(comment,"%s:%.1f,%.1f\n%s:%.1f,%.1f\n%s:%.1f,%.1f",
+	sprintf(comment,"[score] %s:%.1f,%.1f\n%s:%.1f,%.1f\n%s:%.1f,%.1f",
 		haitext,hp1[0].sc,hp2[0].sc,
 		haitext2,hp1[1].sc,hp2[1].sc,
 		haitext3,hp1[2].sc,hp2[2].sc);

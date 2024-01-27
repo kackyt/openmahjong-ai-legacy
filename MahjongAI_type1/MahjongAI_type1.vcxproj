@@ -88,9 +88,6 @@
   <ItemGroup>
     <ClCompile Include="MahjongAI.cpp" />
     <ClCompile Include="MahjongAIKikenhai.cpp" />
-    <ClCompile Include="MahjongAIType1.cpp" />
-    <ClCompile Include="MahjongAIType2.cpp" />
-    <ClCompile Include="MahjongAIType3.cpp" />
     <ClCompile Include="MahjongAIType4.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -60,15 +60,9 @@ typedef enum {
 	AI_DECISION_ORI,
 } AI_DECISION;
 
-#define MAHJONGAI( method ) MahjongAI##method
-#define PLAYERNAME( method ) "KING" #method
+#define AINAME "KING"
 
-
-#define MAHJONGAITYPE MAHJONGAI(Type4)
-#define AINAME PLAYERNAME(v2)
-
-MAHJONGAITYPE ai;
-MahjongAIKikenhai kikenhai;
+MahjongAIType4 ai;MahjongAIKikenhai kikenhai;
 
 
 class MahjongAI {

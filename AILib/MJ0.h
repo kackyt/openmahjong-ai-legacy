@@ -443,12 +443,15 @@ namespace MJAI {
 		std::vector<Pai> _kawahai;
 		bool _is_riichi;
 		bool _is_ippatsu;
+		int _somete;
 		double _rate;
+		int _score;
 
 		Player() :
 			_is_riichi(false),
 			_is_ippatsu(false),
-			_rate(1.0)
+			_rate(1.0),
+			_score(0)
 		{
 
 		}
@@ -463,11 +466,12 @@ namespace MJAI {
 			_kawahai.clear();
 			_is_riichi = false;
 			_is_ippatsu = false;
+			_score = 0;
 		}
 
+		/* テンパイする確率(鳴き有り) */
 		double rate()
 		{
-			/* テンパイする確率(鳴き有り) */
 			static float tempai_table[] = {
 				0.0,
 				0.001,
@@ -558,6 +562,8 @@ namespace MJAI {
 				_kawahai.push_back(Pai(kawa[i].hai, false, kawa[i].state & MJKS_NAKI, kawa[i].state & MJKS_REACH));
 			}
 		}
+
+		void calcSomete();
 	};
 
 	using Players = std::vector<Player>;

@@ -1,22 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MahjongAI", "MahjongAI\MahjongAI.vcxproj", "{4E90355D-257B-469F-B683-80D1628AA8EF}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MahjongAI_type1", "MahjongAI_type1\MahjongAI_type1.vcxproj", "{142641BB-F65C-479D-B721-E5BF246239F9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{957777CB-91E0-4BA5-8541-B27F06DE602F} = {957777CB-91E0-4BA5-8541-B27F06DE602F}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AILib", "AILib\AILib.vcxproj", "{957777CB-91E0-4BA5-8541-B27F06DE602F}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MahjongAITest", "MahjongAITest\MahjongAITest.vcxproj", "{A79C8453-1443-466E-AC64-C3FD0F45E791}"
-	ProjectSection(ProjectDependencies) = postProject
-		{142641BB-F65C-479D-B721-E5BF246239F9} = {142641BB-F65C-479D-B721-E5BF246239F9}
-		{957777CB-91E0-4BA5-8541-B27F06DE602F} = {957777CB-91E0-4BA5-8541-B27F06DE602F}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MahjongAITestGUI", "MahjongAITestGUI\MahjongAITestGUI.vcxproj", "{E21320D5-2183-420E-9F68-58794540EDD7}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -25,18 +17,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MahjongAITestGUI", "Mahjong
 	EndProjectSection
 EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4E90355D-257B-469F-B683-80D1628AA8EF}.Debug|Win32.ActiveCfg = Debug|Win32
-		{4E90355D-257B-469F-B683-80D1628AA8EF}.Debug|Win32.Build.0 = Debug|Win32
-		{4E90355D-257B-469F-B683-80D1628AA8EF}.Release|Win32.ActiveCfg = Release|Win32
-		{4E90355D-257B-469F-B683-80D1628AA8EF}.Release|Win32.Build.0 = Release|Win32
 		{142641BB-F65C-479D-B721-E5BF246239F9}.Debug|Win32.ActiveCfg = Debug|Win32
 		{142641BB-F65C-479D-B721-E5BF246239F9}.Debug|Win32.Build.0 = Debug|Win32
 		{142641BB-F65C-479D-B721-E5BF246239F9}.Release|Win32.ActiveCfg = Release|Win32
@@ -45,10 +30,6 @@ Global
 		{957777CB-91E0-4BA5-8541-B27F06DE602F}.Debug|Win32.Build.0 = Debug|Win32
 		{957777CB-91E0-4BA5-8541-B27F06DE602F}.Release|Win32.ActiveCfg = Release|Win32
 		{957777CB-91E0-4BA5-8541-B27F06DE602F}.Release|Win32.Build.0 = Release|Win32
-		{A79C8453-1443-466E-AC64-C3FD0F45E791}.Debug|Win32.ActiveCfg = Debug|Win32
-		{A79C8453-1443-466E-AC64-C3FD0F45E791}.Debug|Win32.Build.0 = Debug|Win32
-		{A79C8453-1443-466E-AC64-C3FD0F45E791}.Release|Win32.ActiveCfg = Release|Win32
-		{A79C8453-1443-466E-AC64-C3FD0F45E791}.Release|Win32.Build.0 = Release|Win32
 		{E21320D5-2183-420E-9F68-58794540EDD7}.Debug|Win32.ActiveCfg = Debug|Win32
 		{E21320D5-2183-420E-9F68-58794540EDD7}.Debug|Win32.Build.0 = Debug|Win32
 		{E21320D5-2183-420E-9F68-58794540EDD7}.Release|Win32.ActiveCfg = Release|Win32
@@ -56,5 +37,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {332CC39A-F6F3-4051-A67B-AAE0E3AAF5D1}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

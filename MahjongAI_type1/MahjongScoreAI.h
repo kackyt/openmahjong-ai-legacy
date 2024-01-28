@@ -121,21 +121,6 @@ public:
 	}
 };
 
-class MahjongAIType1 : public MahjongScoreAI {
-public:
-	double evalSutehaiSub(MahjongAIState &param,int hai);
-};
-
-class MahjongAIType2 : public MahjongScoreAI {
-public:
-	double evalSutehaiSub(MahjongAIState &param,int hai);
-};
-
-class MahjongAIType3 : public MahjongScoreAI {
-public:
-	double evalSutehaiSub(MahjongAIState &param,int hai);
-};
-
 class MahjongAIKikenhai : public MahjongScoreAI {
 public:
 	double evalSutehaiSub(MahjongAIState &param,int hai);

@@ -345,12 +345,14 @@ static double calcscore(THREAD_PARAM *prm, PaiArrayInt cnt, vector<Mentsu> *pMen
 
 	if (prm->val < probability) {
 		prm->val = probability;
+#if 0
 		sprintf(prm->debug, "%d*%d*%d*%d*%d",
 				item.mentsulist[0].category * 100 + item.mentsulist[0].pailist[0],
 				item.mentsulist[1].category * 100 + item.mentsulist[1].pailist[0],
 				item.mentsulist[2].category * 100 + item.mentsulist[2].pailist[0],
 				item.mentsulist[3].category * 100 + item.mentsulist[3].pailist[0],
 				item.mentsulist[4].category * 100 + item.mentsulist[4].pailist[0]);
+#endif
 	}
 
 	if (ret < value) {
@@ -669,12 +671,12 @@ static unsigned __stdcall threadfunc6(void *pParam)
 }
 
 #define THREADNUM (6)
+static THREAD_PARAM tparam[THREADNUM];
+static HANDLE hThread[THREADNUM];
 
 double MahjongAIType4::evalSutehaiSub(MahjongAIState &param, int hai)
 {
 	double sum = 0.0;
-	THREAD_PARAM tparam[THREADNUM];
-	HANDLE hThread[THREADNUM];
 	int i, j;
 	char message[256];
 	double nokorisum = 0.0;
@@ -723,7 +725,12 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param, int hai)
 	hThread[4] = (HANDLE)_beginthreadex(NULL, 0, threadfunc5, &tparam[4], 0, NULL);
 	hThread[5] = (HANDLE)_beginthreadex(NULL, 0, threadfunc6, &tparam[5], 0, NULL);
 
-	WaitForMultipleObjects(THREADNUM, hThread, TRUE, INFINITE);
+	WaitForSingleObject(hThread[0], INFINITE);
+	WaitForSingleObject(hThread[1], INFINITE);
+	WaitForSingleObject(hThread[2], INFINITE);
+	WaitForSingleObject(hThread[3], INFINITE);
+	WaitForSingleObject(hThread[4], INFINITE);
+	WaitForSingleObject(hThread[5], INFINITE);
 #endif
 
 	for (i = 0; i < THREADNUM; i++) {

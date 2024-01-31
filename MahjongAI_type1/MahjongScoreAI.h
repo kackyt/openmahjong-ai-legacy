@@ -27,6 +27,8 @@
 #include "MIPIface.h"
 #include "MJ0.h"
 
+#define sprintf(...) 
+
 #define SIMULATECOUNT      (5000)
 
 #define SCORE_KOUKEI_BIAS        (1.0)

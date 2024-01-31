@@ -452,7 +452,7 @@ static double koutsupoint(THREAD_PARAM *prm, PaiArrayInt cnt, vector<Mentsu> *pM
 }
 
 /* 4つの刻子+頭 */
-static unsigned __stdcall threadfunc(void * pParam)
+static void threadfunc(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
 	vector<Mentsu> mentsu;
@@ -468,15 +468,15 @@ static unsigned __stdcall threadfunc(void * pParam)
 	}
 
 #ifndef SINGLETHREAD
-	_endthreadex(0);
+	_endthread();
 #endif
-	return 0;
+	return;
 }
 
 
 
 /* 3つの刻子+1つの順子+頭 */
-static unsigned __stdcall threadfunc2(void * pParam)
+static void threadfunc2(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
 	vector<Mentsu> mentsu;
@@ -492,14 +492,14 @@ static unsigned __stdcall threadfunc2(void * pParam)
 	}
 
 #ifndef SINGLETHREAD
-	_endthreadex(0);
+	_endthread();
 #endif
-	return 0;
+	return;
 }
 
 
 /* 2つの刻子+2つの順子+頭 */
-static unsigned __stdcall threadfunc3(void * pParam)
+static void threadfunc3(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
 	vector<Mentsu> mentsu;
@@ -515,13 +515,13 @@ static unsigned __stdcall threadfunc3(void * pParam)
 	}
 
 #ifndef SINGLETHREAD
-	_endthreadex(0);
+	_endthread();
 #endif
-	return 0;
+	return;
 }
 
 /* 1つの刻子+3つの順子+頭 */
-static unsigned __stdcall threadfunc4(void * pParam)
+static void threadfunc4(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
 	vector<Mentsu> mentsu;
@@ -537,13 +537,13 @@ static unsigned __stdcall threadfunc4(void * pParam)
 	}
 
 #ifndef SINGLETHREAD
-	_endthreadex(0);
+	_endthread();
 #endif
-	return 0;
+	return;
 }
 
 /* 4つの順子+頭 */
-static unsigned __stdcall threadfunc5(void * pParam)
+static void threadfunc5(void * pParam)
 {
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
 	vector<Mentsu> mentsu;
@@ -562,9 +562,9 @@ static unsigned __stdcall threadfunc5(void * pParam)
 	}
 
 #ifndef SINGLETHREAD
-	_endthreadex(0);
+	_endthread();
 #endif
-	return 0;
+	return;
 }
 
 
@@ -644,14 +644,19 @@ double chiitoipoint(THREAD_PARAM *prm, int cnt, unsigned long long tehaibitmap, 
 
 
 /* 七対子 */
-static unsigned __stdcall threadfunc6(void *pParam)
+static void threadfunc6(void *pParam)
 {
 	int count;
 	THREAD_PARAM *prm = (THREAD_PARAM*)pParam;
 	int toitsunum = 0;
 	unsigned long long bitmap = 0;
 
-	if (prm->pState->myself._naki_mentsu.size() > 0) return 0;
+	if (prm->pState->myself._naki_mentsu.size() > 0) {
+#ifndef SINGLETHREAD
+		_endthread();
+#endif
+		return;
+	}
 
 	for (count = 0; count < 34; count++) {
 		if (prm->pState->te_cnt[count] >= 2) {
@@ -665,9 +670,9 @@ static unsigned __stdcall threadfunc6(void *pParam)
 	}
 
 #ifndef SINGLETHREAD
-	_endthreadex(0);
+	_endthread();
 #endif
-	return 0;
+	return;
 }
 
 #define THREADNUM (6)
@@ -718,12 +723,12 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param, int hai)
 #else
 	memset(hThread, 0, sizeof(hThread));
 
-	hThread[0] = (HANDLE)_beginthreadex(NULL, 0, threadfunc, &tparam[0], 0, NULL);
-	hThread[1] = (HANDLE)_beginthreadex(NULL, 0, threadfunc2, &tparam[1], 0, NULL);
-	hThread[2] = (HANDLE)_beginthreadex(NULL, 0, threadfunc3, &tparam[2], 0, NULL);
-	hThread[3] = (HANDLE)_beginthreadex(NULL, 0, threadfunc4, &tparam[3], 0, NULL);
-	hThread[4] = (HANDLE)_beginthreadex(NULL, 0, threadfunc5, &tparam[4], 0, NULL);
-	hThread[5] = (HANDLE)_beginthreadex(NULL, 0, threadfunc6, &tparam[5], 0, NULL);
+	hThread[0] = (HANDLE)_beginthread(threadfunc, 0, &tparam[0]);
+	hThread[1] = (HANDLE)_beginthread(threadfunc2, 0, &tparam[1]);
+	hThread[2] = (HANDLE)_beginthread(threadfunc3, 0, &tparam[2]);
+	hThread[3] = (HANDLE)_beginthread(threadfunc4, 0, &tparam[3]);
+	hThread[4] = (HANDLE)_beginthread(threadfunc5, 0, &tparam[4]);
+	hThread[5] = (HANDLE)_beginthread(threadfunc6, 0, &tparam[5]);
 
 	WaitForSingleObject(hThread[0], INFINITE);
 	WaitForSingleObject(hThread[1], INFINITE);
@@ -735,7 +740,6 @@ double MahjongAIType4::evalSutehaiSub(MahjongAIState &param, int hai)
 
 	for (i = 0; i < THREADNUM; i++) {
 		sum += tparam[i].ret;
-		CloseHandle(hThread[i]);
 	}
 
 #if 0
